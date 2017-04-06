@@ -50,7 +50,7 @@ function defineTrack(name)
     t.name=name;
     t.func=:fourier;
     t.dir=:posX
-    dfs=dataSet(name,Pkg.dir("OCP/examples/Cases/Tracks/"));
+    dfs=dataSet(name,Pkg.dir("MAVs/examples/Cases/Tracks/"));
     t.a=dfs[1][:a][1:8];
     t.b=dfs[1][:b][1:8];
     t.c=dfs[1][:c][1:8];
@@ -169,7 +169,7 @@ function defineObstacles(name)
     o.status=falses(length(o.X0));
   elseif name==:caseStudy # test case for testPathFollowing.jl
     o.name=name;
-    dfs=dataSet(name,Pkg.dir("OCP/examples/Cases/Obstacles/"));
+    dfs=dataSet(name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
     o.X0=dfs[1][:X];
     o.Y0=dfs[1][:Y];
     o.A=dfs[1][:A];
@@ -335,7 +335,7 @@ function defineMisc(name)
     m.sigma=1.0;
     m.Ni=4;
     m.Nck=[13,10,8,6];
-    m.solver=:IPOPT;
+    m.solver=:KNITRO;
     m.max_iter=250;
     m.mpc_max_iter=600;
   elseif name==:empty # test case for testPathFollowing.jl with other model
