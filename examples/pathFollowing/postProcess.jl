@@ -1,9 +1,9 @@
 using PrettyPlots, Plots, DataFrames
-gr();
+#gr();
 #pgfplots();
-#pyplot();
+pyplot();
 
-r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_test_PLOTS_gr/")
+r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_test_9/")
 resultsDir(r.results_dir);
 
 description = string(
@@ -20,17 +20,17 @@ RESULTS DISCUSSION:  \n
 # save data
 function savePlantData(r)
   dfs=DataFrame();
-  temp = [r.dfs_plant[jj][:t][1:end-1,:] for jj in 1:r.eval_num]; # time
+  temp = [r.dfs_plant[jj][:t][1:end-1,:] for jj in 1:length(r.dfs_plant)]; # time
   U=[idx for tempM in temp for idx=tempM]; dfs[:t]=U;
 
   for st in 1:n.numStates # state
-    temp = [r.dfs_plant[jj][n.state.name[st]][1:end-1,:] for jj in 1:r.eval_num];
+    temp = [r.dfs_plant[jj][n.state.name[st]][1:end-1,:] for jj in 1:length(r.dfs_plant)];
     U=[idx for tempM in temp for idx=tempM];
     dfs[n.state.name[st]]=U;
   end
 
   for ctr in 1:n.numControls # control
-    temp = [r.dfs_plant[jj][n.control.name[ctr]][1:end-1,:] for jj in 1:r.eval_num];
+    temp = [r.dfs_plant[jj][n.control.name[ctr]][1:end-1,:] for jj in 1:length(r.dfs_plant)];
     U=[idx for tempM in temp for idx=tempM];
     dfs[n.control.name[ctr]]=U;
   end
@@ -51,7 +51,8 @@ s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
 #s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
 #mainSimPath(n,r,s,c,pa,r.eval_num-1);
 
-if r.eval_num>2; #TODO can I do 1 here??
+if r.eval_num>2;
+
    anim = @animate for ii in 1:length(r.dfs_plant)
     mainSimPath(n,r,s,c,pa,ii);
   end

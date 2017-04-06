@@ -328,14 +328,14 @@ function defineMisc(name)
     m.Ylims=[-10., 200.]
     m.tp=5.0;
     m.tex=0.20;
-    m.max_cpu_time=m.tex;
+    m.max_cpu_time=0.15;
     m.sm=2.0;
     m.Lr=60.;
     m.L_rd=1.;
     m.sigma=1.0;
     m.Ni=4;
     m.Nck=[13,10,8,6];
-    m.solver=:IPOPT;
+    m.solver=:KNITRO;
     m.max_iter=250;
     m.mpc_max_iter=600;
   elseif name==:empty # test case for testPathFollowing.jl with other model

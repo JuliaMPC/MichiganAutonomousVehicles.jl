@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/febbo/.julia/v0.5/MAVs/workspace/devel/setup.sh
