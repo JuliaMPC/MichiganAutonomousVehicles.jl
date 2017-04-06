@@ -1,0 +1,12 @@
+In this test:
+default
+nothing
+
+ RESULTS DISCUSSION:
+ * looks the best
+
+ c.m.Ni=4;
+ c.m.Nck=[12,10,8,6];
+
+
+The lateral velocity tolerance looks a bit high though at 0.05

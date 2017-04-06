@@ -1,0 +1,6 @@
+In this test:
+default
+
+ RESULTS DISCUSSION:
+ * Tolerances probably need to be adjusted.
+ * No 1-1 comparison between IPOPT and KNITRO though

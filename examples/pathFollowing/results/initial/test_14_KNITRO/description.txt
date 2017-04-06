@@ -1,0 +1,8 @@
+In this test:
+default
+
+ RESULTS DISCUSSION:
+ * c.m.Ni=5;
+ c.m.Nck=[14,12,10,8,6];
+
+ wow

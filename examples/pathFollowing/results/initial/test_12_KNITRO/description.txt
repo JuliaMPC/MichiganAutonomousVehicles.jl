@@ -1,0 +1,13 @@
+In this test:
+default
+
+ RESULTS DISCUSSION:
+ * c.m.Ni=3;
+ * c.m.Nck=[9,7,7];
+
+
+was an error with:
+c.m.Ni=4;
+c.m.Nck=[9,7,8,6]
+
+using KNITRO

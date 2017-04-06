@@ -1,0 +1,9 @@
+In this test:
+default
+
+ RESULTS DISCUSSION:
+
+* X0_tol=[0.05,0.05,0.001,0.05,0.01,0.001,0.05,0.05];
+
+
+ this fixed the bumpy-ness
