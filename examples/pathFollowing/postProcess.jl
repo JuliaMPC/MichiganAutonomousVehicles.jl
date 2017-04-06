@@ -1,9 +1,9 @@
 using PrettyPlots, Plots, DataFrames
-#gr();
+gr();
 #pgfplots();
-pyplot();
+#pyplot();
 
-r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_test_7/")
+r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_test_PLOTS_gr/")
 resultsDir(r.results_dir);
 
 description = string(
@@ -56,7 +56,9 @@ if r.eval_num>2; #TODO can I do 1 here??
     mainSimPath(n,r,s,c,pa,ii);
   end
   gif(anim, string(r.results_dir,"mainSimPath.gif"), fps = 5);
- run(`ffmpeg -f gif -i mainSimPath.gif RESULT.mp4`)
+  cd(r.results_dir)
+    run(`ffmpeg -f gif -i mainSimPath.gif RESULT.mp4`)
+  cd(r.main_dir)
 
 #  pgfplots();
 #  s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);

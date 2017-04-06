@@ -335,7 +335,7 @@ function defineMisc(name)
     m.sigma=1.0;
     m.Ni=4;
     m.Nck=[13,10,8,6];
-    m.solver=:KNITRO;
+    m.solver=:IPOPT;
     m.max_iter=250;
     m.mpc_max_iter=600;
   elseif name==:empty # test case for testPathFollowing.jl with other model

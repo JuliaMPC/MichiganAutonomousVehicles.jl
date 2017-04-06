@@ -4,8 +4,8 @@ using Parameters
 using DataFrames
 using MAVs
 
-#c=defineCase(;(:mode=>:path));
-c=defineCase(;(:mode=>:caseStudy));
+c=defineCase(;(:mode=>:path));
+#c=defineCase(;(:mode=>:caseStudy));
 
 mdl,n,r,params=initializePathFollowing(c);  #TODO add driveStraight here to get a better intialization
 global pa=params[1];
@@ -64,28 +64,9 @@ for ii=2:n.mpc.max_iter
       if c.m.model==:ThreeDOFv1
         sol=ThreeDOFv1(pa,n.X0,r.t_ctr+n.mpc.t0,r.U[:,1],UX,n.mpc.t0,n.mpc.tf);
       elseif c.m.model==:ThreeDOFv2
-        print("a")
         sol=ThreeDOFv2(pa,n.X0,r.t_ctr+n.mpc.t0,r.U[:,1],r.U[:,2],n.mpc.t0,n.mpc.tf);
       end
-      print("b")
 
-      if r.eval_num == 19
-        cd(r.results_dir)
-          dfs_X0=DataFrame();
-          dfs_X0[:X0]=n.X0;
-          writetable("X0.csv",dfs_X0);
-          dfs_t=DataFrame();
-          dfs_t[:t]=r.t_ctr+n.mpc.t0;
-          writetable("t.csv",dfs_t);
-          dfs_U=DataFrame();
-          dfs_U[:U1]=r.U[:,1];
-          dfs_U[:U2]=r.U[:,2];
-          writetable("U.csv",dfs_U);
-          dfs_not=DataFrame();
-          dfs_not[:not_save]=sol.interp.notsaveat_idxs;
-          writetable("not_save.csv",dfs_not);
-        cd(r.main_dir)
-      end
       # 2) "predict" X0 (X0p) using 3DOF vehicle model (eventually the "actual model" will be different)
       # this should be done as the vehicle is simulated/actually controlled
       if c.m.model==:ThreeDOFv1
@@ -93,33 +74,8 @@ for ii=2:n.mpc.max_iter
       elseif c.m.model==:ThreeDOFv2
         sol=ThreeDOFv2(pa,n.X0,r.t_ctr+n.mpc.t0,r.U[:,1],r.U[:,2],n.mpc.t0,n.mpc.tf);
       end
-      print("c")
-
-      if !(sol.t[end] == n.mpc.tf)
-          print("NOT EQUAL")
-      end
-      print(sol.t[end])
-      print(n.mpc.tf)
-      if r.eval_num == 19
-        cd(r.results_dir)
-          dfs_sol=DataFrame();
-          dfs_sol[:sol_t]=sol.t;
-          writetable("sol_t.csv",dfs_sol);
-          dfs_tf=DataFrame();
-          dfs_tf[:tf]=n.mpc.tf;
-          dfs_tf[:t0]=n.mpc.t0;
-          writetable("mpc_tf.csv",dfs_tf);
-          dfs_u=DataFrame();
-          dfs_u[:u]=sol.u;
-          writetable("sol_u.csv",dfs_u);
-          dfs_not=DataFrame();
-          dfs_not[:not_save]=sol.interp.notsaveat_idxs;
-          writetable("not_save.csv",dfs_not);
-        cd(r.main_dir)
-      end
 
       n.mpc.X0p=sol(n.mpc.tf)[:];   # consider turning this into a function -> predict X0
-      print("d")
 
       # 3) now we can update the actual X0 --> important not to do this before the prediction
       if c.m.model==:ThreeDOFv1
