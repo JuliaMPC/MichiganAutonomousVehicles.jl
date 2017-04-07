@@ -301,6 +301,7 @@ function defineMisc(name)
     m.Nck=[12,10,8,6];
     m.solver=:IPOPT;
     m.max_iter=30;
+    m.mpc_max_iter=600;
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -319,6 +320,7 @@ function defineMisc(name)
     m.Nck=[10,8,6];
     m.solver=:IPOPT;
     m.max_iter=50;
+    m.mpc_max_iter=30;
   elseif name==:caseStudy
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -354,6 +356,7 @@ function defineMisc(name)
     m.Nck=[12,10,8,6];
     m.solver=:KNITRO;
     m.max_iter=300;
+    m.mpc_max_iter=600;
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end
