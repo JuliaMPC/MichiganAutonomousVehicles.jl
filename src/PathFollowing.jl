@@ -3,7 +3,6 @@ module PathFollowing
 using NLOptControl
 using VehicleModels
 using JuMP
-using Ipopt
 using DataFrames
 using Parameters
 

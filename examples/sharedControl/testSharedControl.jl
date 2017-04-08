@@ -1,11 +1,7 @@
 using NLOptControl
 using VehicleModels
-using JuMP
-using Ipopt
-using Parameters
-using KNITRO
 
-using OCP
+using MAVs
 
 # initializatin data
 c=defineCase(;track=:NA,obstacles=:o3);

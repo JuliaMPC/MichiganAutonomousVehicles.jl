@@ -178,6 +178,17 @@ function defineObstacles(name)
     o.s_x=zeros(length(o.X0));
     o.s_y=zeros(length(o.X0));
     o.status=falses(length(o.X0));
+  elseif name==:caseStudy_v2 # test case for testPathFollowing.jl
+    o.name=:caseStudy;
+    dfs=dataSet(o.name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
+    o.X0=dfs[1][:X][1:3];
+    o.Y0=dfs[1][:Y][1:3];
+    o.A=dfs[1][:A][1:3];
+    o.B=dfs[1][:B][1:3];
+    o.status=dfs[1][:status][1:3];
+    o.s_x=zeros(length(o.X0));
+    o.s_y=zeros(length(o.X0));
+    o.status=falses(length(o.X0));
   elseif name!==:NA
     error("\n Pick a name for obstacle data! \n")
   end
@@ -237,23 +248,24 @@ end
 ############################### misc info ########################################
 type Misc
   name
-  model # function name
-  X0    # intial state (at the start of the simulation)
+  model  # function name
+  X0     # intial state (at the start of the simulation)
   Xlims  # limit for x
   Ylims  # limit for Y
-  UX    # vehicle speed (m/s)
-  tp    # prediction horizon (s)
-  tex   # execution horizon (s)
+  UX     # vehicle speed (m/s)
+  tp     # prediction horizon (s)
+  tex    # execution horizon (s)
   max_cpu_time  # maximum time the algorithm has
   sm            # (m) distance to make sure we don't hit obstacle
   Lr            # LiDAR range (m)
   L_rd          # relaxation distance to LiDAR range
   sigma         # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
-  Ni     # number of intervals
-  Nck    # number of points per interval
-  solver # either :IPOPT or :KNITRO
+  Ni       # number of intervals
+  Nck      # number of points per interval
+  solver   # either :IPOPT or :KNITRO
   max_iter # max evaluations in optimization
   mpc_max_iter # an MPC parameter
+  PredictX0    # if the state that the vehicle will be at when the optimization is finished is to be predicted
 end
 
 function Misc()
@@ -264,6 +276,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -302,6 +315,7 @@ function defineMisc(name)
     m.solver=:IPOPT;
     m.max_iter=30;
     m.mpc_max_iter=600;
+    m.PredictX0=true;
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -321,6 +335,7 @@ function defineMisc(name)
     m.solver=:IPOPT;
     m.max_iter=50;
     m.mpc_max_iter=30;
+    m.PredictX0=true;
   elseif name==:caseStudy
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -340,6 +355,7 @@ function defineMisc(name)
     m.solver=:KNITRO;
     m.max_iter=250;
     m.mpc_max_iter=600;
+    m.PredictX0=true;
   elseif name==:empty # test case for testPathFollowing.jl with other model
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -357,6 +373,7 @@ function defineMisc(name)
     m.solver=:KNITRO;
     m.max_iter=300;
     m.mpc_max_iter=600;
+    m.PredictX0=true;
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end
@@ -367,7 +384,7 @@ end
 c.m = setMisc(;)
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/28/2017, Last Modified: 3/28/2017 \n
+Date Create: 3/28/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function setMisc(;
@@ -386,7 +403,8 @@ function setMisc(;
                 Nck::Vector{Int64}=[10,10],
                 solver::Symbol=:KNITRO,
                 max_iter::Int64=50,
-                mpc_max_iter::Int64=200);
+                mpc_max_iter::Int64=200,
+                predictX0::Bool=false);
     m=Misc();
     m.name=name;
     m.model=model;
@@ -404,6 +422,7 @@ function setMisc(;
     m.solver=solver;
     m.max_iter=max_iter;
     m.mpc_max_iter=mpc_max_iter;
+    m.predictX0=predictX0;
     return m
 end
 
@@ -482,7 +501,7 @@ function defineCase(;name::Symbol=:auto,
    elseif mode==:caseStudy
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObstacles(:caseStudy_v2);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);

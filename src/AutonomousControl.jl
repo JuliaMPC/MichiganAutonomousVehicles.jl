@@ -3,8 +3,6 @@ module AutonomousControl
 using NLOptControl
 using VehicleModels
 using JuMP
-using Ipopt
-using KNITRO
 using DataFrames
 using Parameters
 
@@ -32,8 +30,6 @@ function initializeAutonomousControl(c)
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
  n = define(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU,tf_max=40.0)
  n = configure(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => true))
- #n = configure(n,N=60;(:integrationMethod => :tm),(:integrationScheme => :bkwEuler),(:finalTimeDV => true))
- #n = configure(n,N=60;(:integrationMethod => :tm),(:integrationScheme => :trapezoidal),(:finalTimeDV => true))
  mpcParams(n,c);
  mdl=defineSolver(n,c);
 

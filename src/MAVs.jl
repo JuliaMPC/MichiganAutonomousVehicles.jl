@@ -1,4 +1,4 @@
-# isdefined(Base, :__precompile__) && __precompile__()  -> VehicleModels cannot be precompiled becasue of DifferentialEquations.jl
+isdefined(Base, :__precompile__) && __precompile__()
 
 module MAVs
 
@@ -14,7 +14,6 @@ using .AutonomousControl
 using .SharedControl
 using .SimpleModel
 using .PathFollowing
-
 
 export
 
@@ -33,8 +32,9 @@ export
       # SharedControl.jl
       initializeSharedControl,
       sharedControl,
-      feasible,
-      OA,
+      getPlantData,
+      sendOptData,
+      ExternalModel,
 
       # SimpleModel.jl
       initializeSimpleModel,

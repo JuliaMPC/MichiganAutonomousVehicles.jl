@@ -1,20 +1,49 @@
 using NLOptControl
+using VehicleModels
+using Parameters
+using DataFrames
 using MAVs
 
-# initialization data -> TODO Yingshi should pass all of this
-#ObsX = [0.1,-3.9602,-31.8776]; ObsY = [30.5,99.8831,194.783]; ObsR = [1.0,1.0,1.0]; UX = 10.0;
+# THINGS TO THINK ABOUT TODO
+# 1) what if we sent a torque signal?'
+# (a) have a PID controller follow the steering angle sent by the automation and record the torque -> maybe characterize the system somehow
+  # different settings for different drivers?
+  # basically fight a lot, medium and not so much and look at the torque that is needed to overcome
+  # set up some sort of mapping then and different "levels" of automation based off of a higher level controller
 
-# initializatin data
-c=defineCase(;track=:NA,obstacles=:o3);
-c.m=setMisc(;sm=2.0,tex=0.2,tp=3.0,X0=[0.0, 0.0, 0.0, 0.0, pi/2],UX=10.0);
+# 2) the integration thing may not make sense anymore!!
+# 4) think about settings, careful!
+# 5)  if r.dfs_opt[r.eval_num][:status][end]!==:Infeasible # if infeasible -> let user control TODO what is this YINgshi?  sendOptData
+# 6) intialize obstacle field in intial solve
+# 7) get the vehicle states from MATLAB so that I can plot things as well
 
-mdl,d,n,r,params = initializeSharedControl(c); # initialize problem
+c=defineCase(;(:mode=>:caseStudy));
 
-function run()
-  # set up the UDP communication
-  s1 = UDPSocket();bind(s1,ip"141.212.135.219",36880); # change this ip to the server (or julia code)
-  s2 = UDPSocket();bind(s2,ip"141.212.135.219",12000); # change this ip to the server (or julia code)
+e=ExternalModel(); # setup data with Matlab
+# setup UDP port and UDP communication
+e.s1 = UDPSocket();bind(e.s1,ip"35.2.169.128",36880); # change this ip to the server (or julia code)
+e.s2 = UDPSocket();bind(e.s2,ip"35.2.169.128",12000); # change this ip to the server (or julia code)
 
-  s=Settings(;reset=true,save=false);
-  OA(s,s1,s2) # call OA "block"
+mdl,n,r,params=initializePathFollowing(c);
+global pa=params[1];
+global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
+
+while(Bool(e.runJulia))
+  println("Running model for the: ",r.eval_num," time");
+  println("Getting Vehicle Position From MATLAB");
+  getPlantData(n,params,e);
+
+  # update X0
+  updateX0(n,r,e.X0;(:userUpdate=>true));
+  if n.mpc.predictX0 # predict where X0 will be when optimized signal is actually sent to the vehicle
+    predictX0(n,pa,r;(:fixedTp=>false))
+  else
+    n.mpc.X0p=e.X0;  # autonomousControl (inside sharedControl()) uses n.mpc.X0p
+  end
+
+  println("Running Optimization");
+  sharedControl(mdl,n,r,s,params,e);   # rerun optimization
+
+  println("Sending Optimized Steering Angle Commands to MATLAB");
+  sendOptData(r,e);
 end

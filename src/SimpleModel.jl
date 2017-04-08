@@ -3,8 +3,6 @@ module SimpleModel
 using NLOptControl
 using VehicleModels
 using JuMP
-using Ipopt
-using KNITRO
 using DataFrames
 using Parameters
 

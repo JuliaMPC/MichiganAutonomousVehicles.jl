@@ -3,10 +3,8 @@ module SharedControl
 using NLOptControl
 using VehicleModels
 using JuMP
-using Ipopt
 using DataFrames
 using Parameters
-#using KNITRO
 
 include("CaseModule.jl")
 using .CaseModule
@@ -14,7 +12,38 @@ using .CaseModule
 export
       initializeSharedControl,
       sharedControl,
-      OA
+      getPlantData,
+      sendOptData,
+      ExternalModel
+
+type ExternalModel  # communication
+  s1
+  s2
+  status   # to pass result of optimization to Matlab
+  runJulia # a Bool (in Int form) to indicate to run julia comming from Matlab
+  numObs   # number of obstacles
+  SA       # drivers steering angle
+  UX       # vehicle speed
+  X_Obs
+  Y_Obs
+  A
+  B
+end
+
+function ExternalModel()
+  ExternalModel(Any,
+                Any,
+                1.0,
+                1,
+                3,
+                0.0,
+                0.0,
+                [],
+                [],
+                [],
+                [])
+end
+
 
 """
 mdl,n,r,params = initializeSharedControl(c);
@@ -112,10 +141,11 @@ function initializeSharedControl(c)
       @NLobjective(mdl, Min, path_obj + driver_obj)
     elseif c.m.model==:ThreeDOFv2
       # follow driver
-      driver_obj=integrate(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
+      #driver_obj=integrate(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
       # minimum steering rate
       sr_obj=integrate(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));
-      @NLobjective(mdl, Min, path_obj + sr_obj);
+      #@NLobjective(mdl, Min, path_obj + sr_obj);
+      @NLobjective(mdl, Min, sr_obj);
     else
       error("\n set c.m.model \n")
     end
@@ -152,103 +182,84 @@ function initializeSharedControl(c)
 
     return mdl,n,r,params
 end
-
-
 """
-t_opt, sa_opt, t_sample, sa_sample, status = sharedControl(mdl,n,r,s,params,X0,SA,UX;Iter);
+
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 1/27/2017, Last Modified: 4/4/2017 \n
+Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sharedControl(mdl,n,r,s,params,X0,SA,UX;Iter::Int64=0)
 
-  setvalue(params[2][1],UX)   # update speed
-  setvalue(params[2][2],SA)   # update desired steering angle
-  updateX0(n,r,X0;(:userUpdate=>true))    # user defined update of X0
-
-  updateStates(n,r);
-  status=optimize(mdl,n,r,s;Iter=Iter);
-
-  # sample solution
-  sp_SA=Linear_Spline(r.t_ctr,r.U[:,1]);
-  t_sample = Vector(0:0.01:n.mpc.tex);
-  sa_sample  = sp_SA[t_sample];
-  if status!=:Infeasible; status=1.; else status=0.; end
-  return r.t_ctr[1:end-1], r.U[:,1], t_sample, sa_sample, status
+function getPlantData(n,params,e)
+  MsgString = recv(e.s1);
+  MsgIn = zeros(19);
+  allidx = find(MsgString->MsgString == 0x20,MsgString);
+  allidx = [0;allidx];
+  for i in 1:19  #length(allidx)-1
+    MsgIn[i] = parse(Float64,String(copy(MsgString[allidx[i]+1:allidx[i+1]-1])));
+  end
+  e.SA = MsgIn[1];                # Vehicle steering angle
+  e.UX = MsgIn[2];                # Longitudinal speed
+  e.X0=zeros(n.numStates);
+  e.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
+  e.X_0obs       = MsgIn[8:8+e.numObs-1];             # ObsX
+  e.Y_0obs       = MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
+  e.A            = MsgIn[8+2*e.numObs:8+3*e.numObs-1];  # ObsR
+  e.B            = A;
+  e.runJulia     = MsgIn[8+3*e.numObs+2];
 end
 
 """
-OA(s)
+
 --------------------------------------------------------------------------------------\n
-Authors: Yingshi and Huckleberry Febbo, Graduate Students, University of Michigan
-Date Create: 1/15/2017, Last Modified: 4/4/2017 \n
+Author: Huckleberry Febbo, Graduate Student, University of Michigan
+Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function OA(s,s1,s2)
-  # Parameters
-  Iter=1;RunJulia=1;NumObs=3;status=1.0;
-
-  if s.save
-    global R_obs=[];
-    global X0_obs=[];
-    global Y0_obs=[];
-    global X0_all=[];
+function sendOptData(r,e)
+  if r.dfs_opt[r.eval_num][:status][end]!==:Infeasible # if infeasible -> let user control TODO what is this YINgshi?
+    MsgOut = [SA*ones(convert(Int64, floor(c.m.max_cpu_time/0.01))+1 );r.dfs_opt[r.eval_num][:t_solve][end];3;0]
+  else
+    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve][end];2;0];
   end
 
-  while(RunJulia>0.0)
-    print("Iteration:"); println(Iter);
-    MsgString = recv(s1);
-    MsgIn = zeros(19);
-    allidx = find(MsgString->MsgString == 0x20,MsgString);
-    allidx = [0;allidx];
-    for i in 1:19  #length(allidx)-1
-      MsgIn[i] = parse(Float64,String(copy(MsgString[allidx[i]+1:allidx[i+1]-1])));
-    end
+  # send UDP packets to client side
+  MsgOut = [MsgOut;Float64(r.eval_num)];
+  MsgOutString = ' ';
+  for j in 1:length(MsgOut)
+      MsgOutString = string(MsgOutString,' ',MsgOut[j]);
+  end
+  MsgOutString = string(MsgOutString," \n");
+  send(e.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
+end
+"""
 
-    tic();
-    SA = MsgIn[1];                # Vehicle steering angle
-    UX = MsgIn[2];                # Longitudinal speed
-    X0 = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
-    X_0obs       = MsgIn[8:8+NumObs-1];             # ObsX
-    Y_0obs       = MsgIn[8+NumObs:8+2*NumObs-1];    # ObsY
-    A            = MsgIn[8+2*NumObs:8+3*NumObs-1];  # ObsR
-    B            = A;
-    RunJulia     = MsgIn[8+3*NumObs+2];             # whether to update obstacles info.
+--------------------------------------------------------------------------------------\n
+Author: Huckleberry Febbo, Graduate Student, University of Michigan
+Date Create: 1/27/2017, Last Modified: 4/7/2017 \n
+--------------------------------------------------------------------------------------\n
+"""
+function sharedControl(mdl,n,r,s,params,e)
 
-    # update obstacle feild
-    for i in 1:length(A)
-      setvalue(params[3][1][i],A[i]);
-      setvalue(params[3][2][i],B[i]);
-      setvalue(params[3][3][i],X_0obs[i]);
-      setvalue(params[3][4][i],Y_0obs[i]);
-    end
+  # update obstacle feild
+  for i in 1:length(e.A)
+    setvalue(params[3][1][i],e.A[i]);
+    setvalue(params[3][2][i],e.B[i]);
+    setvalue(params[3][3][i],e.X_0obs[i]);
+    setvalue(params[3][4][i],e.Y_0obs[i]);
+  end
 
-    if s.save
-      R_obs=append!(R_obs,[A]);
-      X0_obs=append!(X0_obs,[X_0obs]);
-      Y0_obs=append!(Y0_obs,[Y_0obs]);
-      X0_all=append!(X0_all,[X0]);
-    end
+  # rerun optimization
+  status=autonomousControl(mdl,n,r,s,params);
 
-    t_opt, sa_opt, t_sample, sa_sample, status = sharedControl(mdl,n,r,s,params,X0,SA,UX;Iter=Iter) # SAMPLE OUTPUT
-    Comp_time = toc();
-    if status == 0.0 # if infeasible -> let user control
-      MsgOut = [SA*ones(convert(Int64, floor(t_ocp/0.01))+1 );Comp_time;3;0]
-    else
-      MsgOut = [sa_sample;Comp_time;2;0];
-    end
+  # sample solution
+  sp_SA=Linear_Spline(r.t_ctr,r.X[:,6][1:end-1]);
+  t_sample = Vector(0:0.01:n.mpc.tex);
+  e.sa_sample=sp_SA[t_sample];
 
-    # send UDP packets to client side
-    MsgOut = [MsgOut;Float64(Iter)];
-    MsgOutString = ' ';
-    for j in 1:length(MsgOut)
-        MsgOutString = string(MsgOutString,' ',MsgOut[j]);
-    end
-    MsgOutString = string(MsgOutString," \n");
-    send(s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
-    Iter = Iter+1;
-  end # while
+  # update status for Matlab
+  if status!=:Infeasible; e.status=1.; else e.status=0.; end
+
 end
 
 """
@@ -272,6 +283,7 @@ function evalNum(Idx)
   s=Settings(;format=:png,MPC=false);
   cd("results/test1"); allPlots(n,r,s,eval_num); cd(main_dir)
 end
+
 
 
 end # module
