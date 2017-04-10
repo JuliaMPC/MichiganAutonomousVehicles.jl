@@ -1,0 +1,17 @@
+In this test: 
+caseStudy
+
+RESULTS DISCUSSION:  
+
+* m.Ni=4 
+
+* m.Nck=[13,10,8,6]
+
+* m.tp=5.0 
+
+* m.tex=0.2
+
+* m.max_cpu_time=0.15 
+
+* m.Nck=[13,10,8,6]
+

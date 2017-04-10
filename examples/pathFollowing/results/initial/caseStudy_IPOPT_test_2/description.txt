@@ -1,0 +1,8 @@
+In this test: 
+caseStudy
+
+RESULTS DISCUSSION:  
+
+*    m.max_cpu_time=m.tex*10;
+
+*

@@ -1,9 +1,9 @@
 using PrettyPlots, Plots, DataFrames
-#gr();
+gr();
 #pgfplots();
-pyplot();
+#pyplot();
 
-r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_test_9/")
+r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_GR/")
 resultsDir(r.results_dir);
 
 description = string(

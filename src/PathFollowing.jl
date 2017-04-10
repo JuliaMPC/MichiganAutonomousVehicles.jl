@@ -135,7 +135,8 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   optimize!(mdl,n,r,s);
 
   # set mpc parameters
-  initializeMPC!(n,r,copy(c.m.X0);FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+  initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+  n.mpc.X0=[copy(c.m.X0)];
 
         #  1    2          3         4
   params=[pa,ux_param,obs_params,X0_params];

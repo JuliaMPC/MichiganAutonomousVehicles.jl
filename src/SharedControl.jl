@@ -11,9 +11,9 @@ using .CaseModule
 
 export
       initializeSharedControl,
-      sharedControl,
-      getPlantData,
-      sendOptData,
+      sharedControl!,
+      getPlantData!,
+      sendOptData!,
       ExternalModel
 
 type ExternalModel  # communication
@@ -183,7 +183,7 @@ function initializeSharedControl(c)
     optimize!(mdl,n,r,s);
 
     # set mpc parameters
-    initializeMPC!(n,r,copy(c.m.X0),c)
+    initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
 
           #  1      2          3         4
     params=[pa,veh_params, obs_params,X0_params];
@@ -199,23 +199,26 @@ Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 """
 function getPlantData!(n,params,e)
   MsgString = recv(e.s1);
-  MsgIn = zeros(19);
+  MsgIn = zeros(18);
   allidx = find(MsgString->MsgString == 0x20,MsgString);
   allidx = [0;allidx];
-  for i in 1:19  #length(allidx)-1
+  for i in 1:18  #length(allidx)-1
     MsgIn[i] = parse(Float64,String(copy(MsgString[allidx[i]+1:allidx[i+1]-1])));
   end
-  e.SA = MsgIn[1];                # Vehicle steering angle
-  e.UX = MsgIn[2];                # Longitudinal speed
+  #@show MsgIn
+  e.SA=MsgIn[1];                # Vehicle steering angle
+  e.UX=MsgIn[2];                # Longitudinal speed
   e.X0=zeros(n.numStates);
   e.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
-  e.Xobs       = MsgIn[8:8+e.numObs-1];             # ObsX
-  e.Yobs       = MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
-  e.A            = MsgIn[8+2*e.numObs:8+3*e.numObs-1];  # ObsR
-  e.B            = e.A;
-  e.runJulia     = MsgIn[8+3*e.numObs+2];
-
-  e.t0=  #TODO
+  e.X0[7]=copy(e.UX);
+  e.Xobs=MsgIn[8:8+e.numObs-1];             # ObsX
+  e.Yobs=MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
+  e.A= MsgIn[8+2*e.numObs:8+3*e.numObs-1];  # ObsR
+  e.B=e.A;
+  e.runJulia=MsgIn[8+3*e.numObs];
+  e.t0=MsgIn[8+3*e.numObs+1];
+  n.mpc.t0_actual=copy(e.t0);
+  nothing
 end
 
 """
@@ -226,20 +229,22 @@ Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function sendOptData!(r,e)
-  if r.dfs_opt[r.eval_num][:status]!=:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
-    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve];3;0]
+  if r.dfs_opt[r.eval_num-1][:status][1]==:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
+    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]
   else
-    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve];2;0];
+    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0];
   end
 
   # send UDP packets to client side
-  MsgOut = [MsgOut;Float64(r.eval_num)];
+  MsgOut = [MsgOut;Float64(r.eval_num-1)];
   MsgOutString = ' ';
   for j in 1:length(MsgOut)
       MsgOutString = string(MsgOutString,' ',MsgOut[j]);
   end
-  MsgOutString = string(MsgOutString," \n");
+  @show MsgOutString = string(MsgOutString," \n");
+  @show length(MsgOutString)
   send(e.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
+  nothing
 end
 """
 
@@ -259,7 +264,7 @@ function sharedControl!(mdl,n,r,s,params,e)
   end
 
   # rerun optimization
-  status=autonomousControl!(mdl,n,r,s,params);
+  status=autonomousControl!(mdl,n,r,s,params[1]);
 
   # sample solution
   sp_SA=Linear_Spline(r.t_ctr,r.X[:,6][1:end-1]);

@@ -176,9 +176,9 @@ function defineObstacles(name)
     o.X0=[17.,49.];
     o.Y0=[100.,200.];
     o.status=falses(length(o.X0));
-  elseif name==:caseStudy # test case for testPathFollowing.jl
-    o.name=name;
-    dfs=dataSet(name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
+  elseif name==:caseStudyPath # test case for testPathFollowing.jl
+    o.name=:caseStudy;
+    dfs=dataSet(o.name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
     o.X0=dfs[1][:X];
     o.Y0=dfs[1][:Y];
     o.A=dfs[1][:A];
@@ -187,7 +187,7 @@ function defineObstacles(name)
     o.s_x=zeros(length(o.X0));
     o.s_y=zeros(length(o.X0));
     o.status=falses(length(o.X0));
-  elseif name==:caseStudy_v2 # test case for testPathFollowing.jl
+  elseif name==:caseStudy # test case for testPathFollowing.jl
     o.name=:caseStudy;
     dfs=dataSet(o.name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
     o.X0=dfs[1][:X][1:3];
@@ -356,6 +356,27 @@ function defineMisc(name)
     m.X0=[0.0, 0.0, 0.0, 0.0, 1.2037,0.0,m.UX,0.0];
     m.Xlims=[-10., 750.]
     m.Ylims=[-10., 200.]
+    m.tp=6.0;
+    m.tex=0.3;
+    m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model! 0.3 currently
+    m.sm=2.0;
+    m.Lr=60.;
+    m.L_rd=1.;
+    m.sigma=1.0;
+    m.Ni=3;
+    m.Nck=[10,8,6];
+    m.solver=:KNITRO;
+    m.max_iter=350;
+    m.mpc_max_iter=600;
+    m.PredictX0=true;
+    m.FixedTp=true;
+#=
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.UX=10.0;
+    m.X0=[0.0, 0.0, 0.0, 0.0, 1.2037,0.0,m.UX,0.0];
+    m.Xlims=[-10., 750.]
+    m.Ylims=[-10., 200.]
     m.tp=2.0;
     m.tex=0.30;   #NOTE:this needs to mattch Matlab model!
     m.max_cpu_time=0.27;
@@ -368,25 +389,28 @@ function defineMisc(name)
     m.solver=:KNITRO;
     m.max_iter=250;
     m.mpc_max_iter=600;
-    m.PredictX0=false;
+    m.PredictX0=true;
     m.FixedTp=true;
-  elseif name==:empty # test case for testPathFollowing.jl with other model
-    m.name=name;
+    =#
+  elseif name==:caseStudyPath # test case for testPathFollowing.jl with other model
+    m.name=:caseStudy;
     m.model=:ThreeDOFv2;
     m.UX=10.0;
-    m.X0=[0.0,0.0, 0.0, 0.0,1.9378,0.0,m.UX,0.0];
-    m.tp=9.0;
-    m.tex=0.5;
-    m.max_cpu_time=m.tex;
+    m.X0=[0.0,0.0, 0.0, 0.0,1.2037,0.0,m.UX,0.0];
+    m.Xlims=[-10., 750.]
+    m.Ylims=[-10., 200.]
+    m.tp=7.0;
+    m.tex=0.3;
+    m.max_cpu_time=0.25;
     m.sm=2.0;
     m.Lr=100.;
     m.L_rd=1.;
     m.sigma=1.0;
-    m.Ni=4;
-    m.Nck=[12,10,8,6];
+    m.Ni=3;
+    m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=300;
-    m.mpc_max_iter=600;
+    m.mpc_max_iter=30;
     m.PredictX0=true;
     m.FixedTp=true;
   elseif name!==:NA
@@ -516,10 +540,17 @@ function defineCase(;name::Symbol=:auto,
    elseif mode==:caseStudy
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(:caseStudy_v2);
+     c.o=defineObstacles(c.name);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);
+   elseif mode==:caseStudyPath
+     c.name=:caseStudy;
+     c.g=defineGoal(c.name);
+     c.o=defineObstacles(:caseStudyPath);
+     c.w=defineWeights(:path);
+     c.t=defineTrack(c.name);
+     c.m=defineMisc(:caseStudyPath);
    else
      name=:user;
      c.name=name;

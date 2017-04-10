@@ -4,8 +4,7 @@ using Parameters
 using DataFrames
 using MAVs
 
-c=defineCase(;(:mode=>:path));
-#c=defineCase(;(:mode=>:caseStudy));
+c=defineCase(;(:mode=>:caseStudyPath));
 
 mdl,n,r,params=initializePathFollowing(c);
 global pa=params[1];

@@ -78,7 +78,8 @@ function initializeAutonomousControl(c)
  postProcess!(n,r,Settings();(:Init=>true));
 
  # set mpc parameters
- initializeMPC!(n,r,copy(c.m.X0),c)
+ initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+ n.mpc.X0=[copy(c.m.X0)];
 
  # save case data TODO    case_data, obs_data = case2dfs(c);
  return mdl, n, r, params
