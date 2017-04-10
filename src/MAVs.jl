@@ -7,12 +7,12 @@ using .CaseModule
 
 include("AutonomousControl.jl")
 include("SharedControl.jl")
-include("SimpleModel.jl")
+#include("SimpleModel.jl")
 include("PathFollowing.jl")
 
 using .AutonomousControl
 using .SharedControl
-using .SimpleModel
+#using .SimpleModel
 using .PathFollowing
 
 export
@@ -27,23 +27,23 @@ export
 
       # AutonomousControl.jl
       initializeAutonomousControl,
-      autonomousControl,
+      autonomousControl!,
 
       # SharedControl.jl
       initializeSharedControl,
-      sharedControl,
-      getPlantData,
-      sendOptData,
+      sharedControl!,
+      getPlantData!,
+      sendOptData!,
       ExternalModel,
 
       # SimpleModel.jl
-      initializeSimpleModel,
-      updateSimpleModel,
-      runSimpleModel,
-      compareSimpleModels,
-      resetDesignVariables,
+  #    initializeSimpleModel,
+    #  updateSimpleModel,
+  #    runSimpleModel,
+  #    compareSimpleModels,
+#      resetDesignVariables,
 
       # PathFollowing.jl
       initializePathFollowing,
-      updatePathParams
+      updatePathParams!
 end

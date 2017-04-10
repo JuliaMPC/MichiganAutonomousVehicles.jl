@@ -11,7 +11,7 @@ using .CaseModule
 
 export
       initializePathFollowing,
-      updatePathParams
+      updatePathParams!
 
 """
 
@@ -30,7 +30,7 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
     XL = [x_min, y_min, NaN, NaN, psi_min];
     XU = [x_max, y_max, NaN, NaN, psi_max];
     CL = [sa_min]; CU = [sa_max];
-    n = define(n,stateEquations=ThreeDOFv1,numStates=5,numControls=1,X0=c.m.X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
+    define!(n,stateEquations=ThreeDOFv1,numStates=5,numControls=1,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
 
     # variable names
     names = [:x,:y,:v,:r,:psi];
@@ -43,38 +43,34 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
     XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
     XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
     XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
-  #  XL=[NaN, NaN, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];  # TODO adding in LiDAR-> do not want degeneracy in the constraints!
-#    XU=[NaN, NaN, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
     CL = [sr_min, 0.0]; CU = [sr_max, 0.0];
-    n = define(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=c.m.X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
-
+    define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
     # variable names
              # 1  2  3  4  5    6   7   8
     names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
     descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
-    stateNames(n,names,descriptions);
+    stateNames!(n,names,descriptions);
              # 1    2
     names = [:sr,:jx];
     descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
-    controlNames(n,names,descriptions);
+    controlNames!(n,names,descriptions);
   else
     error("\n set c.m.model \n")
   end
 
   # configure problem
-  n = configure(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
-  mpcParams(n,c);
-  mdl=defineSolver(n,c);
+  configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
+  mdl=defineSolver!(n,c);
 
   # define tolerances
   if c.m.model==:ThreeDOFv1
     XF_tol=[NaN,NaN,NaN,NaN,NaN];
     X0_tol=[0.05,0.05,0.005,0.05,0.01];
-    defineTolerances(n;X0_tol=X0_tol,XF_tol=XF_tol);
+    defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
   elseif c.m.model==:ThreeDOFv2
     XF_tol=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN];
     X0_tol=[0.05,0.05,0.005,0.05,0.01,0.001,NaN,NaN];  # TODO BE CAREFUL HERE!!
-    defineTolerances(n;X0_tol=X0_tol,XF_tol=XF_tol);
+    defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
   else
     error("\n set c.m.model \n")
   end
@@ -84,15 +80,15 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
 
   # obstacles
   Q = size(c.o.A)[1]; # number of obstacles TODO update these based off of LiDAR data
-  @NLparameter(mdl, a[i=1:Q] == c.o.A[i]);
-  @NLparameter(mdl, b[i=1:Q] == c.o.B[i]);
-  @NLparameter(mdl, X_0[i=1:Q] == c.o.X0[i]);
-  @NLparameter(mdl, Y_0[i=1:Q] == c.o.Y0[i]);
+  @NLparameter(mdl, a[i=1:Q] == copy(c.o.A[i]));
+  @NLparameter(mdl, b[i=1:Q] == copy(c.o.B[i]));
+  @NLparameter(mdl, X_0[i=1:Q] == copy(c.o.X0[i]));
+  @NLparameter(mdl, Y_0[i=1:Q] == copy(c.o.Y0[i]));
   obs_params=[a,b,X_0,Y_0];
 
   # define ocp
   s=Settings(;save=false,MPC=true);
-  n,r=OCPdef(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
+  r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
   # define objective function
   # follow the path -> min((X_path(Yt)-Xt)^2)
@@ -105,7 +101,7 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   if c.m.model==:ThreeDOFv1
     @NLobjective(mdl, Min, path_obj)
   elseif c.m.model==:ThreeDOFv2
-    sr_obj=integrate(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));
+    sr_obj=integrate!(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));
     @NLobjective(mdl, Min, path_obj + sr_obj);
   else
     error("\n set c.m.model \n")
@@ -117,9 +113,9 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
 
   # constraint position
   obs_con=@NLconstraint(mdl, [j=1:Q,i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
-  newConstraint(r,obs_con,:obs_con);
+  newConstraint!(r,obs_con,:obs_con);
 
-  # LiDAR connstraint  TODO finish fixing the lidara constraints here
+  # LiDAR connstraint  TODO finish fixing the lidar constraints here
   @NLparameter(mdl, X0_params[j=1:2]==n.X0[j]);
 
 #  LiDAR_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], ((r.x[(i+1),1]-X0_params[1])^2+(r.x[(i+1),2]-X0_params[2])^2) <= (c.m.Lr + c.m.L_rd)^2); # not constraining the first state
@@ -129,14 +125,17 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   # constraint on progress on track (no turning around!)
   if c.t.dir==:posY
     progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,2] <= r.x[(i+1),2]);
-    newConstraint(r,progress_con,:progress_con);
+    newConstraint!(r,progress_con,:progress_con);
   elseif c.t.dir==:posX
     progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,1] <= r.x[(i+1),1]);
-    newConstraint(r,progress_con,:progress_con);
+    newConstraint!(r,progress_con,:progress_con);
   end
 
   # intial optimization
-  optimize(mdl,n,r,s);
+  optimize!(mdl,n,r,s);
+
+  # set mpc parameters
+  initializeMPC!(n,r,copy(c.m.X0);FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
 
         #  1    2          3         4
   params=[pa,ux_param,obs_params,X0_params];
@@ -158,7 +157,7 @@ Date Create: 3/20/2017, Last Modified: 3/21/2017 \n
 """
 
 
-function updatePathParams(n,r,c,params)
+function updatePathParams!(n,r,c,params)
 
   # vehicle position for LiDAR
   setvalue(params[4][1],n.X0[1])
@@ -175,7 +174,7 @@ function updatePathParams(n,r,c,params)
     error("\n set c.m.model \n")
   end
 
-
+  nothing
 end
 
 

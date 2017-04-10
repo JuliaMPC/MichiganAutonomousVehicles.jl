@@ -15,9 +15,11 @@ RESULTS DISCUSSION:  \n
 * m.tex=",c.m.tex,"\n
 * m.max_cpu_time=",c.m.max_cpu_time," \n
 * m.Nck=",c.m.Nck,"\n
+* m.PredictX0=",c.m.PredictX0," \n
+* m.FixedTp=",c.m.FixedTp,"\n
 ")
 
-# save data
+# save data TODO push this to NLOptControl.jl
 function savePlantData(r)
   dfs=DataFrame();
   temp = [r.dfs_plant[jj][:t][1:end-1,:] for jj in 1:length(r.dfs_plant)]; # time
@@ -70,7 +72,7 @@ else
   allPlots(n,r,s,2)
 end
 
-if r.dfs_opt[r.eval_num][:status][r.eval_num]==:Infeasible
+if r.dfs_opt[r.eval_num][:status]==:Infeasible
   s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
   postProcess(n,r,s)
   # trouble getting a feasible solution? -> look at the constraints
@@ -97,3 +99,7 @@ XF_tol=[NaN,NaN,NaN,NaN,NaN];
 X0_tol=[0.05,0.05,0.05,0.05,0.01];
 defineTolerances(n;X0_tol=X0_tol,XF_tol=XF_tol);
 =#
+
+#using PrettyPlots
+#s=Settings(;save=true,MPC=false,simulate=false,format=:png);
+#pSimPath(n,r,s,c,r.eval_num)

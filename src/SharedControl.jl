@@ -20,20 +20,24 @@ type ExternalModel  # communication
   s1
   s2
   status   # to pass result of optimization to Matlab
+  sa_sample
   runJulia # a Bool (in Int form) to indicate to run julia comming from Matlab
   numObs   # number of obstacles
   SA       # drivers steering angle
   UX       # vehicle speed
-  X_Obs
-  Y_Obs
+  X0       # vehicle states
+  Xobs
+  Yobs
   A
   B
+  t0  # current time
 end
 
 function ExternalModel()
   ExternalModel(Any,
                 Any,
                 1.0,
+                [],
                 1,
                 3,
                 0.0,
@@ -41,7 +45,9 @@ function ExternalModel()
                 [],
                 [],
                 [],
-                [])
+                [],
+                [],
+                0.0)
 end
 
 
@@ -63,49 +69,48 @@ function initializeSharedControl(c)
       XL = [x_min, y_min, NaN, NaN, psi_min];
       XU = [x_max, y_max, NaN, NaN, psi_max];
       CL = [sa_min]; CU = [sa_max];
-      n = define(n,stateEquations=ThreeDOFv1,numStates=5,numControls=1,X0=c.m.X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
+      define!(n,stateEquations=ThreeDOFv1,numStates=5,numControls=1,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
 
       # variable names
       names = [:x,:y,:v,:r,:psi];
       descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)","Yaw Rate (rad/s)","Yaw Angle (rad)"];
-      stateNames(n,names,descriptions)
+      stateNames!(n,names,descriptions)
       names = [:sa];
       descriptions = ["Steering Angle (rad)"];
-      controlNames(n,names,descriptions);
+      controlNames!(n,names,descriptions);
     elseif c.m.model==:ThreeDOFv2
       XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
       XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
       XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
       CL = [sr_min, 0.0]; CU = [sr_max, 0.0];
-      n = define(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=c.m.X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
+      define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
 
       # variable names
                # 1  2  3  4  5    6   7   8
       names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
       descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
-      stateNames(n,names,descriptions);
+      stateNames!(n,names,descriptions);
                # 1    2
       names = [:sr,:jx];
       descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
-      controlNames(n,names,descriptions);
+      controlNames!(n,names,descriptions);
     else
       error("\n set c.m.model \n")
     end
 
     # configure problem
-    n = configure(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
-    mpcParams(n,c);
-    mdl=defineSolver(n,c);
+    configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
+    mdl=defineSolver!(n,c);
 
     # define tolerances
     if c.m.model==:ThreeDOFv1
       XF_tol=[NaN,NaN,NaN,NaN,NaN];
       X0_tol=[0.05,0.05,0.005,0.05,0.01];
-      defineTolerances(n;X0_tol=X0_tol,XF_tol=XF_tol);
+      defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
     elseif c.m.model==:ThreeDOFv2
       XF_tol=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN];
       X0_tol=[0.05,0.05,0.005,0.05,0.01,0.001,NaN,NaN];  # TODO BE CAREFUL HERE!!
-      defineTolerances(n;X0_tol=X0_tol,XF_tol=XF_tol);
+      defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
     else
       error("\n set c.m.model \n")
     end
@@ -125,7 +130,7 @@ function initializeSharedControl(c)
 
     # define ocp
     s=Settings(;save=false,MPC=true);
-    n,r=OCPdef(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
+    r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
     # define objective function
     # follow the path -> min((X_path(Yt)-Xt)^2)
@@ -141,9 +146,9 @@ function initializeSharedControl(c)
       @NLobjective(mdl, Min, path_obj + driver_obj)
     elseif c.m.model==:ThreeDOFv2
       # follow driver
-      #driver_obj=integrate(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
+      #driver_obj=integrate!(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
       # minimum steering rate
-      sr_obj=integrate(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));
+      sr_obj=integrate!(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));
       #@NLobjective(mdl, Min, path_obj + sr_obj);
       @NLobjective(mdl, Min, sr_obj);
     else
@@ -156,7 +161,7 @@ function initializeSharedControl(c)
 
     # constraint position
     obs_con=@NLconstraint(mdl, [j=1:Q,i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
-    newConstraint(r,obs_con,:obs_con);
+    newConstraint!(r,obs_con,:obs_con);
 
     # LiDAR connstraint  TODO finish fixing the lidara constraints here
     @NLparameter(mdl, X0_params[j=1:2]==n.X0[j]);
@@ -168,14 +173,17 @@ function initializeSharedControl(c)
     # constraint on progress on track (no turning around!)
     if c.t.dir==:posY
       progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,2] <= r.x[(i+1),2]);
-      newConstraint(r,progress_con,:progress_con);
+      newConstraint!(r,progress_con,:progress_con);
     elseif c.t.dir==:posX
       progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,1] <= r.x[(i+1),1]);
-      newConstraint(r,progress_con,:progress_con);
+      newConstraint!(r,progress_con,:progress_con);
     end
 
     # intial optimization
-    optimize(mdl,n,r,s);
+    optimize!(mdl,n,r,s);
+
+    # set mpc parameters
+    initializeMPC!(n,r,copy(c.m.X0),c)
 
           #  1      2          3         4
     params=[pa,veh_params, obs_params,X0_params];
@@ -189,8 +197,7 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-
-function getPlantData(n,params,e)
+function getPlantData!(n,params,e)
   MsgString = recv(e.s1);
   MsgIn = zeros(19);
   allidx = find(MsgString->MsgString == 0x20,MsgString);
@@ -202,11 +209,13 @@ function getPlantData(n,params,e)
   e.UX = MsgIn[2];                # Longitudinal speed
   e.X0=zeros(n.numStates);
   e.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
-  e.X_0obs       = MsgIn[8:8+e.numObs-1];             # ObsX
-  e.Y_0obs       = MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
+  e.Xobs       = MsgIn[8:8+e.numObs-1];             # ObsX
+  e.Yobs       = MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
   e.A            = MsgIn[8+2*e.numObs:8+3*e.numObs-1];  # ObsR
-  e.B            = A;
+  e.B            = e.A;
   e.runJulia     = MsgIn[8+3*e.numObs+2];
+
+  e.t0=  #TODO
 end
 
 """
@@ -216,11 +225,11 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sendOptData(r,e)
-  if r.dfs_opt[r.eval_num][:status][end]!==:Infeasible # if infeasible -> let user control TODO what is this YINgshi?
-    MsgOut = [SA*ones(convert(Int64, floor(c.m.max_cpu_time/0.01))+1 );r.dfs_opt[r.eval_num][:t_solve][end];3;0]
+function sendOptData!(r,e)
+  if r.dfs_opt[r.eval_num][:status]!=:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
+    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve];3;0]
   else
-    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve][end];2;0];
+    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num][:t_solve];2;0];
   end
 
   # send UDP packets to client side
@@ -239,27 +248,26 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 1/27/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sharedControl(mdl,n,r,s,params,e)
+function sharedControl!(mdl,n,r,s,params,e)
 
   # update obstacle feild
   for i in 1:length(e.A)
     setvalue(params[3][1][i],e.A[i]);
     setvalue(params[3][2][i],e.B[i]);
-    setvalue(params[3][3][i],e.X_0obs[i]);
-    setvalue(params[3][4][i],e.Y_0obs[i]);
+    setvalue(params[3][3][i],e.Xobs[i]);
+    setvalue(params[3][4][i],e.Yobs[i]);
   end
 
   # rerun optimization
-  status=autonomousControl(mdl,n,r,s,params);
+  status=autonomousControl!(mdl,n,r,s,params);
 
   # sample solution
   sp_SA=Linear_Spline(r.t_ctr,r.X[:,6][1:end-1]);
-  t_sample = Vector(0:0.01:n.mpc.tex);
+  t_sample=Vector(0:0.01:n.mpc.tex); # 0.3
   e.sa_sample=sp_SA[t_sample];
 
   # update status for Matlab
   if status!=:Infeasible; e.status=1.; else e.status=0.; end
-
 end
 
 """

@@ -47,16 +47,19 @@ function initializeSimpleModel(n,c,pa;x_min::Float64=0.0)  # can intially pass d
   XU = [x_max,y_max,psi_max,u_max];
   CL = [sa_min,-2.0];
   CU = [sa_max,2.5];
-  n1 = define(n1,stateEquations=KinematicBicycle,numStates=4,numControls=2,X0=X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
+  define!(n1,stateEquations=KinematicBicycle,numStates=4,numControls=2,X0=X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
 
   # build
-  n1 = configure(n1,Ni=n.Ni,Nck=n.Nck;(:integrationMethod => n.integrationMethod),(:integrationScheme => n.integrationScheme),(:finalTimeDV => true))
-  defineSolver(n1,solver=:IPOPT)
-  mdl1 = build(n1);
+  configure!(n1,Ni=n.Ni,Nck=n.Nck;(:integrationMethod => n.integrationMethod),(:integrationScheme => n.integrationScheme),(:finalTimeDV => true))
+  defineSolver!(n1,solver=:IPOPT)
+  error("update this!")
+  mdl=defineSolver!(n,c);
+
+
 
   # setup OCP
   params1 = [VparaKB()];   # simple vehicle parameters TODO--> are they the same?
-  n1,r1 = OCPdef(mdl1,n1,s1,params1);
+  r1=OCPdef!(mdl1,n1,s1,params1);
   @NLobjective(mdl1, Min,  n1.tf + (r1.x[end,1]-c.x_ref)^2 + (r1.x[end,2]-c.y_ref)^2);
 
   # obstacles
@@ -74,10 +77,10 @@ function initializeSimpleModel(n,c,pa;x_min::Float64=0.0)  # can intially pass d
 
   # constraint on position
   obs_con=@NLconstraint(mdl1, [j=1:Q,i=1:n1.numStatePoints-1], 1 <= ((r1.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.sm)^2) + ((r1.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.sm)^2));
-  newConstraint(r1,obs_con,:obs_con);
+  newConstraint!(r1,obs_con,:obs_con);
 
   # solve
-  optimize(mdl1,n1,r1,s1)
+  optimize!(mdl1,n1,r1,s1)
 
   return mdl1, n1, r1
 end

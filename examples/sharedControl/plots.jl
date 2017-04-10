@@ -17,3 +17,8 @@ gif(anim, string(r.results_dir,"pSimPath.gif"), fps = 5);
 #cd(r.results_dir)
  #run(`ffmpeg -f gif -i pSimPath.gif RESULT.mp4`)
 #cd(r.main_dir)
+
+
+s=Settings(;MPC=false)
+
+pSimPath(n,r,s,c,1)

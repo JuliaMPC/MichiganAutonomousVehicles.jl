@@ -2,7 +2,7 @@ using NLOptControl
 using VehicleModels
 
 using MAVs
-
+error("this is old")
 # initializatin data
 c=defineCase(;track=:NA,obstacles=:o3);
 c.m=setMisc(;sm=2.0,tex=0.2,tp=3.0,X0=[0.0, 0.0, 0.0, 0.0, pi/2],UX=15.0)

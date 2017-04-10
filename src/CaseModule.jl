@@ -140,6 +140,15 @@ function defineObstacles(name)
     o.X0=[200.];
     o.Y0=[50.];
     o.status=falses(length(o.X0));
+  elseif name==:auto2
+    o.name=name;
+    o.A=[5.,10.,2.];
+    o.B=[5.,10.,2.];
+    o.s_x=[-2.,0.,0.];
+    o.s_y=[0.,0.,4.];
+    o.X0=[205.,180.,200.];
+    o.Y0=[50.,75.,30.];
+    o.status=falses(length(o.X0));
   elseif name==:path  # test case for testPathFollowing.jl
     o.name=name;
     o.A=[5.,4.,10.]
@@ -266,6 +275,7 @@ type Misc
   max_iter # max evaluations in optimization
   mpc_max_iter # an MPC parameter
   PredictX0    # if the state that the vehicle will be at when the optimization is finished is to be predicted
+  FixedTp  # fixed final time for predicting X0
 end
 
 function Misc()
@@ -276,6 +286,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -312,10 +323,11 @@ function defineMisc(name)
     m.sigma=1.0;
     m.Ni=4;
     m.Nck=[12,10,8,6];
-    m.solver=:IPOPT;
+    m.solver=:KNITRO;
     m.max_iter=30;
     m.mpc_max_iter=600;
     m.PredictX0=true;
+    m.FixedTp=true;
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -332,10 +344,11 @@ function defineMisc(name)
     m.sigma=1.0;
     m.Ni=3;
     m.Nck=[10,8,6];
-    m.solver=:IPOPT;
+    m.solver=:KNITRO;
     m.max_iter=50;
     m.mpc_max_iter=30;
     m.PredictX0=true;
+    m.FixedTp=true;
   elseif name==:caseStudy
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -343,19 +356,20 @@ function defineMisc(name)
     m.X0=[0.0, 0.0, 0.0, 0.0, 1.2037,0.0,m.UX,0.0];
     m.Xlims=[-10., 750.]
     m.Ylims=[-10., 200.]
-    m.tp=5.0;
-    m.tex=0.20;
-    m.max_cpu_time=0.15;
+    m.tp=2.0;
+    m.tex=0.30;   #NOTE:this needs to mattch Matlab model!
+    m.max_cpu_time=0.27;
     m.sm=2.0;
     m.Lr=60.;
     m.L_rd=1.;
     m.sigma=1.0;
-    m.Ni=4;
-    m.Nck=[13,10,8,6];
+    m.Ni=2;
+    m.Nck=[10,10];
     m.solver=:KNITRO;
     m.max_iter=250;
     m.mpc_max_iter=600;
-    m.PredictX0=true;
+    m.PredictX0=false;
+    m.FixedTp=true;
   elseif name==:empty # test case for testPathFollowing.jl with other model
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -374,6 +388,7 @@ function defineMisc(name)
     m.max_iter=300;
     m.mpc_max_iter=600;
     m.PredictX0=true;
+    m.FixedTp=true;
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end
