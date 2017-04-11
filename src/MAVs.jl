@@ -20,14 +20,16 @@ export
       # CaseModule.jl
       Case,
       defineCase,
-      setMisc,
+      setMisc!,
       setupResults,
       case2dfs,  # currently not working
       dataSet,
+      defineObstacles,
 
       # AutonomousControl.jl
       initializeAutonomousControl,
       autonomousControl!,
+      updateAutoParams!,
 
       # SharedControl.jl
       initializeSharedControl,

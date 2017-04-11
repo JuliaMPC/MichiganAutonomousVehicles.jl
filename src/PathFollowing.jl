@@ -21,10 +21,8 @@ Date Create: 3/28/2017, Last Modified: 4/3/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializePathFollowing(c)  #TODO add in some sort of a window around the vehicle where it only sees certain obstacles
-
   pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],Fz_min=1.0);
   n=NLOpt(); @unpack_Vpara pa;
-
   if c.m.model==:ThreeDOFv1
     XF = [NaN, NaN,  NaN,  NaN, NaN];
     XL = [x_min, y_min, NaN, NaN, psi_min];

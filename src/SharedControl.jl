@@ -5,6 +5,7 @@ using VehicleModels
 using JuMP
 using DataFrames
 using Parameters
+using Ranges
 
 include("CaseModule.jl")
 using .CaseModule
@@ -31,6 +32,8 @@ type ExternalModel  # communication
   A
   B
   t0  # current time
+  t_opt
+  wsa
 end
 
 function ExternalModel()
@@ -47,7 +50,9 @@ function ExternalModel()
                 [],
                 [],
                 [],
-                0.0)
+                0.0,
+                0.0,
+                1.0)
 end
 
 
@@ -197,27 +202,28 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function getPlantData!(n,params,e)
-  MsgString = recv(e.s1);
-  MsgIn = zeros(18);
+function getPlantData!(n,params,x)
+  MsgString = recv(x.s1);
+  MsgIn = zeros(19);
   allidx = find(MsgString->MsgString == 0x20,MsgString);
   allidx = [0;allidx];
-  for i in 1:18  #length(allidx)-1
+  for i in 1:19  #length(allidx)-1
     MsgIn[i] = parse(Float64,String(copy(MsgString[allidx[i]+1:allidx[i+1]-1])));
   end
   #@show MsgIn
-  e.SA=MsgIn[1];                # Vehicle steering angle
-  e.UX=MsgIn[2];                # Longitudinal speed
-  e.X0=zeros(n.numStates);
-  e.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
-  e.X0[7]=copy(e.UX);
-  e.Xobs=MsgIn[8:8+e.numObs-1];             # ObsX
-  e.Yobs=MsgIn[8+e.numObs:8+2*e.numObs-1];    # ObsY
-  e.A= MsgIn[8+2*e.numObs:8+3*e.numObs-1];  # ObsR
-  e.B=e.A;
-  e.runJulia=MsgIn[8+3*e.numObs];
-  e.t0=MsgIn[8+3*e.numObs+1];
-  n.mpc.t0_actual=copy(e.t0);
+  x.SA=zeros(2);
+  x.SA=[MsgIn[1],MsgIn[19]];    # Vehicle steering angle
+  x.UX=MsgIn[2];                # Longitudinal speed
+  x.X0=zeros(n.numStates);
+  x.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
+  x.X0[7]=copy(x.UX);
+  x.Xobs=MsgIn[8:8+x.numObs-1];             # ObsX
+  x.Yobs=MsgIn[8+x.numObs:8+2*x.numObs-1];    # ObsY
+  x.A= MsgIn[8+2*x.numObs:8+3*x.numObs-1];  # ObsR
+  x.B=x.A;
+  x.runJulia=MsgIn[8+3*x.numObs];
+  x.t0=MsgIn[8+3*x.numObs+1];
+  n.mpc.t0_actual=copy(x.t0);
   nothing
 end
 
@@ -228,22 +234,23 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sendOptData!(r,e)
+function sendOptData!(n,r,x)
   if r.dfs_opt[r.eval_num-1][:status][1]==:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
-    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]
+    MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]
   else
-    MsgOut = [e.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0];
+    MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0];
   end
 
   # send UDP packets to client side
-  MsgOut = [MsgOut;Float64(r.eval_num-1)];
+  TJ=copy(n.mpc.t0_actual)
+  MsgOut = [MsgOut;Float64(r.eval_num-1);TJ];
   MsgOutString = ' ';
   for j in 1:length(MsgOut)
       MsgOutString = string(MsgOutString,' ',MsgOut[j]);
   end
-  @show MsgOutString = string(MsgOutString," \n");
-  @show length(MsgOutString)
-  send(e.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
+  MsgOutString = string(MsgOutString," \n");
+  #@show length(MsgOutString)
+  send(x.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
   nothing
 end
 """
@@ -253,26 +260,27 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 1/27/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sharedControl!(mdl,n,r,s,params,e)
+function sharedControl!(mdl,n,r,s,params,x)
 
   # update obstacle feild
-  for i in 1:length(e.A)
-    setvalue(params[3][1][i],e.A[i]);
-    setvalue(params[3][2][i],e.B[i]);
-    setvalue(params[3][3][i],e.Xobs[i]);
-    setvalue(params[3][4][i],e.Yobs[i]);
+  for i in 1:length(x.A)
+    setvalue(params[3][1][i],x.A[i]);
+    setvalue(params[3][2][i],x.B[i]);
+    setvalue(params[3][3][i],x.Xobs[i]);
+    setvalue(params[3][4][i],x.Yobs[i]);
   end
 
   # rerun optimization
   status=autonomousControl!(mdl,n,r,s,params[1]);
 
   # sample solution
-  sp_SA=Linear_Spline(r.t_ctr,r.X[:,6][1:end-1]);
-  t_sample=Vector(0:0.01:n.mpc.tex); # 0.3
-  e.sa_sample=sp_SA[t_sample];
+  sp_SA=Linear_Spline(r.t_st,r.X[:,6]);
+  t_sample=Ranges.linspace(0.0,1.0,31);
+  x.sa_sample=sp_SA[t_sample];
 
   # update status for Matlab
-  if status!=:Infeasible; e.status=1.; else e.status=0.; end
+  if status!=:Infeasible; x.status=1.; else x.status=0.; end
+  nothing
 end
 
 """

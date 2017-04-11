@@ -5,10 +5,11 @@ using DataFrames
 export
       Case,
       defineCase,
-      setMisc,
+      setMisc!,
       setupResults,
       case2dfs,  # currently not working
-      dataSet
+      dataSet,
+      defineObstacles
 ################################################################################
 # Basic Types
 ################################################################################
@@ -123,7 +124,7 @@ function Obstacles()
 end
 
 """
-defineObstacles(name)
+o=defineObstacles(name)
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 3/28/2017, Last Modified: 4/3/2017 \n
@@ -138,7 +139,7 @@ function defineObstacles(name)
     o.s_x=[0.0];
     o.s_y=[0.0];
     o.X0=[200.];
-    o.Y0=[50.];
+    o.Y0=[75.];
     o.status=falses(length(o.X0));
   elseif name==:auto2
     o.name=name;
@@ -231,7 +232,7 @@ function defineGoal(name)
     g=Goal();
     g.name=name;
     g.x_ref=200.;
-    g.y_ref=100.;
+    g.y_ref=150.;
     g.psi_ref=pi/2;
   elseif name==:path # test case for testPathFollowing.jl
     g=Goal();
@@ -314,7 +315,9 @@ function defineMisc(name)
   if name==:auto
     m.name=name;
     m.model=:ThreeDOFv2;
-    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,m.UX,0.0];
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,7.0,0.0];
+    m.Xlims=[-1., 400.]
+    m.Ylims=[-1., 400.]
     m.tex=0.5;
     m.max_cpu_time=m.tex;
     m.sm=2.0;
@@ -324,7 +327,7 @@ function defineMisc(name)
     m.Ni=4;
     m.Nck=[12,10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=30;
+    m.max_iter=50;
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
@@ -420,49 +423,48 @@ function defineMisc(name)
 end
 
 """
-c.m = setMisc(;)
+setMisc!(c;UX=10.0,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6],mpc_max_iter=200,predictX0=false,fixedTp=false);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 3/28/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function setMisc(;
-                name::Symbol=:user,
-                model::Symbol=:ThreeDOFv1,
-                X0::Vector{Float64}=[],
+function setMisc!(c;
+                Xlims::Vector{Float64}=[-10., 750.],
+                Ylims::Vector{Float64}=[-10., 200.],
                 UX::Float64=10.0,
-                tp::Float64=3.0,
-                tex::Float64=0.5,
-                max_cpu_time::Float64=5.0,
+                tp::Float64=5.0,
+                tex::Float64=0.3,
+                max_cpu_time::Float64=0.26,
                 sm::Float64=2.0,
                 Lr::Float64=100.0,
-                l_rd::Float64=1.0,
+                L_rd::Float64=1.0,
                 sigma::Float64=1.0,
-                Ni::Int64=2,
-                Nck::Vector{Int64}=[10,10],
+                Ni::Int64=3,
+                Nck::Vector{Int64}=[10,8,6],
                 solver::Symbol=:KNITRO,
-                max_iter::Int64=50,
+                max_iter::Int64=300,
                 mpc_max_iter::Int64=200,
-                predictX0::Bool=false);
-    m=Misc();
-    m.name=name;
-    m.model=model;
-    m.X0=X0;
-    m.UX=UX;
-    m.tp=tp;
-    m.tex=tex;
-    m.max_cpu_time=m.tex;
-    m.sm=sm;
-    m.Lr=Lr;
-    m.L_rd=L_rd;
-    m.sigma=sigma;
-    m.Ni=Ni;
-    m.Nck=Nck;
-    m.solver=solver;
-    m.max_iter=max_iter;
-    m.mpc_max_iter=mpc_max_iter;
-    m.predictX0=predictX0;
-    return m
+                PredictX0::Bool=false,
+                FixedTp::Bool=false);
+    c.m.Xlims=Xlims;
+    c.m.Ylims=Ylims;
+    c.m.UX=UX;
+    c.m.tp=tp;
+    c.m.tex=tex;
+    c.m.max_cpu_time=max_cpu_time;
+    c.m.sm=sm;
+    c.m.Lr=Lr;
+    c.m.L_rd=L_rd;
+    c.m.sigma=sigma;
+    c.m.Ni=Ni;
+    c.m.Nck=Nck;
+    c.m.solver=solver;
+    c.m.max_iter=max_iter;
+    c.m.mpc_max_iter=mpc_max_iter;
+    c.m.PredictX0=PredictX0;
+    c.m.FixedTp=FixedTp;
+    nothing
 end
 
 ################################################################################
