@@ -5,7 +5,6 @@ gr();
 
 description = string(
 "In this test: \n",c.m.name,"\n
-RESULTS DISCUSSION:  \n
 * m.Ni=",c.m.Ni," \n
 * m.Nck=",c.m.Nck,"\n
 * m.tp=",c.m.tp," \n
@@ -15,6 +14,8 @@ RESULTS DISCUSSION:  \n
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
+results_dir=string(r.main_dir,"/results","/testA_",c.m.name,"_",c.m.solver,"/")
+resultsDir!(r,results_dir;description=description);
 
 function pmain(n,r,s,c)
   if r.eval_num>2;

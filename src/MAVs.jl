@@ -32,7 +32,8 @@ export
       updateAutoParams!,
 
       # SharedControl.jl
-      initializeSharedControl,
+      initializeSharedControl!,
+      checkFeasibility!,
       sharedControl!,
       getPlantData!,
       sendOptData!,

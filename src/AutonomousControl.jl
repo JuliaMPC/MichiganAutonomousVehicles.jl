@@ -62,7 +62,35 @@ function initializeAutonomousControl(c)
 
  # define ocp
  s=Settings(;save=false,MPC=true);
- r=OCPdef!(mdl,n,s,[pa]); #TODO add rest of terms in obj function
+ r=OCPdef!(mdl,n,s,[pa]);
+
+ #TODO add rest of terms in obj function
+#=
+#----------------------
+# OBJECTIVE FUNCTION #
+#----------------------
+# penalize distance to goal
+@NLparameter(mdl, w_goal_param == w_goal)  # temp values
+@NLexpression(mdl, goal_obj, w_goal_param*((x[1] - x_ref)^2 + (y[1] - y_ref)^2)/((x[N+1] - x_ref)^2 + (y[N+1] - y_ref)^2+EP))
+
+# penalize difference between final heading angle and angle relative to the goal
+@NLparameter(mdl, w_psi_param == w_psi)  # temp values
+@NLexpression(mdl, psi_obj, w_psi_param*atan((y_ref-y[end])/(x_ref-x[end]+EP))*(atan(sin(psi[end]-psi_ref)/(cos(psi[end]-psi_ref)+EP)))^2 )
+
+# minimizing the integral over the entire prediction horizon of the line that passes through the goal
+@NLexpression(mdl, haf_obj, w_haf*sum{((sin(psi_ref)*(x[i]-x_ref)-cos(psi_ref)*(y[i]-y_ref))^2)*dt[i],i=1:N})
+
+# penalize control effort
+@NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2)*dt[i],i=1:N});
+#@NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2+(ax[i])^2)*dt[i],i=1:N});
+
+# prevent vehicle from operating at its vertical tire load limit
+@NLexpression(mdl, Fz_obj, w_Fz*sum{2 + (tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)+tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) + KZYR*((FYF[i] + FYR[i])/m)-a_t)/b_t))*dt[i],i=1:N});
+
+# define objective function
+#@NLobjective(mdl, Min, aux_time[N+1] + goal_obj + psi_obj + haf_obj + ce_obj + Fz_obj )
+@NLobjective(mdl, Min, aux_time[N+1] + haf_obj + ce_obj + Fz_obj )
+=#
 
  # define objective function
  sr_obj=integrate!(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared))

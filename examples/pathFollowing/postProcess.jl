@@ -3,12 +3,8 @@ gr();
 #pgfplots();
 #pyplot();
 
-r.results_dir = string(r.main_dir,"/results/",c.m.name,"_",c.m.solver,"_GR/")
-resultsDir(r.results_dir);
-
 description = string(
 "In this test: \n",c.m.name,"\n
-RESULTS DISCUSSION:  \n
 * m.Ni=",c.m.Ni," \n
 * m.Nck=",c.m.Nck,"\n
 * m.tp=",c.m.tp," \n
@@ -18,6 +14,9 @@ RESULTS DISCUSSION:  \n
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
+results_dir=string(r.main_dir,"/results","/testA_",c.m.name,"_",c.m.solver,"/")
+resultsDir!(r,results_dir;description=description);
+
 
 # save data TODO push this to NLOptControl.jl
 function savePlantData(r)

@@ -276,7 +276,10 @@ type Misc
   max_iter # max evaluations in optimization
   mpc_max_iter # an MPC parameter
   PredictX0    # if the state that the vehicle will be at when the optimization is finished is to be predicted
-  FixedTp  # fixed final time for predicting X0
+  FixedTp      # fixed final time for predicting X0
+  activeSafety # a bool if the system is only used to avoid collisions with obstacles
+  followDriver # a bool to try and follow the driver
+  followPath   # a bool to follow the path
 end
 
 function Misc()
@@ -287,6 +290,9 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
+            [],
+            [],
             [],
             [],
             [],
@@ -361,7 +367,7 @@ function defineMisc(name)
     m.Ylims=[-10., 200.]
     m.tp=6.0;
     m.tex=0.3;
-    m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model! 0.3 currently
+    m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model!
     m.sm=2.0;
     m.Lr=60.;
     m.L_rd=1.;
@@ -369,32 +375,13 @@ function defineMisc(name)
     m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=350;
+    m.max_iter=450;
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
-#=
-    m.name=name;
-    m.model=:ThreeDOFv2;
-    m.UX=10.0;
-    m.X0=[0.0, 0.0, 0.0, 0.0, 1.2037,0.0,m.UX,0.0];
-    m.Xlims=[-10., 750.]
-    m.Ylims=[-10., 200.]
-    m.tp=2.0;
-    m.tex=0.30;   #NOTE:this needs to mattch Matlab model!
-    m.max_cpu_time=0.27;
-    m.sm=2.0;
-    m.Lr=60.;
-    m.L_rd=1.;
-    m.sigma=1.0;
-    m.Ni=2;
-    m.Nck=[10,10];
-    m.solver=:KNITRO;
-    m.max_iter=250;
-    m.mpc_max_iter=600;
-    m.PredictX0=true;
-    m.FixedTp=true;
-    =#
+    activeSafety=true;
+    followPath=false;
+    followDriver=false;
   elseif name==:caseStudyPath # test case for testPathFollowing.jl with other model
     m.name=:caseStudy;
     m.model=:ThreeDOFv2;
@@ -423,7 +410,7 @@ function defineMisc(name)
 end
 
 """
-setMisc!(c;UX=10.0,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6],mpc_max_iter=200,predictX0=false,fixedTp=false);
+setMisc!(c;activeSafety=true,followPath=false,followDriver=false,predictX0=false,fixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 3/28/2017, Last Modified: 4/7/2017 \n
@@ -446,7 +433,10 @@ function setMisc!(c;
                 max_iter::Int64=300,
                 mpc_max_iter::Int64=200,
                 PredictX0::Bool=false,
-                FixedTp::Bool=false);
+                FixedTp::Bool=false,
+                activeSafety::Bool=false,
+                followPath::Bool=false,
+                followDriver::Bool=false);
     c.m.Xlims=Xlims;
     c.m.Ylims=Ylims;
     c.m.UX=UX;
@@ -464,6 +454,9 @@ function setMisc!(c;
     c.m.mpc_max_iter=mpc_max_iter;
     c.m.PredictX0=PredictX0;
     c.m.FixedTp=FixedTp;
+    c.m.activeSafety=activeSafety;
+    c.m.followPath=followPath;
+    c.m.followDriver=followDriver;
     nothing
 end
 
@@ -582,28 +575,6 @@ function dataSet(set,path)
   dfs[1]=readtable(string(set,".csv"))
   cd(main_dir)
   return dfs
-end
-
-"""
---------------------------------------------------------------------------------------\n
-Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/26/2017, Last Modified: 3/26/2017 \n
---------------------------------------------------------------------------------------\n
-"""
-function setupResults(r,results_name)
- # define directories
- results_dir = string(main_dir,"/results/",results_name)
- r.results_dir=results_dir;
-
- resultsDir(r.results_dir);  # create directory
-
- description = string(
- "In this test: \n
-  RESULTS DISCUSSION:  \n * ")  # TODO add field to case
-
- cd(results_dir)
-   write("description.txt", description)
- cd(main_dir)
 end
 
 

@@ -16,8 +16,7 @@ c.o=defineObstacles(:auto2)
 setMisc!(c;tex=0.5,max_cpu_time=0.45,Ni=4,Nck=[12,10,8,6],mpc_max_iter=200,PredictX0=true,FixedTp=true);
 
 mdl,n,r,params=initializeAutonomousControl(c);
-r.results_dir = string(r.main_dir,"/results","/testB_",c.m.name,"_",c.m.solver,"/")
-resultsDir(r.results_dir);
+
 global pa=params[1];
 global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
 
