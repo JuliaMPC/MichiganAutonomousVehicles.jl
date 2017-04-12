@@ -37,7 +37,7 @@ type ExternalModel  # communication
   t0  # current time
   t_opt
   wsa
-  feasible
+  feasible # a bool for the feasibility of the current dirver commands
   AL
   AU
   dt  # this is the time step in simulink
@@ -60,7 +60,7 @@ function ExternalModel()
                 0.0,
                 0.0,
                 1.0,
-                0.0, # a Bool in Int form
+                false,
                 [],
                 [],
                 0.01)
@@ -125,18 +125,19 @@ function initializeSharedControl!(c)
     # define objective function
     obj=0;
     if c.m.followPath
+      wp=15;
       # follow the path -> min((X_path(Yt)-Xt)^2)
       if c.t.func==:poly
-        path_obj=@NLexpression(mdl,sum(  (  (c.t.a[1] + c.t.a[2]*r.x[(i+1),2] + c.t.a[3]*r.x[(i+1),2]^2 + c.t.a[4]*r.x[(i+1),2]^3 + c.t.a[5]*r.x[(i+1),2]^4) - r.x[(i+1),1]  )^2 for i in 1:n.numStatePoints-1)  );
+        path_obj=@NLexpression(mdl,wp*sum(  (  (c.t.a[1] + c.t.a[2]*r.x[(i+1),2] + c.t.a[3]*r.x[(i+1),2]^2 + c.t.a[4]*r.x[(i+1),2]^3 + c.t.a[5]*r.x[(i+1),2]^4) - r.x[(i+1),1]  )^2 for i in 1:n.numStatePoints-1)  );
       elseif c.t.func==:fourier
-        path_obj=@NLexpression(mdl,sum(  (  (c.t.a[1]*sin(c.t.b[1]*r.x[(i+1),1]+c.t.c[1]) + c.t.a[2]*sin(c.t.b[2]*r.x[(i+1),1]+c.t.c[2]) + c.t.a[3]*sin(c.t.b[3]*r.x[(i+1),1]+c.t.c[3]) + c.t.a[4]*sin(c.t.b[4]*r.x[(i+1),1]+c.t.c[4]) + c.t.a[5]*sin(c.t.b[5]*r.x[(i+1),1]+c.t.c[5]) + c.t.a[6]*sin(c.t.b[6]*r.x[(i+1),1]+c.t.c[6]) + c.t.a[7]*sin(c.t.b[7]*r.x[(i+1),1]+c.t.c[7]) + c.t.a[8]*sin(c.t.b[8]*r.x[(i+1),1]+c.t.c[8])+c.t.y0) - r.x[(i+1),2]  )^2 for i in 1:n.numStatePoints-1)  );
+        path_obj=@NLexpression(mdl,wp*sum(  (  (c.t.a[1]*sin(c.t.b[1]*r.x[(i+1),1]+c.t.c[1]) + c.t.a[2]*sin(c.t.b[2]*r.x[(i+1),1]+c.t.c[2]) + c.t.a[3]*sin(c.t.b[3]*r.x[(i+1),1]+c.t.c[3]) + c.t.a[4]*sin(c.t.b[4]*r.x[(i+1),1]+c.t.c[4]) + c.t.a[5]*sin(c.t.b[5]*r.x[(i+1),1]+c.t.c[5]) + c.t.a[6]*sin(c.t.b[6]*r.x[(i+1),1]+c.t.c[6]) + c.t.a[7]*sin(c.t.b[7]*r.x[(i+1),1]+c.t.c[7]) + c.t.a[8]*sin(c.t.b[8]*r.x[(i+1),1]+c.t.c[8])+c.t.y0) - r.x[(i+1),2]  )^2 for i in 1:n.numStatePoints-1)  );
       end
       obj=path_obj;
     end
 
     if c.m.followDriver
-       driver_obj=integrate(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
-       @NLobjective(mdl, Min, path_obj + driver_obj)
+      wd=1;
+       driver_obj=integrate(mdl,n,r.x[:,6];C=wd,D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
        obj=obj+driver_obj;
     end
     sr_obj=integrate!(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));     # minimize steering rate
@@ -233,8 +234,7 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
     end
   end
   x.AL=AL[L:U]; x.AU=AU[L:U];
-  if minimum(sign([x.AL;x.AU]))==-1;x.feasible=0.0;else;x.feasible=1.0; end
-
+  if minimum(sign([x.AL;x.AU]))==-1;x.feasible=false;else;x.feasible=true; end
   nothing
 end
 
@@ -245,27 +245,27 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function getPlantData!(n,params,x)
-  MsgString = recv(x.s1);
-  MsgIn = zeros(19);
+function getPlantData!(n,params,x,c)
+  MsgString = recv(x.s1);L=19;
+  MsgIn = zeros(L);
   allidx = find(MsgString->MsgString == 0x20,MsgString);
   allidx = [0;allidx];
-  for i in 1:19  #length(allidx)-1
+  for i in 1:L  #length(allidx)-1
     MsgIn[i] = parse(Float64,String(copy(MsgString[allidx[i]+1:allidx[i+1]-1])));
   end
-  #@show MsgIn
-  x.SA=zeros(2);
-  x.SA=[MsgIn[1],MsgIn[19]];    # Vehicle steering angle
-  x.UX=MsgIn[2];                # Longitudinal speed
   x.X0=zeros(n.numStates);
-  x.X0[1:5] = MsgIn[3:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
-  x.X0[7]=copy(x.UX);
-  x.Xobs=MsgIn[8:8+x.numObs-1];             # ObsX
-  x.Yobs=MsgIn[8+x.numObs:8+2*x.numObs-1];    # ObsY
-  x.A= MsgIn[8+2*x.numObs:8+3*x.numObs-1];  # ObsR
+  x.X0[1:7]=MsgIn[1:7];              # global X, global y, lateral speed v, yaw rate r, yaw angle psi
+  x.SA=zeros(2);
+  x.SA=[copy(x.X0[6]),MsgIn[8]];     # Vehicle steering angle and previous state of steering angle
+  x.UX=copy(x.X0[7]);
+
+  N=n.numStates+1;
+  x.Xobs=MsgIn[N:N+x.numObs-1];               # ObsX
+  x.Yobs=MsgIn[N+x.numObs:N+2*x.numObs-1];    # ObsY
+  x.A= MsgIn[N+2*x.numObs:N+3*x.numObs-1];    # ObsR
   x.B=x.A;
-  x.runJulia=MsgIn[8+3*x.numObs];
-  x.t0=MsgIn[8+3*x.numObs+1];
+  x.runJulia=MsgIn[N+3*x.numObs];
+  x.t0=MsgIn[N+3*x.numObs+1];
   n.mpc.t0_actual=copy(x.t0);
 
   # update obstacle feild
@@ -292,33 +292,25 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function sendOptData!(n,r,x;kwargs...)
-  kw = Dict(kwargs);
-  if !haskey(kw,:feasible); kw_ = Dict(:feasible=>true); feasible=get(kw_,:feasible,0);
-  else; feasible=get(kw,:feasible,0);
-  end
-
-  if feasible
+function sendOptData!(n,r,x)
+  if !x.feasible
+    println("Sending Optimized Steering Angle Commands to MATLAB");
     if r.dfs_opt[r.eval_num-1][:status][1]==:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
       MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]
     else
       MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0];
     end
-
     # send UDP packets to client side
     TJ=copy(n.mpc.t0_actual)
     MsgOut = [MsgOut;Float64(r.eval_num-1);TJ];
-    MsgOutString = ' ';
-    for j in 1:length(MsgOut)
-        MsgOutString = string(MsgOutString,' ',MsgOut[j]);
-    end
-    MsgOutString = string(MsgOutString," \n");
   else
-    MsgOutString = ' ';
-    for j in 1:length(MsgOut)
-        MsgOutString = string(MsgOutString,' ',1);
-    end
+    MsgOut=[copy(x.SA[1])*ones(31);0.01;1;0]
   end
+  MsgOutString = ' ';
+  for j in 1:length(MsgOut)
+      MsgOutString = string(MsgOutString,' ',MsgOut[j]);
+  end
+  MsgOutString = string(MsgOutString," \n");
   #@show length(MsgOutString)
   send(x.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
   nothing
