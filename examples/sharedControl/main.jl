@@ -15,8 +15,8 @@ end
 c=defineCase(;(:mode=>:caseStudy));
 
 # active safety
-setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
-setWeights!(c;sr=0.08,path=10.0,driver=0.5)
+setMisc!(c;activeSafety=true,followPath=true,followDriver=true,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
+setWeights!(c;sr=0.08,path=0.5,driver=0.0)
 
 # shared control
 #setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=9.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
@@ -36,6 +36,8 @@ r.eval_num=1;
 #r.U=0*Matrix{Float64}(n.numControlPoints,n.numControls); # for initial predictX0 [SR and JX]
 #r.t_ctr=Vector(Ranges.linspace(0,copy(c.m.tp),n.numControlPoints)); # gives a bunch of points
 
+# set infeasible_counter for active safety
+x.infeasible_counter=100; x.infeasible_counter_max=10;  # initially the condition will be false
 while(Bool(x.runJulia))
   println("Running model for the: ",r.eval_num," time");
   println("Getting Vehicle Position From MATLAB");
@@ -45,9 +47,14 @@ while(Bool(x.runJulia))
 
   if c.m.activeSafety
     checkFeasibility!(mdl,d,n,c,x,params[1],r;feas_tol=0.005);
+    if !x.feasible
+      x.infeasible_counter=1;
+    else
+      x.infeasible_counter+=1;
+    end
   end
 
-  if !c.m.activeSafety || !x.feasible
+  if !c.m.activeSafety || !x.feasible || (x.infeasible_counter < x.infeasible_counter_max)
     println("Running Optimization");
     sharedControl!(mdl,n,r,s,params,x);   # rerun optimization
   end

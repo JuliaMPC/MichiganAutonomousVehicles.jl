@@ -28,6 +28,7 @@ type ExternalModel  # communication
   runJulia # a Bool (in Int form) to indicate to run julia comming from Matlab
   numObs   # number of obstacles
   SA       # last two drivers steering angle
+  SA_first # first order approximation of drivers commands
   UX       # vehicle speed
   X0       # vehicle states
   Xobs
@@ -37,7 +38,9 @@ type ExternalModel  # communication
   t0  # current time
   t_opt
   wsa
-  feasible # a bool for the feasibility of the current dirver commands
+  feasible # a bool for the feasibility of the current driver commands
+  infeasible_counter
+  infeasible_counter_max
   AL
   AU
   dt  # this is the time step in simulink
@@ -51,6 +54,7 @@ function ExternalModel()
                 1,
                 3,
                 [0.0,0.0],
+                [],
                 10.0,
                 [],
                 [],
@@ -61,6 +65,8 @@ function ExternalModel()
                 0.0,
                 1.0,
                 false,
+                100,
+                10,
                 [],
                 [],
                 0.01)
@@ -106,8 +112,8 @@ function initializeSharedControl!(c)
     defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
     # add parameters
-    @NLparameter(mdl, ux_param==c.m.UX);                  # inital vehicle speed
-    @NLparameter(mdl, sa_param[i=1:n.numStates]==0.0);    # driver steering command
+    @NLparameter(mdl, ux_param==c.m.UX);                       # inital vehicle speed
+    @NLparameter(mdl, sa_param[i=1:n.numStatePoints]==0.0);    # driver steering command
     veh_params=[ux_param,sa_param];
 
     # obstacles
@@ -122,6 +128,8 @@ function initializeSharedControl!(c)
     s=Settings(;save=false,MPC=true);
     r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
+    x=ExternalModel(); # setup data with Matlab
+
     # define objective function
     obj=0;
     if c.m.followPath
@@ -135,8 +143,8 @@ function initializeSharedControl!(c)
     end
 
     if c.m.followDriver
-       driver_obj=integrate!(mdl,n,r.x[:,6];C=c.w.driver,D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
-       obj=obj+driver_obj;
+       driver_obj=integrate!(mdl,n,r.x[:,6];C=c.w.driver,D=copy(sa_param),(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
+       obj=@NLexpression(mdl,obj+driver_obj);
     end
     sr_obj=integrate!(mdl,n,r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared));     # minimize steering rate
 
@@ -172,7 +180,6 @@ function initializeSharedControl!(c)
     # setup mpc parameters
     initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
 
-    x=ExternalModel(); # setup data with Matlab
     x.X0=copy(c.m.X0);
     if c.m.activeSafety
       evalConstraints!(n,r);         # setup constraint data
@@ -274,9 +281,14 @@ function getPlantData!(n,params,x,c)
     setvalue(params[3][4][i],x.Yobs[i]);
   end
 
-  if c.m.followDriver # assum it is constant, but we could make it vary
-    for i in 1:n.numStates
-      setvalue(params[2][2][i], x.SA[1])
+  x.SA_first=zeros(n.numStatePoints,);
+  for jj in 1:n.numStatePoints
+    x.SA_first[jj]=copy(x.SA[1]) + jj*copy(x.SA[1]-x.SA[2]);  # first order approximation of SA
+  end
+
+  if c.m.followDriver # first order
+    for jj in 1:n.numStatePoints
+      setvalue(params[2][2][jj], x.SA_first[jj])
     end
   end
 
@@ -291,7 +303,7 @@ Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function sendOptData!(n,r,x)
-  if !x.feasible
+  if !x.feasible || (x.infeasible_counter < x.infeasible_counter_max)
     println("Sending Optimized Steering Angle Commands to MATLAB");
     if r.dfs_opt[r.eval_num-1][:status][1]==:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
       MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]

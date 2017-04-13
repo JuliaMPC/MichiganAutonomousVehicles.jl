@@ -1,21 +1,17 @@
 In this test: 
-
-  RESULTS DISCUSSION:  
-
-  * In this test: 
 caseStudy
 
-* m.Ni=3 
+* m.Ni=2 
 
-* m.Nck=[10,8,6]
+* m.Nck=[10,10]
 
-* m.tp=9.0 
+* m.tp=4.0 
 
-* m.tex=0.3
+* m.tex=0.2
 
-* m.max_cpu_time=0.26 
+* m.max_cpu_time=0.18 
 
-* m.Nck=[10,8,6]
+* m.Nck=[10,10]
 
 * m.PredictX0=false 
 

@@ -20,6 +20,7 @@ export
       # CaseModule.jl
       Case,
       defineCase,
+      setWeights!,
       setMisc!,
       setupResults,
       case2dfs,  # currently not working
