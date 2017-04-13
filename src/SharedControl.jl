@@ -124,6 +124,10 @@ function initializeSharedControl!(c)
     @NLparameter(mdl, Y_0[i=1:Q] == c.o.Y0[i]);
     obs_params=[a,b,X_0,Y_0];
 
+    # setup mpc parameters
+    initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+    x.X0=copy(c.m.X0);
+
     # define ocp
     s=Settings(;save=false,MPC=true);
     r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
@@ -177,10 +181,6 @@ function initializeSharedControl!(c)
     # intial optimization
     optimize!(mdl,n,r,s);
 
-    # setup mpc parameters
-    initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
-
-    x.X0=copy(c.m.X0);
     if c.m.activeSafety
       evalConstraints!(n,r);         # setup constraint data
       d=JuMP.NLPEvaluator(mdl);      # initialize feasibility checking functionality

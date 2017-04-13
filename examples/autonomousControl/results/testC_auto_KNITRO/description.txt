@@ -1,0 +1,15 @@
+In this test: 
+auto
+
+* m.Ni=4 
+
+* m.Nck=[12,10,8,6]
+
+* m.tp=5.0 
+
+* m.tex=0.5
+
+* m.max_cpu_time=0.45 
+
+* m.Nck=[12,10,8,6]
+

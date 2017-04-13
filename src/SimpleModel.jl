@@ -34,7 +34,7 @@ Date Create: 3/28/2017, Last Modified: 3/28/2017 \n
 """
 
 function initializeSimpleModel(n,c,pa;x_min::Float64=0.0)  # can intially pass different x_min
-
+error("this needs to be updated")
   # initialize
   n1 = NLOpt();s1=Settings();
 

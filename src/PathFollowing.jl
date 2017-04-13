@@ -84,6 +84,10 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   @NLparameter(mdl, Y_0[i=1:Q] == copy(c.o.Y0[i]));
   obs_params=[a,b,X_0,Y_0];
 
+  # set mpc parameters
+  initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+  n.mpc.X0=[copy(c.m.X0)];
+  
   # define ocp
   s=Settings(;save=false,MPC=true);
   r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
@@ -131,10 +135,6 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
 
   # intial optimization
   optimize!(mdl,n,r,s);
-
-  # set mpc parameters
-  initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
-  n.mpc.X0=[copy(c.m.X0)];
 
         #  1    2          3         4
   params=[pa,ux_param,obs_params,X0_params];

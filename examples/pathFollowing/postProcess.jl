@@ -53,7 +53,6 @@ s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
 #mainSimPath(n,r,s,c,pa,r.eval_num-1);
 
 if r.eval_num>2;
-
    anim = @animate for ii in 1:length(r.dfs_plant)
     mainSimPath(n,r,s,c,pa,ii);
   end
@@ -73,7 +72,7 @@ end
 
 if r.dfs_opt[r.eval_num][:status]==:Infeasible
   s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
-  postProcess(n,r,s)
+  postProcess!(n,r,s)
   # trouble getting a feasible solution? -> look at the constraints
   print(r.constraint.value)
 end # then consider relaxing tolerances etc. to make it work

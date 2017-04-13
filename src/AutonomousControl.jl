@@ -40,10 +40,11 @@ function initializeAutonomousControl(c)
  descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
  controlNames!(n,names,descriptions)
  params = [pa];   # vehicle parameters
-
+@show n.mpc.t0_param
  # configure problem
  configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => true))
  mdl=defineSolver!(n,c);
+ @show n.mpc.t0_param
 
  # define tolerances
  XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
@@ -59,6 +60,10 @@ function initializeAutonomousControl(c)
  @NLparameter(mdl, speed_x[i=1:Q] == copy(c.o.s_x[i]));
  @NLparameter(mdl, speed_y[i=1:Q] == copy(c.o.s_y[i]));
  obs_params=[a,b,X_0,Y_0,speed_x,speed_y];
+
+ # set mpc parameters
+ initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
+ n.mpc.X0=[copy(c.m.X0)];
 
  # define ocp
  s=Settings(;save=false,MPC=true);
@@ -115,10 +120,6 @@ function initializeAutonomousControl(c)
 
 # intial optimization
  optimize!(mdl,n,r,s);
-
- # set mpc parameters
- initializeMPC!(n,r;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
- n.mpc.X0=[copy(c.m.X0)];
 
         #  1    2          3
  params=[pa,obs_params,X0_params];

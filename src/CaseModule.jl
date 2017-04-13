@@ -258,7 +258,7 @@ function defineGoal(name)
     g=Goal();
     g.name=name;
     g.x_ref=200.;
-    g.y_ref=150.;
+    g.y_ref=125.;
     g.psi_ref=pi/2;
   elseif name==:path # test case for testPathFollowing.jl
     g=Goal();
