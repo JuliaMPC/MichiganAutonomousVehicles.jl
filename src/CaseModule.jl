@@ -73,6 +73,8 @@ type Weights
   sa
   sr
   jx
+  path
+  driver
 end
 
 function Weights()
@@ -84,7 +86,10 @@ function Weights()
           1.,      # w_ce
           0.1,     # w_sa
           1.,      # w_sr
-          0.01);   # w_jx
+          0.01,   # w_jx
+          1.0,    # path following
+          1.0,    # follow driver steering angle
+          );
 end
 
 function defineWeights(name)
@@ -93,12 +98,32 @@ function defineWeights(name)
   elseif name==:path
     w=Weights();
     w.sr=0.1;
+    w.path=1.0;
+    w.driver=1.0;
   elseif name==:m3
 
   elseif name!==:NA
     error("\n Pick a name for weights! \n")
   end
   return w
+end
+
+"""
+setWeights!(c;sr=0.08,path=10.0,driver=0.5)
+--------------------------------------------------------------------------------------\n
+Author: Huckleberry Febbo, Graduate Student, University of Michigan
+Date Create: 4/12/2017, Last Modified: 4/12/2017 \n
+--------------------------------------------------------------------------------------\n
+"""
+function setWeights!(c;
+                      sr::Float64=0.1,
+                      path::Float64=1.0,
+                      driver::Float64=1.0
+                      )
+    c.w.sr=sr;
+    c.w.path=path;
+    c.w.driver=driver;
+    nothing
 end
 ############################### obstacle info ########################################
 type Obstacles
