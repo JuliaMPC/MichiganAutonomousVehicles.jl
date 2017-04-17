@@ -13,8 +13,8 @@ using MAVs
 c=defineCase(;(:mode=>:auto));
 c.o=defineObstacles(:auto2)
 
-setMisc!(c;sm=2.6,Xlims=[100.,250.],Ylims=[-1., 140.],tex=0.5,max_cpu_time=.41,Ni=4,Nck=[12,10,8,6],mpc_max_iter=200,PredictX0=true,FixedTp=true);
-c.m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,17.0,0.0];
+setMisc!(c;sm=2.6,Xlims=[100.,250.],Ylims=[-1., 140.],tex=0.5,max_cpu_time=.44,Ni=4,Nck=[12,10,8,6],mpc_max_iter=200,PredictX0=true,FixedTp=true);
+c.m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,20.0,0.0];
 
 # TEST # 1
 #c.o.A=[5.,10.,2.];
@@ -71,7 +71,7 @@ push!(c.o.B,B[2]);
 push!(c.o.s_x,-5.5);
 push!(c.o.s_y,0);
 
-push!(c.o.X0,220);
+push!(c.o.X0,225);
 push!(c.o.Y0,45);
 push!(c.o.A,B[1]);
 push!(c.o.B,B[2]);
@@ -92,7 +92,7 @@ push!(c.o.s_y,0);
 #push!(c.o.s_x,4);
 #push!(c.o.s_y,0);
 
-push!(c.o.X0,220);
+push!(c.o.X0,225);
 push!(c.o.Y0,75);
 push!(c.o.A,A[1]);
 push!(c.o.B,A[2]);
@@ -106,12 +106,13 @@ push!(c.o.B,C[2]);
 push!(c.o.s_x,4);
 push!(c.o.s_y,0);
 
+
 push!(c.o.X0,200);
 push!(c.o.Y0,50);
 push!(c.o.A,C[2]);
 push!(c.o.B,C[1]);
-push!(c.o.s_x,-2);
-push!(c.o.s_y,5);
+push!(c.o.s_x,0);
+push!(c.o.s_y,7);
 
 #=
 %
@@ -163,9 +164,7 @@ global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
 
 driveStraight!(n,pa,r,s)
 for ii=2:n.mpc.max_iter
-   #if ((r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.mpc.tex*r.dfs_plant[1][:ux][end] #TODO this should be tollerance in PRettyPlots || sum(getvalue(dt)) < 0.0001
-   if ((r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 0.4*n.mpc.tex*r.dfs_plant[1][:ux][end] #TODO this should be tollerance in PRettyPlots || sum(getvalue(dt)) < 0.0001
-
+   if ((r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.mpc.tex*r.dfs_plant[1][:ux][end] #TODO this should be tollerance in PRettyPlots || sum(getvalue(dt)) < 0.0001
       println("Goal Attained! \n"); n.mpc.goal_reached=true; break;
     end
     println("Running model for the: ",r.eval_num," time");

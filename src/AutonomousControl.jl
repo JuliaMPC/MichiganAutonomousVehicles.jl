@@ -24,7 +24,9 @@ Date Create: 2/1/2017, Last Modified: 3/28/2017 \n
 function initializeAutonomousControl(c)
  pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2]);
  n=NLOpt(); @unpack_Vpara pa
+# XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN]; TODO change back
  XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN];
+
  XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, u_min, NaN];
  XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, u_max, NaN];
  #XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, u_min, NaN];
@@ -40,15 +42,16 @@ function initializeAutonomousControl(c)
  descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
  controlNames!(n,names,descriptions)
  params = [pa];   # vehicle parameters
-@show n.mpc.t0_param
+
  # configure problem
  configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => true))
  mdl=defineSolver!(n,c);
- @show n.mpc.t0_param
 
  # define tolerances
- XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
+ #XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN]; TODO change back
+ XF_tol=[.5,.5,NaN,NaN,NaN,NaN,NaN,NaN]; # actually seems to work better like this....
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
+
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
  # add parameters

@@ -124,6 +124,8 @@ function initializeSharedControl!(c)
     @NLparameter(mdl, Y_0[i=1:Q] == c.o.Y0[i]);
     obs_params=[a,b,X_0,Y_0];
 
+    x=ExternalModel(); # setup data with Matlab
+
     # setup mpc parameters
     initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
     x.X0=copy(c.m.X0);
@@ -131,8 +133,6 @@ function initializeSharedControl!(c)
     # define ocp
     s=Settings(;save=false,MPC=true);
     r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
-
-    x=ExternalModel(); # setup data with Matlab
 
     # define objective function
     obj=0;

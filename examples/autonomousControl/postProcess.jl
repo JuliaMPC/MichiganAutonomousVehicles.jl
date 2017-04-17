@@ -19,7 +19,7 @@ description = string(
 * sx=",c.o.s_x,"\n
 * sy=",c.o.s_y,"\n
 ")
-results_dir=string("testD_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("posterA_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(r,results_dir;description=description);
 
 println("Plotting the Final Results!")
