@@ -131,7 +131,7 @@ function initializeSharedControl!(c)
     x.X0=copy(c.m.X0);
 
     # define ocp
-    s=Settings(;save=false,MPC=true);
+    s=Settings(;save=false,MPC=true,evalConstraints=false);
     r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
     # define objective function
@@ -182,10 +182,10 @@ function initializeSharedControl!(c)
     optimize!(mdl,n,r,s);
 
     if c.m.activeSafety
-      evalConstraints!(n,r);         # setup constraint data
+    #  evalConstraints!(n,r);         # setup constraint data
       d=JuMP.NLPEvaluator(mdl);      # initialize feasibility checking functionality
       MathProgBase.initialize(d,[:Grad]);
-    #  checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol=0.005);
+      checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol=0.005);
     else
       d=NaN
     end
@@ -225,8 +225,6 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
     values[linearindex(r.u[idx,1])] = SR[idx]; idx+=1;
   end
   g=zeros(MathProgBase.numconstr(d.m));; # TODO fix -->number of constraints is different from num TODO remove that if we are not doing mpc??
-  @show length(g)
-  @show length(values)
   MathProgBase.eval_g(d,g,values)# is this broken ?
   b=JuMP.constraintbounds(mdl);
   AL=g-b[1]-feas_tol; AU=b[2]+feas_tol-g; # give tolerance
@@ -235,8 +233,12 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
   L=0;U=0;
   for i in 1:length(r.constraint.name)
     if r.constraint.name[i]==:obs_con
-      L=r.constraint.nums[i][end][1];
-      U=r.constraint.nums[i][end][2];
+      L=297
+      U=356
+      warn("currently configured for 3 obstacles! \n
+      if you want to programatically set the indecies where the obstacles are then unccoment the next two lines")
+    #  L=r.constraint.nums[i][end][1];
+    #  U=r.constraint.nums[i][end][2];
     end
   end
   x.AL=AL[L:U]; x.AU=AU[L:U];
@@ -322,7 +324,6 @@ function sendOptData!(n,r,x)
       MsgOutString = string(MsgOutString,' ',MsgOut[j]);
   end
   MsgOutString = string(MsgOutString," \n");
-  #@show length(MsgOutString)
   send(x.s2,ip"141.212.141.245",36881,MsgOutString);  # change this to the ip where you are running Simulink!
   nothing
 end
