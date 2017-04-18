@@ -185,7 +185,7 @@ function initializeSharedControl!(c)
       evalConstraints!(n,r);         # setup constraint data
       d=JuMP.NLPEvaluator(mdl);      # initialize feasibility checking functionality
       MathProgBase.initialize(d,[:Grad]);
-      checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol=0.005);
+    #  checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol=0.005);
     else
       d=NaN
     end
@@ -193,9 +193,8 @@ function initializeSharedControl!(c)
     params=[pa,veh_params, obs_params,X0_params];
     return mdl,n,r,params,x,d
 end
-
-
 """
+
 checkFeasibility!(mdl,d,n,c,x,params[1],r;feas_tol=0.005);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
@@ -205,7 +204,7 @@ Date Create: 2/13/2017, Last Modified: 4/11/2017 \n
 function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
 
   # simulate vehicle response
-  U=zeros(n.numStatePoints,2);
+  U=zeros(n.numStatePoints,2); # NOTE using numStatePoints so that we can approximate the state at the end point
   SR=copy((x.SA[2]-x.SA[1])/x.dt)*ones(n.numStatePoints,);  # first order approximation of SR
   JX=0.0;
   U[:,1]=SR;U[:,2]=JX;
@@ -214,7 +213,7 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
   sol=simModel(n,pa,x.X0,t,U,t0,tf);
 
   # pass values to constraint equations
-  num=n.numStatePoints*n.numStates + n.numControlPoints*n.numControls + 1; # +1 for t0
+  num=n.numStatePoints*n.numStates + n.numControlPoints*n.numControls; # NOTE we removed t0 as a design variable
   values=zeros(num);
   for st in 1:n.numStates
     for j in 1:n.numStatePoints
@@ -226,6 +225,8 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
     values[linearindex(r.u[idx,1])] = SR[idx]; idx+=1;
   end
   g=zeros(MathProgBase.numconstr(d.m));; # TODO fix -->number of constraints is different from num TODO remove that if we are not doing mpc??
+  @show length(g)
+  @show length(values)
   MathProgBase.eval_g(d,g,values)# is this broken ?
   b=JuMP.constraintbounds(mdl);
   AL=g-b[1]-feas_tol; AU=b[2]+feas_tol-g; # give tolerance
@@ -305,10 +306,10 @@ Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 function sendOptData!(n,r,x)
   if !x.feasible || (x.infeasible_counter < x.infeasible_counter_max)
     println("Sending Optimized Steering Angle Commands to MATLAB");
-    if r.dfs_opt[r.eval_num-1][:status][1]==:Infeasible # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
-      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0]
+    if r.dfs_opt[r.eval_num-1][:status][1]==:Optimal # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
+      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0]
     else
-      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0];
+      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0];
     end
     # send UDP packets to client side
     TJ=copy(n.mpc.t0_actual)

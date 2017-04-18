@@ -15,12 +15,18 @@ end
 c=defineCase(;(:mode=>:caseStudy));
 
 # active safety
-setMisc!(c;activeSafety=true,followPath=true,followDriver=true,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
-setWeights!(c;sr=0.08,path=0.5,driver=0.0)
+setMisc!(c;activeSafety=true,followPath=false,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
+setWeights!(c;sr=0.08,path=8.0,driver=0.0)
 
-# shared control
-#setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=9.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
-#setWeights!(c;sr=0.08,path=10.0,driver=0.5)
+# shared control, quick updates
+#setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
+#setWeights!(c;sr=0.08,path=10.0,driver=0.0)
+#setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
+#setWeights!(c;sr=0.08,path=10.0,driver=0.0)
+
+# fixed updates
+#setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=true,tp=9.0,tex=0.5,max_cpu_time=0.45,Ni=4,Nck=[12,10,8,6]);
+
 
 mdl,n,r,params,x,d=initializeSharedControl!(c)
 
