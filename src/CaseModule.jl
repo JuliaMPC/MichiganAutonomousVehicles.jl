@@ -217,11 +217,11 @@ function defineObstacles(name)
   elseif name==:caseStudy # test case for testPathFollowing.jl
     o.name=:caseStudy;
     dfs=dataSet(o.name,Pkg.dir("MAVs/examples/Cases/Obstacles/"));
-    o.X0=dfs[1][:X][1:3];
-    o.Y0=dfs[1][:Y][1:3];
-    o.A=dfs[1][:A][1:3];
-    o.B=dfs[1][:B][1:3];
-    o.status=dfs[1][:status][1:3];
+    o.X0=dfs[1][:X][1];
+    o.Y0=dfs[1][:Y][1];
+    o.A=dfs[1][:A][1];
+    o.B=dfs[1][:B][1];
+    o.status=dfs[1][:status][1];
     o.s_x=zeros(length(o.X0));
     o.s_y=zeros(length(o.X0));
     o.status=falses(length(o.X0));
@@ -306,6 +306,7 @@ type Misc
   activeSafety # a bool if the system is only used to avoid collisions with obstacles
   followDriver # a bool to try and follow the driver
   followPath   # a bool to follow the path
+  NF           # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
 end
 
 function Misc()
@@ -316,6 +317,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -405,9 +407,10 @@ function defineMisc(name)
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
-    activeSafety=true;
-    followPath=false;
-    followDriver=false;
+    m.activeSafety=true;
+    m.followPath=false;
+    m.followDriver=false;
+    m.NF=0;
   elseif name==:caseStudyPath # test case for testPathFollowing.jl with other model
     m.name=:caseStudy;
     m.model=:ThreeDOFv2;
@@ -462,7 +465,8 @@ function setMisc!(c;
                 FixedTp::Bool=false,
                 activeSafety::Bool=false,
                 followPath::Bool=false,
-                followDriver::Bool=false);
+                followDriver::Bool=false,
+                NF::Int64=0);
     c.m.Xlims=Xlims;
     c.m.Ylims=Ylims;
     c.m.UX=UX;
@@ -483,6 +487,7 @@ function setMisc!(c;
     c.m.activeSafety=activeSafety;
     c.m.followPath=followPath;
     c.m.followDriver=followDriver;
+    c.m.NF=NF;
     nothing
 end
 

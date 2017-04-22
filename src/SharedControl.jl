@@ -117,7 +117,9 @@ function initializeSharedControl!(c)
     veh_params=[ux_param,sa_param];
 
     # obstacles
-    Q = size(c.o.A)[1]; # number of obstacles TODO update these based off of LiDAR data
+    #Q=size(c.o.A)[1]; # number of obstacles TODO update these based off of LiDAR data
+    Q=1;
+    if Q>3; error("for activeSafety mode the code was modified to deal with only three obstales when checkFeasibility is running \n");end
     @NLparameter(mdl, a[i=1:Q] == c.o.A[i]);
     @NLparameter(mdl, b[i=1:Q] == c.o.B[i]);
     @NLparameter(mdl, X_0[i=1:Q] == c.o.X0[i]);
@@ -157,10 +159,13 @@ function initializeSharedControl!(c)
     # obstacle postion after the intial postion
     @NLexpression(mdl, X_obs[j=1:Q,i=1:n.numStatePoints], X_0[j])
     @NLexpression(mdl, Y_obs[j=1:Q,i=1:n.numStatePoints], Y_0[j])
-
     # constraint position
-    obs_con=@NLconstraint(mdl, [j=1:Q,i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
-    newConstraint!(r,obs_con,:obs_con);
+    j=1;obs_con1=@NLconstraint(mdl, [i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
+    newConstraint!(r,obs_con1,:obs_con1);
+    #j=2;obs_con2=@NLconstraint(mdl, [i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
+    #newConstraint!(r,obs_con2,:obs_con2);
+    #j=3;obs_con3=@NLconstraint(mdl, [i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
+    #newConstraint!(r,obs_con3,:obs_con3);
 
     # LiDAR connstraint  TODO finish fixing the lidar constraints here NOTE currently not using this
     @NLparameter(mdl, X0_params[j=1:2]==n.X0[j]);
@@ -182,7 +187,7 @@ function initializeSharedControl!(c)
     optimize!(mdl,n,r,s);
 
     if c.m.activeSafety
-    #  evalConstraints!(n,r);         # setup constraint data
+      evalConstraints!(n,r);         # setup constraint data
       d=JuMP.NLPEvaluator(mdl);      # initialize feasibility checking functionality
       MathProgBase.initialize(d,[:Grad]);
       checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol=0.005);
@@ -205,9 +210,10 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
 
   # simulate vehicle response
   U=zeros(n.numStatePoints,2); # NOTE using numStatePoints so that we can approximate the state at the end point
-  SR=copy((x.SA[2]-x.SA[1])/x.dt)*ones(n.numStatePoints,);  # first order approximation of SR
-  JX=0.0;
-  U[:,1]=SR;U[:,2]=JX;
+  SR=copy((x.SA[1]-x.SA[2])/x.dt)*ones(n.numStatePoints,);  # first order approximation of SR
+  #JX=0.0;
+  U[:,1]=SR;
+  #U[:,2]=JX; #NOTE for now assue a constant steering angle
   t0=copy(x.t0); tf=t0+copy(c.m.tp); # tf should be the same as t[end]
   t=t0+r.t_st; # for a fixed final time, this never changes
   sol=simModel(n,pa,x.X0,t,U,t0,tf);
@@ -220,28 +226,39 @@ function checkFeasibility!(mdl,d,n,c,x,pa,r;feas_tol::Float64=0.005)
      values[linearindex(r.x[j,st])] = sol(t[j])[st];
     end
   end
-  idx=1;
-  for j in 1:n.numControlPoints;  # assuming JX is zero
-    values[linearindex(r.u[idx,1])] = SR[idx]; idx+=1;
-  end
+  #idx=1; #NOTE for now assue a constant steering angle
+  #for j in 1:n.numControlPoints;  # assuming JX is zero
+  #  values[linearindex(r.u[idx,1])] = SR[idx]; idx+=1;
+  #end
   g=zeros(MathProgBase.numconstr(d.m));; # TODO fix -->number of constraints is different from num TODO remove that if we are not doing mpc??
   MathProgBase.eval_g(d,g,values)# is this broken ?
   b=JuMP.constraintbounds(mdl);
   AL=g-b[1]-feas_tol; AU=b[2]+feas_tol-g; # give tolerance
 
   # check obstacle avoidance constraints
-  L=0;U=0;
-  for i in 1:length(r.constraint.name)
-    if r.constraint.name[i]==:obs_con
-      L=297
-      U=356
-      warn("currently configured for 3 obstacles! \n
-      if you want to programatically set the indecies where the obstacles are then unccoment the next two lines")
-    #  L=r.constraint.nums[i][end][1];
-    #  U=r.constraint.nums[i][end][2];
+  L1=0;U1=0;  #L2=0;U2=0;  L3=0;U3=0;
+
+  for i in 1:length(r.constraint.name) # note only setup for three obstacles currently
+    if r.constraint.name[i]==:obs_con1
+      L1=r.constraint.nums[i][end][1];
+      U1=r.constraint.nums[i][end][2]-c.m.NF;
     end
+
+#=
+    if r.constraint.name[i]==:obs_con2
+      L2=r.constraint.nums[i][end][1];
+      U2=r.constraint.nums[i][end][2]-c.m.NF;
+    end
+    if r.constraint.name[i]==:obs_con3
+      L3=r.constraint.nums[i][end][1];
+      U3=r.constraint.nums[i][end][2]-c.m.NF;
+    end
+    =#
   end
-  x.AL=AL[L:U]; x.AU=AU[L:U];
+  #x.AL=[AL[L1:U1];AL[L2:U2];AL[L3:U3]];
+#  x.AU=[AU[L1:U1];AU[L2:U2];AU[L3:U3]];
+  x.AL=AL[L1:U1];
+  x.AU=AU[L1:U1];
   if minimum(sign([x.AL;x.AU]))==-1;x.feasible=false;else;x.feasible=true; end
   nothing
 end
@@ -277,12 +294,13 @@ function getPlantData!(n,params,x,c)
   n.mpc.t0_actual=copy(x.t0);
 
   # update obstacle feild
-  for i in 1:length(x.A)
+#  for i in 1:length(x.A)
+  i=1;
     setvalue(params[3][1][i],x.A[i]);
     setvalue(params[3][2][i],x.B[i]);
     setvalue(params[3][3][i],x.Xobs[i]);
     setvalue(params[3][4][i],x.Yobs[i]);
-  end
+#  end
 
   x.SA_first=zeros(n.numStatePoints,);
   for jj in 1:n.numStatePoints
@@ -309,15 +327,15 @@ function sendOptData!(n,r,x)
   if !x.feasible || (x.infeasible_counter < x.infeasible_counter_max)
     println("Sending Optimized Steering Angle Commands to MATLAB");
     if r.dfs_opt[r.eval_num-1][:status][1]==:Optimal # if infeasible -> let user control -> the 3 is a flag in Matlab that tells the system not to use signals from Autonomy
-      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;0]
+      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];2;1]
     else
-      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;0];
+      MsgOut = [x.sa_sample;r.dfs_opt[r.eval_num-1][:t_solve];3;1];
     end
     # send UDP packets to client side
     TJ=copy(n.mpc.t0_actual)
     MsgOut = [MsgOut;Float64(r.eval_num-1);TJ];
   else
-    MsgOut=[copy(x.SA[1])*ones(31);0.01;1;0]
+    MsgOut=[copy(x.SA[1])*ones(31);0.01;1;1]
   end
   MsgOutString = ' ';
   for j in 1:length(MsgOut)

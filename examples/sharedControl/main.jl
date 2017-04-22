@@ -5,8 +5,8 @@ using DataFrames
 using MAVs
 
 """
-main(:activeSafety)
-main(:sharedControl)
+mdl,n,r,pa,x,d,c=main(:activeSafety);
+mdl,n,r,pa,x,d,c=main(:sharedControl);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
@@ -25,12 +25,17 @@ function main(matlabMode)
   c=defineCase(;(:mode=>:caseStudy));
 
   if matlabMode==:activeSafety
-    setMisc!(c;activeSafety=true,followPath=true,followDriver=true,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
-    setWeights!(c;sr=0.08,path=8.0,driver=0.0)
+    #Ok version
+    #setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=3.5,tex=0.35,max_cpu_time=0.3,Ni=3,Nck=[10,8,6]);
+    #setWeights!(c;sr=0.5,path=0.1,driver=0.1)
+    setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,NF=8,tp=5.0,tex=0.4,max_cpu_time=0.35,Ni=3,Nck=[12,10,8]);
+    setWeights!(c;sr=0.05,path=10.0,driver=0.0)
   elseif matlabMode==:sharedControl
-    #setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
-    #setWeights!(c;sr=0.08,path=10.0,driver=0.0)
-    setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=4.0,tex=0.2,max_cpu_time=0.18,Ni=2,Nck=[10,10]);
+    # long prediction horizon
+    #setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=8.0,tex=0.3,max_cpu_time=0.25,Ni=4,Nck=[12,10,8,6]);
+
+    #Ok version
+    setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.25,Ni=2,Nck=[10,10]);
     setWeights!(c;sr=0.08,path=10.0,driver=0.0)
 
     # fixed updates
@@ -45,12 +50,16 @@ function main(matlabMode)
 
   global pa=params[1];
   global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
-  r.eval_num=1;
+  r.eval_num=1;count=1;
   # set infeasible_counter for active safety
-  x.infeasible_counter=100; x.infeasible_counter_max=10;  # initially the condition will be false
+  x.infeasible_counter=100; x.infeasible_counter_max=3;  # initially the condition will be false
+  println("Getting Vehicle Position From MATLAB");
   while(Bool(x.runJulia))
-    println("Running model for the: ",r.eval_num," time");
-    println("Getting Vehicle Position From MATLAB");
+    if count!=r.eval_num
+      println("Running model for the: ",r.eval_num," time");
+    end
+    count=r.eval_num;
+
     getPlantData!(n,params,x,c);
 
     updateX0!(n,r,x.X0;(:userUpdate=>true));
@@ -72,5 +81,6 @@ function main(matlabMode)
   end
   close(x.s1)
   close(x.s2)
+  return mdl,n,r,pa,x,d,c
 end
 #include("postProcess.jl")

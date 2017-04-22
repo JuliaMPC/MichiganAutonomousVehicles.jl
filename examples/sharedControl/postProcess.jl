@@ -18,13 +18,11 @@ results_dir=string("testD_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(r,results_dir;description=description);
 
 
-
-
 println("Plotting the Final Results!")
 s=Settings(;reset=false,save=true,simulate=true,MPC=false,format=:png);
-pmain(n,r,s,c)
+#pmain(n,r,s,c)
 #pp(n,r,s,c)
-
+mainSimPath(n,r,s,c,pa)
 if r.dfs_opt[r.eval_num-1][:status]==:Infeasible
   s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
   postProcess(n,r,s)
