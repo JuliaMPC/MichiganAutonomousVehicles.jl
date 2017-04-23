@@ -5,17 +5,17 @@ In this test:
   * In this test: 
 caseStudy
 
-* m.Ni=3 
+* m.Ni=2 
 
-* m.Nck=[12,10,8]
+* m.Nck=[10,10]
 
-* m.tp=4.0 
+* m.tp=3.5 
 
-* m.tex=0.4
+* m.tex=0.35
 
-* m.max_cpu_time=0.35 
+* m.max_cpu_time=0.33 
 
-* m.Nck=[12,10,8]
+* m.Nck=[10,10]
 
 * m.PredictX0=false 
 

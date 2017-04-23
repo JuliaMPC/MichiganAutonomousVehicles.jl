@@ -36,19 +36,17 @@ function posterP(n,r,s,c)
 
   		pp=plot(vals1,vals2,w=s.lw2,label="Vehicle Trajectory");
 
-      pp=op(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));                     # add obstacles
-      pp=vp(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add the vehicle
+      pp=obstaclePlot(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));                     # add obstacles
+      pp=vehiclePlot(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add the vehicle
     else
-      pp=op(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add obstacles
-      pp=vp(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add the vehicle
+      pp=obstaclePlot(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add obstacles
+      pp=vehiclePlot(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add the vehicle
     end
   end
   l = @layout [a{0.5w} [grid(2,2)
                         b{0.2h}]]
-  poster=plot(pp,sap,vt,longv,axp,tp,layout=l,size=(5*1800,5*1200));
-
-  savefig(string(r.results_dir,"poster_hires",".",s.format));
-
+  poster=plot(pp,sap,vt,longv,axp,tp,layout=l,size=(1800,1200));
+  savefig(string(r.results_dir,"poster",".",s.format));
   nothing
 end
 
@@ -56,7 +54,7 @@ end
 #pp=vehiclePlot(n,r,s,c,ii,pp;(:append=>true),(:posterPlot=>true));  # add the vehicle
 
 
-function op(n,r,s,c,idx,args...;kwargs...)
+function obstaclePlot(n,r,s,c,idx,args...;kwargs...)
   kw = Dict(kwargs);
 
   # check to see if is a basic plot
@@ -163,7 +161,7 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 3/11/2017, Last Modified: 4/4/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function vp(n,r,s,c,idx,args...;kwargs...)
+function vehiclePlot(n,r,s,c,idx,args...;kwargs...)
   kw = Dict(kwargs);
 
   if !haskey(kw,:zoom); kw_=Dict(:zoom => false); zoom=get(kw_,:zoom,0);
@@ -225,14 +223,11 @@ function vp(n,r,s,c,idx,args...;kwargs...)
   if posterPlot
     t=idx*c.m.tex;
     annotate!(X_v,Y_v-4,text(string("t=",t," s"),10,:black,:center))
-  #  xlims!(c.m.Xlims[1],c.m.Xlims[2]);
-  #  ylims!(c.m.Ylims[1],c.m.Ylims[2]);
-    #xlims!(200-66/2,200+66/2);
-  #  ylims!(-2,130);
-    xlims!(158,224);
-    ylims!(-2,130);
+    xlims!(c.m.Xlims[1],c.m.Xlims[2]);
+    ylims!(c.m.Ylims[1],c.m.Ylims[2]);
+    #xlims!(158,224);
+    #ylims!(-2,130);
   end
-
   if !s.simulate; savefig(string(r.results_dir,"x_vs_y",".",s.format)); end
   return pp
 end

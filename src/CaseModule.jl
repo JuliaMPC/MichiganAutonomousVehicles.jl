@@ -10,6 +10,7 @@ export
       setupResults,
       case2dfs,  # currently not working
       dataSet,
+      Obstacles,
       defineObstacles
 ################################################################################
 # Basic Types

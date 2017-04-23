@@ -14,7 +14,7 @@ description = string(
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
-results_dir=string("testD_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("testE_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(r,results_dir;description=description);
 
 

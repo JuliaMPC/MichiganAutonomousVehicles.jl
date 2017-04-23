@@ -108,13 +108,15 @@ function initializeSharedControl!(c)
 
     # define tolerances
     XF_tol=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN];
-    X0_tol=[0.05,0.05,0.005,0.05,0.01,0.001,NaN,NaN];  # TODO BE CAREFUL HERE!!
+    X0_tol=[0.05,0.05,0.005,0.05,0.01,0.003,NaN,NaN];  # TODO BE CAREFUL HERE!!
     defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
     # add parameters
     @NLparameter(mdl, ux_param==c.m.UX);                       # inital vehicle speed
     @NLparameter(mdl, sa_param[i=1:n.numStatePoints]==0.0);    # driver steering command
-    veh_params=[ux_param,sa_param];
+    @NLparameter(mdl, sr_param==0.0);                          # driver steering rate command
+
+    veh_params=[ux_param,sa_param,sr_param];
 
     # obstacles
     #Q=size(c.o.A)[1]; # number of obstacles TODO update these based off of LiDAR data
@@ -156,11 +158,22 @@ function initializeSharedControl!(c)
 
     @NLobjective(mdl, Min, obj+sr_obj);
 
+    # constraint steering rate
+    #sr_tol=0.01;
+    #sr_conL=@NLconstraint(mdl, [i=1],r.u[i,1] <=  (sr_param+sr_tol));
+    #newConstraint!(r,sr_conL,:sr_conL);
+    #sr_conU=@NLconstraint(mdl, [i=1],-r.u[i,1] <= -(sr_param-sr_tol));
+    #newConstraint!(r,sr_conU,:sr_conU);
+
+    #sr_con=@NLconstraint(mdl,[i=1],r.u[i,1]==sr_param);
+    #newConstraint!(r,sr_con,:sr_con);
+
     # obstacle postion after the intial postion
     @NLexpression(mdl, X_obs[j=1:Q,i=1:n.numStatePoints], X_0[j])
     @NLexpression(mdl, Y_obs[j=1:Q,i=1:n.numStatePoints], Y_0[j])
+
     # constraint position
-    j=1;obs_con1=@NLconstraint(mdl, [i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
+    j=1;obs_con1=@NLconstraint(mdl, [i=3:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
     newConstraint!(r,obs_con1,:obs_con1);
     #j=2;obs_con2=@NLconstraint(mdl, [i=1:n.numStatePoints-1], 1 <= ((r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
     #newConstraint!(r,obs_con2,:obs_con2);
@@ -175,6 +188,7 @@ function initializeSharedControl!(c)
           #   1-3      4
 
     # constraint on progress on track (no turning around!)
+    #=
     if c.t.dir==:posY
       progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,2] <= r.x[(i+1),2]);
       newConstraint!(r,progress_con,:progress_con);
@@ -182,7 +196,7 @@ function initializeSharedControl!(c)
       progress_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], r.x[i,1] <= r.x[(i+1),1]);
       newConstraint!(r,progress_con,:progress_con);
     end
-
+=#
     # intial optimization
     optimize!(mdl,n,r,s);
 
@@ -270,7 +284,7 @@ Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 4/6/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function getPlantData!(n,params,x,c)
+function getPlantData!(n,params,x,c,r)
   MsgString = recv(x.s1);L=19;
   MsgIn = zeros(L);
   allidx = find(MsgString->MsgString == 0x20,MsgString);
@@ -293,14 +307,36 @@ function getPlantData!(n,params,x,c)
   x.t0=MsgIn[N+3*x.numObs+1];
   n.mpc.t0_actual=copy(x.t0);
 
+  # update drivers steering rate
+  #setvalue(params[2][3],copy((x.SA[1]-x.SA[2])/x.dt) )
+
   # update obstacle feild
 #  for i in 1:length(x.A)
   i=1;
-    setvalue(params[3][1][i],x.A[i]);
-    setvalue(params[3][2][i],x.B[i]);
-    setvalue(params[3][3][i],x.Xobs[i]);
-    setvalue(params[3][4][i],x.Yobs[i]);
+  setvalue(params[3][1][i],x.A[i]);
+  setvalue(params[3][2][i],x.B[i]);
+  setvalue(params[3][3][i],x.Xobs[i]);
+  setvalue(params[3][4][i],x.Yobs[i]);
 #  end
+
+  # update case for plotting
+  if r.eval_num==1; c.o.A=[];c.o.B=[];c.o.X0=[];c.o.Y0=[]end # reset
+
+  if isempty(c.o.X0) # update obstacle data
+    push!(c.o.A,copy(x.A[1]));
+    push!(c.o.B,copy(x.B[1]));
+    push!(c.o.X0,copy(x.Xobs[1]));
+    push!(c.o.Y0,copy(x.Yobs[1]));
+    push!(c.o.s_y,0.0);
+    push!(c.o.s_x,0.0);
+  elseif  (x.Xobs!=c.o.X0[end]) && (x.Yobs!=c.o.Y0[end])
+    push!(c.o.A,copy(x.A[1]));
+    push!(c.o.B,copy(x.B[1]));
+    push!(c.o.X0,copy(x.Xobs[1]));
+    push!(c.o.Y0,copy(x.Yobs[1]));
+    push!(c.o.s_y,0.0);
+    push!(c.o.s_x,0.0);
+  end
 
   x.SA_first=zeros(n.numStatePoints,);
   for jj in 1:n.numStatePoints
@@ -312,7 +348,6 @@ function getPlantData!(n,params,x,c)
       setvalue(params[2][2][jj], x.SA_first[jj])
     end
   end
-
   nothing
 end
 
@@ -358,7 +393,7 @@ function sharedControl!(mdl,n,r,s,params,x)
 
   # sample solution
   sp_SA=Linear_Spline(r.t_st,r.X[:,6]);
-  t_sample=Ranges.linspace(0.0,1.0,31);
+  t_sample=Ranges.linspace(0.0,3.0,31);
   x.sa_sample=sp_SA[t_sample];
 
   # update status for Matlab

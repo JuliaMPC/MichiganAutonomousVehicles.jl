@@ -4,11 +4,12 @@ using Parameters
 using DataFrames
 using MAVs
 
-
 try
-  close(e.s1)
-  close(e.s2)
+  close(x.s1)
+  close(x.s2)
 end
+mdl=0;n=0;r=0;params=0;c=0;x=0;d=0;pa=0;s=0;
+
 # THINGS TO THINK ABOUT TODO
 # 6) intialize obstacle field in intial solve
 # 7) get the vehicle states from MATLAB so that I can plot things as well
@@ -18,7 +19,7 @@ c=defineCase(;(:mode=>:caseStudy));
 # long prediction horizon
 #setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=8.0,tex=0.3,max_cpu_time=0.25,Ni=4,Nck=[12,10,8,6]);
 
-#Ok version
+#4.21
 setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.25,Ni=2,Nck=[10,10]);
 setWeights!(c;sr=0.08,path=10.0,driver=0.0)
 
@@ -43,7 +44,7 @@ while(Bool(x.runJulia))
   end
   count=r.eval_num;
 
-  getPlantData!(n,params,x,c);
+  getPlantData!(n,params,x,c,r);
 
   updateX0!(n,r,x.X0;(:userUpdate=>true));
 

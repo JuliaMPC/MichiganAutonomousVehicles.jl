@@ -60,7 +60,7 @@ function main(matlabMode)
     end
     count=r.eval_num;
 
-    getPlantData!(n,params,x,c);
+    getPlantData!(n,params,x,c,r);
 
     updateX0!(n,r,x.X0;(:userUpdate=>true));
 
