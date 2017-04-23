@@ -17,11 +17,12 @@ mdl=0;n=0;r=0;params=0;c=0;x=0;d=0;pa=0;s=0;
 c=defineCase(;(:mode=>:caseStudy));
 
 #Ok version
-#setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=3.5,tex=0.35,max_cpu_time=0.3,Ni=3,Nck=[10,8,6]);
-#setWeights!(c;sr=0.5,path=0.1,driver=0.1)
+setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,NF=0,tp=4.0,tex=0.4,max_cpu_time=0.35,Ni=2,Nck=[10,10]);
+setWeights!(c;sr=0.05,path=10.0,driver=0.0)
 
-setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,NF=0,tp=3.5,tex=0.45,max_cpu_time=0.4,Ni=2,Nck=[10,10]);
-setWeights!(c;sr=0.05,path=10.0,driver=5.0)
+#4.23
+#setMisc!(c;activeSafety=true,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,NF=0,tp=3.5,tex=0.45,max_cpu_time=0.4,Ni=2,Nck=[10,10]);
+#setWeights!(c;sr=0.05,path=10.0,driver=5.0)
 # 4.21
 #setMisc!(c;activeSafety=true,followPath=false,followDriver=false,PredictX0=false,FixedTp=false,NF=0,tp=3.0,tex=0.5,max_cpu_time=0.45,Ni=3,Nck=[12,10,8]);
 #setWeights!(c;sr=0.05,path=5.0,driver=0.0)

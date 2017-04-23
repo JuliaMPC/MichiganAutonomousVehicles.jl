@@ -1,0 +1,23 @@
+In this test: 
+
+  RESULTS DISCUSSION:  
+
+  * In this test: 
+caseStudy
+
+* m.Ni=3 
+
+* m.Nck=[10,8,6]
+
+* m.tp=4.0 
+
+* m.tex=0.4
+
+* m.max_cpu_time=0.35 
+
+* m.Nck=[10,8,6]
+
+* m.PredictX0=false 
+
+* m.FixedTp=false
+

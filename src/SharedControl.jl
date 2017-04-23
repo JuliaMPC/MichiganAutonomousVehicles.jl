@@ -87,8 +87,10 @@ function initializeSharedControl!(c)
     n=NLOpt(); @unpack_Vpara pa;
 
     XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
-    XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
-    XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
+  #  XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
+  #  XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
+    XL=[NaN, NaN, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
+    XU=[NaN, NaN, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
     CL = [sr_min, 0.0]; CU = [sr_max, 0.0];
     define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
 
@@ -159,11 +161,11 @@ function initializeSharedControl!(c)
     @NLobjective(mdl, Min, obj+sr_obj);
 
     # constraint steering rate
-    #sr_tol=0.01;
-    #sr_conL=@NLconstraint(mdl, [i=1],r.u[i,1] <=  (sr_param+sr_tol));
-    #newConstraint!(r,sr_conL,:sr_conL);
-    #sr_conU=@NLconstraint(mdl, [i=1],-r.u[i,1] <= -(sr_param-sr_tol));
-    #newConstraint!(r,sr_conU,:sr_conU);
+    sr_tol=0.01;
+    sr_conL=@NLconstraint(mdl, [i=1],r.u[i,1] <=  (sr_param+sr_tol));
+    newConstraint!(r,sr_conL,:sr_conL);
+    sr_conU=@NLconstraint(mdl, [i=1],-r.u[i,1] <= -(sr_param-sr_tol));
+    newConstraint!(r,sr_conU,:sr_conU);
 
     #sr_con=@NLconstraint(mdl,[i=1],r.u[i,1]==sr_param);
     #newConstraint!(r,sr_con,:sr_con);
@@ -308,7 +310,9 @@ function getPlantData!(n,params,x,c,r)
   n.mpc.t0_actual=copy(x.t0);
 
   # update drivers steering rate
-  #setvalue(params[2][3],copy((x.SA[1]-x.SA[2])/x.dt) )
+  SR=copy((x.SA[1]-x.SA[2])/x.dt);
+  if SR>0.086;SR=0.086;elseif SR<-0.086;SR=0.086;end # saturate SR
+  setvalue(params[2][3],SR)
 
   # update obstacle feild
 #  for i in 1:length(x.A)
