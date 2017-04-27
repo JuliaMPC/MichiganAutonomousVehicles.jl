@@ -1,7 +1,7 @@
 using PrettyPlots, Plots, DataFrames
-gr();
+#gr();
 #pgfplots();
-#pyplot();
+pyplot();
 
 description = string(
 "In this test: \n",c.m.name,"\n
@@ -14,62 +14,16 @@ description = string(
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
-results_dir=string(r.main_dir,"/results","/testA_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("10_obstacles_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(r,results_dir;description=description);
+savePlantData(n,r)
 
-
-# save data TODO push this to NLOptControl.jl
-function savePlantData(r)
-  dfs=DataFrame();
-  temp = [r.dfs_plant[jj][:t][1:end-1,:] for jj in 1:length(r.dfs_plant)]; # time
-  U=[idx for tempM in temp for idx=tempM]; dfs[:t]=U;
-
-  for st in 1:n.numStates # state
-    temp = [r.dfs_plant[jj][n.state.name[st]][1:end-1,:] for jj in 1:length(r.dfs_plant)];
-    U=[idx for tempM in temp for idx=tempM];
-    dfs[n.state.name[st]]=U;
-  end
-
-  for ctr in 1:n.numControls # control
-    temp = [r.dfs_plant[jj][n.control.name[ctr]][1:end-1,:] for jj in 1:length(r.dfs_plant)];
-    U=[idx for tempM in temp for idx=tempM];
-    dfs[n.control.name[ctr]]=U;
-  end
-  cd(r.results_dir)
-    writetable("plant_data.csv",dfs);
-  cd(r.main_dir)
-  return nothing
+if s.simulate
+  println("Plotting the Final Results!")
+  mainSimPath(n,r,s,c,pa)
 end
 
-cd(r.results_dir)
-  write("description.txt", description);
-  savePlantData(r)
-cd(r.main_dir)
-
-println("Plotting the Final Results!")
-s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
-
-#s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
-#mainSimPath(n,r,s,c,pa,r.eval_num-1);
-
-if r.eval_num>2;
-   anim = @animate for ii in 1:length(r.dfs_plant)
-    mainSimPath(n,r,s,c,pa,ii);
-  end
-  gif(anim, string(r.results_dir,"mainSimPath.gif"), fps = 5);
-  cd(r.results_dir)
-    run(`ffmpeg -f gif -i mainSimPath.gif RESULT.mp4`)
-  cd(r.main_dir)
-
-#  pgfplots();
-#  s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
-#  mainSimPath(n,r,s,c,pa,length(r.dfs_plant));
-else
-  s=Settings(;save=true,MPC=false,simulate=false,format=:png);
-  pSimPath(n,r,s,c,2)
-  allPlots(n,r,s,2)
-end
-
+# TODO make this an example
 if r.dfs_opt[r.eval_num][:status]==:Infeasible
   s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
   postProcess!(n,r,s)

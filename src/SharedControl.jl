@@ -83,7 +83,12 @@ Date Create: 1/27/2017, Last Modified: 4/4/2017 \n
 function initializeSharedControl!(c)
     if c.m.model!=:ThreeDOFv2; error(" this is for ThreeDOFv2 ! ") end
 
-    pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2]);
+    if c.m.activeSafety
+      pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.18,sr_max=0.18);
+    else
+      pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.10,sr_max=0.10); #0.12
+    end
+
     n=NLOpt(); @unpack_Vpara pa;
 
     XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
@@ -161,7 +166,7 @@ function initializeSharedControl!(c)
     @NLobjective(mdl, Min, obj+sr_obj);
 
     # constraint steering rate
-    sr_tol=0.01;
+    sr_tol=0.005; #0.01
     sr_conL=@NLconstraint(mdl, [i=1],r.u[i,1] <=  (sr_param+sr_tol));
     newConstraint!(r,sr_conL,:sr_conL);
     sr_conU=@NLconstraint(mdl, [i=1],-r.u[i,1] <= -(sr_param-sr_tol));

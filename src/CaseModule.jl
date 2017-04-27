@@ -118,9 +118,9 @@ Date Create: 4/12/2017, Last Modified: 4/12/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function setWeights!(c;
-                      sr::Float64=0.1,
-                      path::Float64=1.0,
-                      driver::Float64=1.0
+                      sr=c.w.sr,
+                      path=c.w.path,
+                      driver=c.w.driver
                       )
     c.w.sr=sr;
     c.w.path=path;
@@ -433,6 +433,7 @@ function defineMisc(name)
     m.mpc_max_iter=30;
     m.PredictX0=true;
     m.FixedTp=true;
+    m.followPath=true;
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end
@@ -447,27 +448,27 @@ Date Create: 3/28/2017, Last Modified: 4/7/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function setMisc!(c;
-                Xlims::Vector{Float64}=[-10., 750.],
-                Ylims::Vector{Float64}=[-10., 200.],
-                UX::Float64=10.0,
-                tp::Float64=5.0,
-                tex::Float64=0.3,
-                max_cpu_time::Float64=0.26,
-                sm::Float64=2.0,
-                Lr::Float64=100.0,
-                L_rd::Float64=1.0,
-                sigma::Float64=1.0,
-                Ni::Int64=3,
-                Nck::Vector{Int64}=[10,8,6],
-                solver::Symbol=:KNITRO,
-                max_iter::Int64=300,
-                mpc_max_iter::Int64=200,
-                PredictX0::Bool=false,
-                FixedTp::Bool=false,
-                activeSafety::Bool=false,
-                followPath::Bool=false,
-                followDriver::Bool=false,
-                NF::Int64=0);
+                Xlims=c.m.Xlims,
+                Ylims=c.m.Ylims,
+                UX=c.m.UX,
+                tp=c.m.tp,
+                tex=c.m.tex,
+                max_cpu_time=c.m.max_cpu_time,
+                sm=c.m.sm,
+                Lr=c.m.Lr,
+                L_rd=c.m.L_rd,
+                sigma=c.m.sigma,
+                Ni=c.m.Ni,
+                Nck=c.m.Nck,
+                solver=c.m.solver,
+                max_iter=c.m.max_iter,
+                mpc_max_iter=c.m.mpc_max_iter,
+                PredictX0=c.m.PredictX0,
+                FixedTp=c.m.FixedTp,
+                activeSafety=c.m.activeSafety,
+                followPath=c.m.followPath,
+                followDriver=c.m.followDriver,
+                NF=c.m.NF);
     c.m.Xlims=Xlims;
     c.m.Ylims=Ylims;
     c.m.UX=UX;

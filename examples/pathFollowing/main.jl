@@ -5,6 +5,18 @@ using DataFrames
 using MAVs
 
 c=defineCase(;(:mode=>:caseStudyPath));
+setMisc!(c;mpc_max_iter=600);
+setWeights!(c;sr=0.05,path=10.0);
+
+#=
+c.o.X0=c.o.X0[1:8];
+c.o.Y0=c.o.Y0[1:8];
+c.o.A=c.o.A[1:8];
+c.o.B=c.o.B[1:8];
+c.o.status=c.o.status[1:8];
+c.o.s_x=c.o.s_x[1:8];
+c.o.s_y=c.o.s_y[1:8];
+=#
 
 mdl,n,r,params=initializePathFollowing(c);
 global pa=params[1];

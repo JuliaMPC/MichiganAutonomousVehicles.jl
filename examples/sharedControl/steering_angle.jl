@@ -25,5 +25,4 @@ plot(L,s0*ones(L),label="s0")
 plot!(L,s0_1*ones(L),label="s0_1")
 plot!(L,s_k,label="s_k")
 
-
 driver_obj=integrate!(mdl,n,r.x[:,6];D=sa_param,(:variable=>:control),(:integrand=>:squared),(:integrandAlgebra=>:subtract));
