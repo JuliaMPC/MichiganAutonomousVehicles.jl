@@ -5,7 +5,7 @@ using DataFrames
 using MAVs
 
 c=defineCase(;(:mode=>:caseStudyPath));
-setMisc!(c;mpc_max_iter=600);
+setMisc!(c;mpc_max_iter=300);
 setWeights!(c;sr=0.05,path=10.0);
 
 #=
@@ -17,10 +17,9 @@ c.o.status=c.o.status[1:8];
 c.o.s_x=c.o.s_x[1:8];
 c.o.s_y=c.o.s_y[1:8];
 =#
-
 mdl,n,r,params=initializePathFollowing(c);
 global pa=params[1];
-global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
+global s=Settings(;s1=1800,s2=1200,lw1=4.0,lw2=3.0,reset=false,save=true,simulate=true,MPC=true,format=:png);
 
 driveStraight!(n,pa,r,s)
 for ii=2:n.mpc.max_iter

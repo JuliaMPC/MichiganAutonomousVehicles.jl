@@ -3,6 +3,9 @@ using PrettyPlots, Plots, DataFrames
 #pgfplots();
 pyplot();
 
+# TODO consider moving this to PrettyPlots
+default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
+
 description = string(
 "In this test: \n",c.m.name,"\n
 * m.Ni=",c.m.Ni," \n
@@ -20,7 +23,7 @@ savePlantData(n,r)
 
 if s.simulate
   println("Plotting the Final Results!")
-  mainSimPath(n,r,s,c,pa)
+  mainSimPath(n,r,s,c,pa;(:simple=>true))
 end
 
 # TODO make this an example

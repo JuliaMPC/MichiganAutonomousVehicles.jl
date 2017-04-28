@@ -423,7 +423,7 @@ function defineMisc(name)
     m.tex=0.3;
     m.max_cpu_time=0.25;
     m.sm=2.0;
-    m.Lr=100.;
+    m.Lr=70.;
     m.L_rd=1.;
     m.sigma=1.0;
     m.Ni=3;
@@ -439,7 +439,7 @@ function defineMisc(name)
   end
   return m
 end
-
+#TODO merge this with misc()?
 """
 setMisc!(c;activeSafety=true,followPath=false,followDriver=false,predictX0=false,fixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
 --------------------------------------------------------------------------------------\n
