@@ -1,8 +1,9 @@
 using PrettyPlots
 using Plots
-
+#gr()
 #pgfplots()
 pyplot()
+default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
 
 description = string(
 "In this test: \n",c.m.name,"\n
@@ -19,20 +20,14 @@ description = string(
 * sx=",c.o.s_x,"\n
 * sy=",c.o.s_y,"\n
 ")
-results_dir=string("posterA_",c.m.name,"_",c.m.solver,"/")
-resultsDir!(r,results_dir;description=description);
 
-println("Plotting the Final Results!")
-if r.eval_num>1;
- anim = @animate for ii in 1:length(r.dfs_plant)
-    mainSim(n,r,s,c,pa,ii);
-  end
-  gif(anim, string(r.results_dir,"mainSim.gif"), fps = Int(ceil(1/c.m.tex)));
-  cd(r.results_dir)
-    run(`ffmpeg -f gif -i mainSim.gif RESULT.mp4`)
-    write("description.txt", description)
-  cd(r.main_dir)
+results_dir=string("posterA2_",c.m.name,"_",c.m.solver,"/")
+resultsDir!(r,results_dir;description=description);
+savePlantData(n,r)
+if s.simulate
+  println("Plotting the Final Results!")
+  mainSim(n,r,s,c,pa;(:mode=>:open1))
 end
 
-#s=Settings(;save=true,MPC=true,simulate=false,format=:png);
-#allPlots(n,r,s,2)
+s=Settings(;save=true,MPC=true,simulate=false,format=:png,plantOnly=true);
+posterP(n,r,s,c,pa)

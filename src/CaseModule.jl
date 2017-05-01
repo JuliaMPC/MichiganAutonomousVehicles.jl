@@ -177,6 +177,17 @@ function defineObstacles(name)
     o.X0=[205.,180.,200.];
     o.Y0=[50.,75.,30.];
     o.status=falses(length(o.X0));
+  elseif name==:autoARC
+    A=[2.5 1.5];      # small car
+    B=[3.3 1.9];      # HUMMVEEs
+    C=[9.8/2 3.65/2]; # tanks
+    random=[0 0.6 1 0.25 0.6 0.5495 0.4852 0.8905 0.7990 1];
+    o.X0=[225,225,220,170,220,165,200];
+    o.Y0=[25,30,45,60,75,95,50];
+    o.A=[B[1],B[1],B[1],C[1],A[1],C[1],C[2]];
+    o.B=[B[2],B[2],B[2],C[2],A[2],C[2],C[1]];
+    o.s_x=[-5,-5.5,-6,6,-5,4,-2];
+    o.s_y=[0,0,0,0,0,0,5];
   elseif name==:path  # test case for testPathFollowing.jl
     o.name=name;
     o.A=[5.,4.,10.]
@@ -356,13 +367,28 @@ function defineMisc(name)
     m.tex=0.5;
     m.max_cpu_time=m.tex;
     m.sm=2.0;
-    m.Lr=100.;
-    m.L_rd=1.;
     m.sigma=1.0;
     m.Ni=4;
     m.Nck=[12,10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=50;
+    m.max_iter=500;
+    m.mpc_max_iter=600;
+    m.PredictX0=true;
+    m.FixedTp=true;
+  elseif name==:autoARC
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,17.0,0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=0.47;#0.41;
+    m.sm=2.6;
+    m.sigma=1.0;
+    m.Ni=3;#4;
+    m.Nck=[10,8,6];#[12,10,8,6];
+    m.solver=:KNITRO;
+    m.max_iter=500;
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
@@ -376,14 +402,12 @@ function defineMisc(name)
     m.tp=6.0;
     m.tex=0.5;
     m.max_cpu_time=m.tex;
-    m.sm=2.0;
-    m.Lr=100.;
-    m.L_rd=1.;
+    m.sm=2.6;
     m.sigma=1.0;
     m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=50;
+    m.max_iter=500;
     m.mpc_max_iter=30;
     m.PredictX0=true;
     m.FixedTp=true;
@@ -398,8 +422,6 @@ function defineMisc(name)
     m.tex=0.3;
     m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model!
     m.sm=2.0;
-    m.Lr=60.;
-    m.L_rd=1.;
     m.sigma=1.0;
     m.Ni=3;
     m.Nck=[10,8,6];
@@ -417,14 +439,12 @@ function defineMisc(name)
     m.model=:ThreeDOFv2;
     m.UX=10.0;
     m.X0=[0.0,0.0, 0.0, 0.0,1.2037,0.0,m.UX,0.0];
-    m.Xlims=[-10., 750.]
+    m.Xlims=[-10., 730.]
     m.Ylims=[-10., 200.]
     m.tp=7.0;
     m.tex=0.3;
     m.max_cpu_time=0.25;
     m.sm=2.0;
-    m.Lr=70.;
-    m.L_rd=1.;
     m.sigma=1.0;
     m.Ni=3;
     m.Nck=[10,8,6];
@@ -558,6 +578,13 @@ function defineCase(;name::Symbol=:auto,
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
+   elseif mode==:autoARC
+       c.name=:auto;
+       c.g=defineGoal(c.name);
+       c.o=defineObstacles(:autoARC);
+       c.w=defineWeights(c.name);
+       c.t=defineTrack(:NA);
+       c.m=defineMisc(:autoARC);
    elseif mode==:path
      c.name=mode;
      c.g=defineGoal(c.name);

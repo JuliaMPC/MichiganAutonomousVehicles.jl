@@ -64,7 +64,8 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   n.mpc.X0=[copy(c.m.X0)];
 
   # define ocp
-  r=OCPdef!(mdl,n,Settings(;save=false,MPC=true),[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
+  s=Settings(;save=false,MPC=true);
+  r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
   # define objective function
   obj=0;

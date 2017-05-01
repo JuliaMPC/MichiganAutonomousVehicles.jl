@@ -17,14 +17,15 @@ description = string(
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
-results_dir=string("10_obstacles_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("test1_10_obstacles")
 resultsDir!(r,results_dir;description=description);
 savePlantData(n,r)
 
 if s.simulate
   println("Plotting the Final Results!")
-  mainSimPath(n,r,s,c,pa;(:simple=>true))
+  mainSim(n,r,s,c,pa;(:mode=>:path3))
 end
+
 
 # TODO make this an example
 if r.dfs_opt[r.eval_num][:status]==:Infeasible

@@ -22,7 +22,7 @@ Date Create: 2/1/2017, Last Modified: 3/28/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializeAutonomousControl(c)
- pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2]);
+ pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.18,sr_max=0.18);
  n=NLOpt(); @unpack_Vpara pa
 # XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN]; TODO change back
  XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN];
