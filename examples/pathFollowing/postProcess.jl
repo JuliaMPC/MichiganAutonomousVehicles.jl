@@ -5,6 +5,7 @@ pyplot();
 
 # TODO consider moving this to PrettyPlots
 default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
+c=defineCase(;(:mode=>:caseStudyPath));
 
 description = string(
 "In this test: \n",c.m.name,"\n
@@ -17,7 +18,7 @@ description = string(
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
-results_dir=string("test1_10_obstacles")
+results_dir=string("test1_10_obstacles_ALL")
 resultsDir!(r,results_dir;description=description);
 savePlantData(n,r)
 

@@ -5,9 +5,8 @@ using DataFrames
 using MAVs
 
 c=defineCase(;(:mode=>:caseStudyPath));
-setMisc!(c;mpc_max_iter=5);
+setMisc!(c;mpc_max_iter=400);
 setWeights!(c;sr=0.05,path=10.0);
-
 #=
 c.o.X0=c.o.X0[1:8];
 c.o.Y0=c.o.Y0[1:8];
