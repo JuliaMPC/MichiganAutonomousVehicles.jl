@@ -7,6 +7,8 @@ pyplot();
 default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
 c=defineCase(;(:mode=>:caseStudyPath));
 
+plotSettings(;(:simulate=>true),(:plant=>true),(:plantOnly=>false));
+
 description = string(
 "In this test: \n",c.m.name,"\n
 * m.Ni=",c.m.Ni," \n
@@ -18,19 +20,18 @@ description = string(
 * m.PredictX0=",c.m.PredictX0," \n
 * m.FixedTp=",c.m.FixedTp,"\n
 ")
-results_dir=string("test1_10_obstacles_ALL")
+results_dir=string("test1_10_obstacles")
 resultsDir!(r,results_dir;description=description);
 savePlantData(n,r)
 
-if s.simulate
+if _pretty_defaults[:simulate];
   println("Plotting the Final Results!")
-  mainSim(n,r,s,c,pa;(:mode=>:path3))
+  mainSim(n,r,c,pa;(:mode=>:path3))
 end
-
 
 # TODO make this an example
 if r.dfs_opt[r.eval_num][:status]==:Infeasible
-  s=Settings(;evalConstraints=true,save=true,MPC=false,simulate=false,format=:png);
+  s=Settings(;evalConstraints=true,save=true,MPC=false);
   postProcess!(n,r,s)
   # trouble getting a feasible solution? -> look at the constraints
   print(r.constraint.value)

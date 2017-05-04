@@ -18,7 +18,7 @@ c.o.s_y=c.o.s_y[1:8];
 =#
 mdl,n,r,params=initializePathFollowing(c);
 global pa=params[1];
-global s=Settings(;s1=1800,s2=1200,lw1=4.0,lw2=3.0,reset=false,save=true,simulate=true,MPC=true,format=:png);
+global s=Settings(;reset=false,save=true,MPC=true);
 
 driveStraight!(n,pa,r,s)
 for ii=2:n.mpc.max_iter
@@ -41,4 +41,4 @@ for ii=2:n.mpc.max_iter
     warn(" \n The maximum number of iterations has been reached while closing the loop; consider increasing (max_iteration) \n")
   end
 end
-if s.simulate; include("postProcess.jl"); end
+include("postProcess.jl");

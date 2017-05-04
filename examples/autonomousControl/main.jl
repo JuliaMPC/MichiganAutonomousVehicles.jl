@@ -17,7 +17,7 @@ setMisc!(c;mpc_max_iter=300,tex=0.5,max_cpu_time=0.47,Ni=3,Nck=[10,8,6]);
 mdl,n,r,params=initializeAutonomousControl(c);
 
 global pa=params[1];
-global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
+global s=Settings(;reset=false,save=true,MPC=true);
 
 driveStraight!(n,pa,r,s)
 for ii=2:n.mpc.max_iter
@@ -44,4 +44,5 @@ for ii=2:n.mpc.max_iter
     warn(" \n The maximum number of iterations has been reached while closing the loop; consider increasing (max_iteration) \n")
   end
 end
-if s.simulate; include("postProcess.jl"); end
+
+include("postProcess.jl"); 

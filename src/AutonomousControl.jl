@@ -24,12 +24,10 @@ Date Create: 2/1/2017, Last Modified: 3/28/2017 \n
 function initializeAutonomousControl(c)
  pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.18,sr_max=0.18);
  n=NLOpt(); @unpack_Vpara pa
-# XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN]; TODO change back
  XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN];
-
  XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, u_min, NaN];
  XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, u_max, NaN];
- #XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, u_min, NaN];
+ #XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, u_min, NaN]; #NOTE this creates problems
  #XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, u_max, NaN];
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
  define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)

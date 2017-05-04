@@ -4,6 +4,7 @@ using Plots
 #pgfplots()
 pyplot()
 default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
+plotSettings(;(:simulate=>true),(:plant=>true),(:plantOnly=>false));
 
 description = string(
 "In this test: \n",c.m.name,"\n
@@ -24,10 +25,9 @@ description = string(
 results_dir=string("posterA2_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(r,results_dir;description=description);
 savePlantData(n,r)
-if s.simulate
+if _pretty_defaults[:simulate];
   println("Plotting the Final Results!")
-  mainSim(n,r,s,c,pa;(:mode=>:open1))
+  mainSim(n,r,c,pa;(:mode=>:open1))
 end
 
-s=Settings(;save=true,MPC=true,simulate=false,format=:png,plantOnly=true);
-posterP(n,r,s,c,pa)
+posterP(n,r,c,pa)
