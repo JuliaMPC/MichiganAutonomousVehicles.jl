@@ -2,11 +2,13 @@ using PrettyPlots
 using Plots
 #gr()
 #pgfplots()
-pyplot()
-default(guidefont = font(17), tickfont = font(15), legendfont = font(12), titlefont = font(20))
-plotSettings(;(:simulate=>true),(:plant=>true),(:plantOnly=>false));
+a=1;
+#pyplot(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))
+#a=0.25;
+#default(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))
+plotSettings(;(:simulate=>true),(:mpc_markers =>(:circle,:blueviolet,0.0,0.0)),(:plant=>true),(:plantOnly=>false),(:size=>(a*900,a*600)),(:format=>"png"));
 
-description = string(
+description=string(
 "In this test: \n",c.m.name,"\n
 * m.Ni=",c.m.Ni," \n
 * m.Nck=",c.m.Nck,"\n
@@ -31,3 +33,6 @@ if _pretty_defaults[:simulate];
 end
 
 posterP(n,r,c,pa)
+
+
+#plot(rand(10),xaxis=("test",(:guidefont=>20)))
