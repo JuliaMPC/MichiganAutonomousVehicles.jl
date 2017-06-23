@@ -308,7 +308,7 @@ type Misc
   Lr            # LiDAR range (m)
   L_rd          # relaxation distance to LiDAR range
   sigma         # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
-  Ni       # number of intervals
+  Ni       # number of intervals TODO remove this
   Nck      # number of points per interval
   solver   # either :IPOPT or :KNITRO
   max_iter # max evaluations in optimization
@@ -516,7 +516,7 @@ end
 ################################################################################
 # Model Class
 ################################################################################
-abstract AbstractCase
+abstract type AbstractCase end
 type Case <: AbstractCase
  name
  g::Goal        # goal data

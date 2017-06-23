@@ -1,5 +1,5 @@
 using PrettyPlots
-using Plots
+
 #gr()
 #pgfplots()
 a=1;
@@ -24,15 +24,15 @@ description=string(
 * sy=",c.o.s_y,"\n
 ")
 
-results_dir=string("posterA2_",c.m.name,"_",c.m.solver,"/")
-resultsDir!(r,results_dir;description=description);
-savePlantData(n,r)
+results_dir=string("test_",c.m.name,"_",c.m.solver,"/")
+resultsDir!(n;results_name=results_dir,description=description);
+savePlantData!(n)
 if _pretty_defaults[:simulate];
   println("Plotting the Final Results!")
-  mainSim(n,r,c,pa;(:mode=>:open1))
+  mainSim(n,c;(:mode=>:open1))
 end
 
-posterP(n,r,c,pa)
+posterP(n,c)
 
 
 #plot(rand(10),xaxis=("test",(:guidefont=>20)))

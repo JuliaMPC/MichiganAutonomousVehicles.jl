@@ -36,7 +36,7 @@ Date Create: 3/28/2017, Last Modified: 3/28/2017 \n
 function initializeSimpleModel(n,c,pa;x_min::Float64=0.0)  # can intially pass different x_min
 error("this needs to be updated")
   # initialize
-  n1 = NLOpt();s1=Settings();
+  s1=Settings();
 
   # define
   @unpack_Vpara pa # other vehicle model's inital parameters
@@ -47,10 +47,10 @@ error("this needs to be updated")
   XU = [x_max,y_max,psi_max,u_max];
   CL = [sa_min,-2.0];
   CU = [sa_max,2.5];
-  define!(n1,stateEquations=KinematicBicycle,numStates=4,numControls=2,X0=X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
+  define(KinematicBicycle;numStates=4,numControls=2,X0=X0,XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
 
   # build
-  configure!(n1,Ni=n.Ni,Nck=n.Nck;(:integrationMethod => n.integrationMethod),(:integrationScheme => n.integrationScheme),(:finalTimeDV => true))
+  configure!(n1,Nck=n.Nck;(:integrationScheme => n.integrationScheme),(:finalTimeDV => true))
   defineSolver!(n1,solver=:IPOPT)
   error("update this!")
   mdl=defineSolver!(n,c);
