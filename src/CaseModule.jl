@@ -125,7 +125,7 @@ function setWeights!(c;
     c.w.sr=sr;
     c.w.path=path;
     c.w.driver=driver;
-    nothing
+    return nothing
 end
 ############################### obstacle info ########################################
 type Obstacles

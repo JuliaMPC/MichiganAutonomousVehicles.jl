@@ -1,12 +1,5 @@
 module SharedControl
 
-using NLOptControl
-using VehicleModels
-using JuMP
-using DataFrames
-using Parameters
-using Ranges
-
 using MathProgBase # for checkFeasibility!
 
 include("CaseModule.jl")

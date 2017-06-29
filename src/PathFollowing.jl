@@ -2,9 +2,6 @@ module PathFollowing
 
 using NLOptControl
 using VehicleModels
-using JuMP
-using DataFrames
-using Parameters
 
 include("CaseModule.jl")
 using .CaseModule

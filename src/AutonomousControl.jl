@@ -2,8 +2,6 @@ module AutonomousControl
 
 using NLOptControl
 using VehicleModels
-using DataFrames
-using Parameters
 
 include("CaseModule.jl")
 using .CaseModule
@@ -149,7 +147,7 @@ function updateAutoParams!(n)
   # vehicle position for LiDAR
   setvalue(n.params[3][1],n.X0[1])
   setvalue(n.params[3][2],n.X0[2])
-#warn("not updating params")
+
   # obstacle information
  return nothing
 end

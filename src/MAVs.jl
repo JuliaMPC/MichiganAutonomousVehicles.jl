@@ -1,19 +1,21 @@
 isdefined(Base, :__precompile__) && __precompile__()
 
 module MAVs
+using NLOptControl
+using VehicleModels
 
 include("CaseModule.jl")
 using .CaseModule
 
 include("AutonomousControl.jl")
-include("SharedControl.jl")
+#include("SharedControl.jl")
 #include("SimpleModel.jl")
-include("PathFollowing.jl")
+#include("PathFollowing.jl")
 
 using .AutonomousControl
-using .SharedControl
+#using .SharedControl
 #using .SimpleModel
-using .PathFollowing
+#using .PathFollowing
 
 export
 
@@ -31,15 +33,15 @@ export
       # AutonomousControl.jl
       initializeAutonomousControl,
       autonomousControl!,
-      updateAutoParams!,
+      updateAutoParams!
 
       # SharedControl.jl
-      initializeSharedControl!,
-      checkFeasibility!,
-      sharedControl!,
-      getPlantData!,
-      sendOptData!,
-      ExternalModel,
+    #  initializeSharedControl!,
+    #  checkFeasibility!,
+    #  sharedControl!,
+    #  getPlantData!,
+    #  sendOptData!,
+    #  ExternalModel,
 
       # SimpleModel.jl
   #    initializeSimpleModel,
@@ -49,6 +51,6 @@ export
 #      resetDesignVariables,
 
       # PathFollowing.jl
-      initializePathFollowing,
-      updatePathParams!
+    #  initializePathFollowing,
+    #  updatePathParams!
 end
