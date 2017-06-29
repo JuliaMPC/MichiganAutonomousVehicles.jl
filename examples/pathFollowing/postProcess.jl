@@ -30,11 +30,12 @@ if _pretty_defaults[:simulate];
 end
 
 # TODO make this an example
-if r.dfs_opt[r.eval_num][:status]==:Infeasible
-  s=Settings(;evalConstraints=true,save=true,MPC=false);
-  postProcess!(n,r,s)
+if n.r.status==:Infeasible
+  #Settings(;evalConstraints=true,save=true,MPC=false);
+  n.s.evalConstraints=true;n.s.save=true;n.s.MPC=false;
+  postProcess!(n)
   # trouble getting a feasible solution? -> look at the constraints
-  print(r.constraint.value)
+  print(n.r.constraint.value)
 end # then consider relaxing tolerances etc. to make it work
 # then looking at the output
 # These are the dual infeasibilities

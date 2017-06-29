@@ -13,7 +13,7 @@ autoARC
 
 * m.tex=0.5
 
-* m.max_cpu_time=0.47 
+* m.max_cpu_time=0.46 
 
 * m.Nck=[10, 8, 6]
 

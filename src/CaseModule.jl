@@ -510,7 +510,7 @@ function setMisc!(c;
     c.m.followPath=followPath;
     c.m.followDriver=followDriver;
     c.m.NF=NF;
-    nothing
+    return nothing
 end
 
 ################################################################################

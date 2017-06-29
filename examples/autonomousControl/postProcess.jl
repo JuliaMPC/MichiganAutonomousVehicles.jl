@@ -2,7 +2,7 @@ using PrettyPlots
 
 #gr()
 #pgfplots()
-a=1;
+a=2;
 #pyplot(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))
 #a=0.25;
 #default(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))

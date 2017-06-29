@@ -14,10 +14,10 @@ export
       updateAutoParams!
 
 """
-mdl,n,r,params = initializeAutonomousControl(c);
+n=initializeAutonomousControl(c);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 2/1/2017, Last Modified: 3/28/2017 \n
+Date Create: 2/1/2017, Last Modified: 6/28/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializeAutonomousControl(c)
@@ -47,16 +47,17 @@ function initializeAutonomousControl(c)
  controlNames!(n,names,descriptions)
  n.params = [pa];   # vehicle parameters
 
+ # define tolerances
+ XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
+ X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
+ defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
+
  # configure problem
  configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrExplicit),(:finalTimeDV => true))
- #mdl=defineSolver!(n,c);
 
- # define tolerances
- #XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN]; TODO change back
- XF_tol=[.5,.5,NaN,NaN,NaN,NaN,NaN,NaN]; # actually seems to work better like this....
- X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
-
- defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
+ # define the solver
+ #defineSolver!(n;(:name=>:Ipopt),(:max_cpu_time=>0.47),(:tol=>5e-1),(:dual_inf_tol=>5.),(:acceptable_tol=>1e-2),(:constr_viol_tol=>1e-1),(:compl_inf_tol=>1e-1),(:acceptable_tol=>1e-2),(:acceptable_constr_viol_tol=>0.01),(:acceptable_dual_inf_tol=>1e10))
+ defineSolver!(n;(:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
 
  # add parameters
  Q = size(c.o.A)[1]; # number of obstacles
@@ -102,7 +103,8 @@ function initializeAutonomousControl(c)
 
  # define objective function
  sr_obj=integrate!(n,n.r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared))
- @NLobjective(n.mdl, Min, n.tf + sr_obj)
+ jx_obj=integrate!(n,n.r.u[:,2];C=c.w.jx,(:variable=>:control),(:integrand=>:squared))
+ @NLobjective(n.mdl, Min, n.tf + sr_obj + jx_obj)
 
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);
@@ -122,17 +124,20 @@ function initializeAutonomousControl(c)
 #  sm=createParallelModels(n,c,pa)
 
 # intial optimization
+ n.s.save=false; n.s.MPC=false; n.s.evalConstraints=false;
  optimize!(n);
 
          #  1    2          3
  n.params=[pa,obs_params,X0_params];
+
+ # settings
+ n.s.save=true; n.s.evalConstraints=true;
 
  # save case data TODO    case_data, obs_data = case2dfs(c);
  return n
 end
 
 """
-
 
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
@@ -148,7 +153,6 @@ function updateAutoParams!(n)
   # obstacle information
  return nothing
 end
-
 
 
 end # module
