@@ -88,9 +88,9 @@ function Weights()
           1.,      # w_ce
           0.1,     # w_sa
           1.,      # w_sr
-          0.01,   # w_jx
-          1.0,    # path following
-          1.0,    # follow driver steering angle
+          0.01,    # w_jx
+          1.0,     # path following
+          1.0,     # follow driver steering angle
           );
 end
 
@@ -296,29 +296,28 @@ end
 ############################### misc info ########################################
 type Misc
   name
-  model  # function name
-  X0     # intial state (at the start of the simulation)
-  Xlims  # limit for x
-  Ylims  # limit for Y
-  UX     # vehicle speed (m/s)
-  tp     # prediction horizon (s)
-  tex    # execution horizon (s)
-  max_cpu_time  # maximum time the algorithm has
-  sm            # (m) distance to make sure we don't hit obstacle
-  Lr            # LiDAR range (m)
-  L_rd          # relaxation distance to LiDAR range
-  sigma         # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
-  Ni       # number of intervals TODO remove this
-  Nck      # number of points per interval
-  solver   # either :IPOPT or :KNITRO
-  max_iter # max evaluations in optimization
-  mpc_max_iter # an MPC parameter
-  PredictX0    # if the state that the vehicle will be at when the optimization is finished is to be predicted
-  FixedTp      # fixed final time for predicting X0
-  activeSafety # a bool if the system is only used to avoid collisions with obstacles
-  followDriver # a bool to try and follow the driver
-  followPath   # a bool to follow the path
-  NF           # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
+  model              # function name
+  X0                 # intial state (at the start of the simulation)
+  Xlims              # limit for x
+  Ylims              # limit for Y
+  UX                 # vehicle speed (m/s)
+  tp                 # prediction horizon (s)
+  tex                # execution horizon (s)
+  max_cpu_time       # maximum time the algorithm has
+  sm                 # (m) distance to make sure we don't hit obstacle
+  Lr                 # LiDAR range (m)
+  L_rd               # relaxation distance to LiDAR range
+  sigma              # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
+  Nck                # number of points per interval
+  solver             # either :IPOPT or :KNITRO
+  max_iter           # max evaluations in optimization
+  mpc_max_iter       # an MPC parameter
+  PredictX0          # if the state that the vehicle will be at when the optimization is finished is to be predicted
+  FixedTp            # fixed final time for predicting X0
+  activeSafety       # a bool if the system is only used to avoid collisions with obstacles
+  followDriver       # a bool to try and follow the driver
+  followPath         # a bool to follow the path
+  NF                 # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
 end
 
 function Misc()
@@ -329,7 +328,6 @@ function Misc()
             [],
             0.0,
             0.0,
-            [],
             [],
             [],
             [],
@@ -368,7 +366,6 @@ function defineMisc(name)
     m.max_cpu_time=m.tex;
     m.sm=2.0;
     m.sigma=1.0;
-    m.Ni=4;
     m.Nck=[12,10,8,6];
     m.solver=:KNITRO;
     m.max_iter=500;
@@ -385,7 +382,6 @@ function defineMisc(name)
     m.max_cpu_time=0.47;#0.41;
     m.sm=2.6;
     m.sigma=1.0;
-    m.Ni=3;#4;
     m.Nck=[10,8,6];#[12,10,8,6];
     m.solver=:KNITRO;
     m.max_iter=500;
@@ -404,7 +400,6 @@ function defineMisc(name)
     m.max_cpu_time=m.tex;
     m.sm=2.6;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=500;
@@ -423,7 +418,6 @@ function defineMisc(name)
     m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model!
     m.sm=2.0;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=450;
@@ -446,7 +440,6 @@ function defineMisc(name)
     m.max_cpu_time=0.25;
     m.sm=2.0;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=300;
@@ -459,7 +452,7 @@ function defineMisc(name)
   end
   return m
 end
-#TODO merge this with misc()?
+
 """
 setMisc!(c;activeSafety=true,followPath=false,followDriver=false,predictX0=false,fixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
 --------------------------------------------------------------------------------------\n
@@ -478,7 +471,6 @@ function setMisc!(c;
                 Lr=c.m.Lr,
                 L_rd=c.m.L_rd,
                 sigma=c.m.sigma,
-                Ni=c.m.Ni,
                 Nck=c.m.Nck,
                 solver=c.m.solver,
                 max_iter=c.m.max_iter,
@@ -499,7 +491,6 @@ function setMisc!(c;
     c.m.Lr=Lr;
     c.m.L_rd=L_rd;
     c.m.sigma=sigma;
-    c.m.Ni=Ni;
     c.m.Nck=Nck;
     c.m.solver=solver;
     c.m.max_iter=max_iter;
@@ -636,7 +627,6 @@ function dataSet(set,path)
   cd(main_dir)
   return dfs
 end
-
 
 """
 case2dfs(c)

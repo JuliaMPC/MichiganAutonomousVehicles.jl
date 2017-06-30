@@ -81,7 +81,7 @@ function initializeAutonomousControl(c)
 @NLexpression(mdl, goal_obj, w_goal_param*((x[1] - x_ref)^2 + (y[1] - y_ref)^2)/((x[N+1] - x_ref)^2 + (y[N+1] - y_ref)^2+EP))
 
 # penalize difference between final heading angle and angle relative to the goal
-@NLparameter(mdl, w_psi_param == w_psi)  # temp values
+@NLparameter(mdl, w_psi_param == w_psi)  # temp values NOTE THESE ARE SO we can set them to zero!  for contraints on getting to goal we can relax those parameters as well
 @NLexpression(mdl, psi_obj, w_psi_param*atan((y_ref-y[end])/(x_ref-x[end]+EP))*(atan(sin(psi[end]-psi_ref)/(cos(psi[end]-psi_ref)+EP)))^2 )
 
 # minimizing the integral over the entire prediction horizon of the line that passes through the goal
@@ -91,18 +91,25 @@ function initializeAutonomousControl(c)
 @NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2)*dt[i],i=1:N});
 #@NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2+(ax[i])^2)*dt[i],i=1:N});
 
-# prevent vehicle from operating at its vertical tire load limit
-@NLexpression(mdl, Fz_obj, w_Fz*sum{2 + (tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)+tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) + KZYR*((FYF[i] + FYR[i])/m)-a_t)/b_t))*dt[i],i=1:N});
 
 # define objective function
 #@NLobjective(mdl, Min, aux_time[N+1] + goal_obj + psi_obj + haf_obj + ce_obj + Fz_obj )
 @NLobjective(mdl, Min, aux_time[N+1] + haf_obj + ce_obj + Fz_obj )
 =#
+  #----------------------
+  # OBJECTIVE FUNCTION #
+  #----------------------
+ # prevent vehicle from operating at its vertical tire load limit
+# @NLexpression(n.mdl, Fz_obj, c.w.Fz*sum((tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)+tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) + KZYR*((FYF[i] + FYR[i])/m)-a_t)/b_t))*dt[i],i=1:N));
 
- # define objective function
+
+#(tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)
+
+ # penalize control effort
+ sa_obj=integrate!(n,n.r.x[:,6];C=c.w.sa,(:variable=>:control),(:integrand=>:squared))
  sr_obj=integrate!(n,n.r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared))
  jx_obj=integrate!(n,n.r.u[:,2];C=c.w.jx,(:variable=>:control),(:integrand=>:squared))
- @NLobjective(n.mdl, Min, n.tf + sr_obj + jx_obj)
+ @NLobjective(n.mdl, Min, c.w.time*n.tf + c.w.ce*(sa_obj + sr_obj + jx_obj) )
 
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);

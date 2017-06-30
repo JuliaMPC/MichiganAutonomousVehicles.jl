@@ -3,8 +3,7 @@
 # closed loop moving obstacle avoidance when goal is within lidar range
 function goal_in_lidar()
   c=defineCase(;(:mode=>:autoARC));
-  setMisc!(c;mpc_max_iter=300,tex=0.5,max_cpu_time=0.46,Ni=3,Nck=[10,8,6]);
-
+  setMisc!(c;mpc_max_iter=300,tex=0.5,max_cpu_time=0.466,Nck=[10,8,6]);
   n=initializeAutonomousControl(c);
   n.s.evalConstraints=false;
   driveStraight!(n)
