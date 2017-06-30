@@ -27,7 +27,22 @@ function initializeAutonomousControl(c)
  #XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, u_min, NaN]; #NOTE this creates problems
  #XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, u_max, NaN];
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
- n=define(ThreeDOFv2;numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
+ n=define(numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
+ n.params = [pa];   # vehicle parameters
+
+        # 1  2  3  4  5    6   7   8
+names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
+descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
+states!(n,names,descriptions=descriptions)
+
+        # 1    2
+names = [:sr,:jx];
+descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
+controls!(n,names,descriptions=descriptions)
+
+ # dynamic constrains
+ dx,FZ_RL,FZ_RR=ThreeDOFv2(n)
+ dynamics!(n,dx)
 
  # set mpc parameters
  initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
@@ -35,26 +50,29 @@ function initializeAutonomousControl(c)
  n.mpc.plantEquations=ThreeDOFv2;
  n.mpc.modelEquations=ThreeDOFv2;
 
-         # 1  2  3  4  5    6   7   8
- names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
- descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
- stateNames!(n,names,descriptions)
-         # 1    2
- names = [:sr,:jx];
- descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
- controlNames!(n,names,descriptions)
- n.params = [pa];   # vehicle parameters
-
  # define tolerances
  XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrExplicit),(:finalTimeDV => true))
+ configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrImplicit),(:finalTimeDV => true))
+
+ # vertical tire load
+ FZ_RL=NLExpr(n,FZ_RL)
+ FZ_RR=NLExpr(n,FZ_RR)
+ FZ_rl_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], 0 <= FZ_RL - Fz_min)
+ FZ_rr_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], 0 <= FZ_RR - Fz_min)
+ newConstraint!(n,FZ_rl_con,:FZ_rl_con);
+ newConstraint!(n,FZ_rr_con,:FZ_rr_con);
+
+ # linear tire and for now this also constrains the nonlinear tire model
+ #Fyf_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], Fyf_min <= (atan((v[i] + la*r[i])/(ux[i]+EP)) - sa[i])*Caf <= Fyf_max)
+ #newConstraint!(n,Fyf_con,:Fyf_con);
+ #Fyr_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], Fyf_min <= atan((v[i] - lb*r[i])/(ux[i]+EP))*Car <= Fyf_max)
+ #newConstraint!(n,Fyr_con,:Fyr_con);
 
  # define the solver
- #defineSolver!(n;(:name=>:Ipopt),(:max_cpu_time=>0.47),(:tol=>5e-1),(:dual_inf_tol=>5.),(:acceptable_tol=>1e-2),(:constr_viol_tol=>1e-1),(:compl_inf_tol=>1e-1),(:acceptable_tol=>1e-2),(:acceptable_constr_viol_tol=>0.01),(:acceptable_dual_inf_tol=>1e10))
  defineSolver!(n;(:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
 
  # add parameters
