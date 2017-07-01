@@ -5,7 +5,7 @@ In this test:
   * In this test: 
 autoARC
 
-* m.Nck=[10, 8, 6]
+* m.Nck=[40]
 
 * m.tp=0.0 
 
@@ -13,7 +13,7 @@ autoARC
 
 * m.max_cpu_time=5.0 
 
-* m.Nck=[10, 8, 6]
+* m.Nck=[40]
 
 * X0=[225, 225, 220, 170, 220, 165, 200]
 

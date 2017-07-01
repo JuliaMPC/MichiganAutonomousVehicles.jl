@@ -41,8 +41,8 @@ function initializeAutonomousControl(c)
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
-        # 1  2  3  4  5    6   7   8
-names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
+         # 1  2  3  4  5    6   7   8
+names = [:X1,:y,:v,:r,:psi,:sa,:ux,:ax];
 descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
 states!(n,names,descriptions=descriptions)
 
@@ -56,9 +56,7 @@ states!(n,names,descriptions=descriptions)
  dynamics!(n,dx)
 
  # solver settings
-# ss=Dict((:name=>:Ipopt),(:mpc_defaults=>true));
  SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
-
 
  # configure problem
  configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
@@ -81,11 +79,7 @@ states!(n,names,descriptions=descriptions)
  newConstraint!(n,Fyf_con,:Fyf_con);
  newConstraint!(n,Fyr_con,:Fyr_con);
 =#
- # define the solver
- #defineSolver!(n;(:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
- SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true));
 
- SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
  # add parameters
  Q = size(c.o.A)[1]; # number of obstacles
  @NLparameter(n.mdl, a[i=1:Q] == copy(c.o.A[i]));
