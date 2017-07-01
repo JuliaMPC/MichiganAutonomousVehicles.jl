@@ -60,7 +60,7 @@ function initializeAutonomousControl(c)
  SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
 
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrImplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
+ configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
 
  # vertical tire load  TODO could put all of the constraints in the model and just eval it
  FZ_RL=NLExpr(n,FZ_RL)
