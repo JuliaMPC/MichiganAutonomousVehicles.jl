@@ -42,7 +42,7 @@ function initializeAutonomousControl(c)
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
          # 1  2  3  4  5    6   7   8
-names = [:X1,:y,:v,:r,:psi,:sa,:ux,:ax];
+names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
 descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
 states!(n,names,descriptions=descriptions)
 
@@ -122,7 +122,7 @@ states!(n,names,descriptions=descriptions)
  # penalize control effort
  ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
 
- @NLobjective(n.mdl, Min, ce_obj )
+ @NLobjective(n.mdl, Min, c.w.time*n.tf + ce_obj )
 
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);
