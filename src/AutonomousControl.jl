@@ -15,7 +15,7 @@ export
 n=initializeAutonomousControl(c);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 2/1/2017, Last Modified: 6/28/2017 \n
+Date Create: 2/1/2017, Last Modified: 6/30/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializeAutonomousControl(c)
@@ -30,20 +30,6 @@ function initializeAutonomousControl(c)
  n=define(numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
  n.params = [pa];   # vehicle parameters
 
-        # 1  2  3  4  5    6   7   8
-names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
-descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
-states!(n,names,descriptions=descriptions)
-
-        # 1    2
-names = [:sr,:jx];
-descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
-controls!(n,names,descriptions=descriptions)
-
- # dynamic constrains
- dx,FZ_RL,FZ_RR=ThreeDOFv2(n)
- dynamics!(n,dx)
-
  # set mpc parameters
  initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
  n.mpc.X0=[copy(c.m.X0)];
@@ -55,26 +41,51 @@ controls!(n,names,descriptions=descriptions)
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
+        # 1  2  3  4  5    6   7   8
+names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
+descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
+states!(n,names,descriptions=descriptions)
+
+        # 1    2
+ names = [:sr,:jx];
+ descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
+ controls!(n,names,descriptions=descriptions)
+
+ # dynamic constrains
+ dx,FZ_RL_expr,FZ_RR_expr,Fyf_linear,Fyr_linear=ThreeDOFv2_expr(n)
+ dynamics!(n,dx)
+
+ # solver settings
+# ss=Dict((:name=>:Ipopt),(:mpc_defaults=>true));
+ SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+
+
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrImplicit),(:finalTimeDV => true))
+ configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
 
  # vertical tire load
- FZ_RL=NLExpr(n,FZ_RL)
- FZ_RR=NLExpr(n,FZ_RR)
- FZ_rl_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], 0 <= FZ_RL - Fz_min)
- FZ_rr_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], 0 <= FZ_RR - Fz_min)
+ #=
+ FZ_RL=NLExpr(n,FZ_RL_expr)
+ FZ_RR=NLExpr(n,FZ_RR_expr)
+ FZ_rl_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RL[j] - Fz_min)
+ FZ_rr_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RR[j] - Fz_min)
  newConstraint!(n,FZ_rl_con,:FZ_rl_con);
  newConstraint!(n,FZ_rr_con,:FZ_rr_con);
-
- # linear tire and for now this also constrains the nonlinear tire model
- #Fyf_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], Fyf_min <= (atan((v[i] + la*r[i])/(ux[i]+EP)) - sa[i])*Caf <= Fyf_max)
- #newConstraint!(n,Fyf_con,:Fyf_con);
- #Fyr_con=@NLconstraint(n.mdl, [i=1:n.numStatePoints], Fyf_min <= atan((v[i] - lb*r[i])/(ux[i]+EP))*Car <= Fyf_max)
- #newConstraint!(n,Fyr_con,:Fyr_con);
-
+=#
+ # linear tire constraint limits
+#=
+ Fyf_linear=NLExpr(n,Fyf_linear)
+ Fyr_linear=NLExpr(n,Fyr_linear)
+ Fyf_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], Fyf_min <= Fyf_linear[j] <= Fyf_max)
+ Fyr_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], Fyf_min <= Fyr_linear[j] <= Fyf_max)
+ newConstraint!(n,Fyf_con,:Fyf_con);
+ newConstraint!(n,Fyr_con,:Fyr_con);
+=#
  # define the solver
- defineSolver!(n;(:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+ #defineSolver!(n;(:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+ SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true));
 
+ SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
  # add parameters
  Q = size(c.o.A)[1]; # number of obstacles
  @NLparameter(n.mdl, a[i=1:Q] == copy(c.o.A[i]));
@@ -84,10 +95,6 @@ controls!(n,names,descriptions=descriptions)
  @NLparameter(n.mdl, speed_x[i=1:Q] == copy(c.o.s_x[i]));
  @NLparameter(n.mdl, speed_y[i=1:Q] == copy(c.o.s_y[i]));
  obs_params=[a,b,X_0,Y_0,speed_x,speed_y];
-
- # define ocp
- #s=Settings(;save=false,MPC=true);
- #OCPdef!(mdl,n,s,[pa]);
 
  #TODO add rest of terms in obj function
 #=
@@ -105,11 +112,6 @@ controls!(n,names,descriptions=descriptions)
 # minimizing the integral over the entire prediction horizon of the line that passes through the goal
 @NLexpression(mdl, haf_obj, w_haf*sum{((sin(psi_ref)*(x[i]-x_ref)-cos(psi_ref)*(y[i]-y_ref))^2)*dt[i],i=1:N})
 
-# penalize control effort
-@NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2)*dt[i],i=1:N});
-#@NLexpression(mdl, ce_obj, w_ce*sum{(w_sa*(sa[i])^2 + w_sr*(sr[i])^2 + w_jx*(jx[i])^2+(ax[i])^2)*dt[i],i=1:N});
-
-
 # define objective function
 #@NLobjective(mdl, Min, aux_time[N+1] + goal_obj + psi_obj + haf_obj + ce_obj + Fz_obj )
 @NLobjective(mdl, Min, aux_time[N+1] + haf_obj + ce_obj + Fz_obj )
@@ -124,10 +126,9 @@ controls!(n,names,descriptions=descriptions)
 #(tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)
 
  # penalize control effort
- sa_obj=integrate!(n,n.r.x[:,6];C=c.w.sa,(:variable=>:control),(:integrand=>:squared))
- sr_obj=integrate!(n,n.r.u[:,1];C=c.w.sr,(:variable=>:control),(:integrand=>:squared))
- jx_obj=integrate!(n,n.r.u[:,2];C=c.w.jx,(:variable=>:control),(:integrand=>:squared))
- @NLobjective(n.mdl, Min, c.w.time*n.tf + c.w.ce*(sa_obj + sr_obj + jx_obj) )
+ ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
+
+ @NLobjective(n.mdl, Min, ce_obj )
 
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);

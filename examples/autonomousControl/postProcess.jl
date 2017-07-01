@@ -10,7 +10,6 @@ plotSettings(;(:simulate=>true),(:mpc_markers =>(:circle,:blueviolet,0.0,0.0)),(
 
 description=string(
 "In this test: \n",c.m.name,"\n
-* m.Ni=",c.m.Ni," \n
 * m.Nck=",c.m.Nck,"\n
 * m.tp=",c.m.tp," \n
 * m.tex=",c.m.tex,"\n
@@ -24,7 +23,7 @@ description=string(
 * sy=",c.o.s_y,"\n
 ")
 
-results_dir=string("test_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("TEMP_",c.m.name,"_",c.m.solver,"/")
 resultsDir!(n;results_name=results_dir,description=description);
 savePlantData!(n)
 if _pretty_defaults[:simulate];
