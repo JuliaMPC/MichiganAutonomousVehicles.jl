@@ -16,7 +16,7 @@ c=defineCase(;(:mode=>:autoARC));
 setMisc!(c;mpc_max_iter=50,tex=0.5,max_cpu_time=5.0,Nck=[10,8,6]);
 
 n=initializeAutonomousControl(c);
-
+n.s.evalConstraints=true
 driveStraight!(n)
 for ii=2:n.mpc.max_iter
    if ((n.r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (n.r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 1.8*n.XF_tol[1]

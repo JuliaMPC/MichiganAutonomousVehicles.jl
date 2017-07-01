@@ -28,6 +28,7 @@ function initializeAutonomousControl(c)
  #XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, u_max, NaN];
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
  n=define(numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
+ n.s.tf_max=15.0;
  n.params = [pa];   # vehicle parameters
 
  # set mpc parameters
@@ -41,10 +42,10 @@ function initializeAutonomousControl(c)
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
-        # 1  2  3  4  5    6   7   8
-names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
-descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
-states!(n,names,descriptions=descriptions)
+         # 1  2  3  4  5    6   7   8
+ names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
+ descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
+ states!(n,names,descriptions=descriptions)
 
           # 1   2
  names = [:sr,:jx];
@@ -61,7 +62,7 @@ states!(n,names,descriptions=descriptions)
  # configure problem
  configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrImplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
 
- # vertical tire load
+ # vertical tire load  TODO could put all of the constraints in the model and just eval it
  FZ_RL=NLExpr(n,FZ_RL)
  FZ_RR=NLExpr(n,FZ_RR)
  FZ_rl_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RL[j] - Fz_min)
