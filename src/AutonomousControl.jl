@@ -62,14 +62,13 @@ states!(n,names,descriptions=descriptions)
  configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
 
  # vertical tire load
- #=
  FZ_RL=NLExpr(n,FZ_RL_expr)
  FZ_RR=NLExpr(n,FZ_RR_expr)
  FZ_rl_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RL[j] - Fz_min)
  FZ_rr_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RR[j] - Fz_min)
  newConstraint!(n,FZ_rl_con,:FZ_rl_con);
  newConstraint!(n,FZ_rr_con,:FZ_rr_con);
-=#
+
  # linear tire constraint limits
 #=
  Fyf_linear=NLExpr(n,Fyf_linear)
@@ -149,7 +148,7 @@ states!(n,names,descriptions=descriptions)
  n.params=[pa,obs_params,X0_params];
 
  # settings
- n.s.save=true; n.s.evalConstraints=true;
+ n.s.save=true;
 
  # save case data TODO    case_data, obs_data = case2dfs(c);
  return n
