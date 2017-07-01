@@ -23,7 +23,7 @@ description=string(
 * sy=",c.o.s_y,"\n
 ")
 
-results_dir=string("TEMP_",c.m.name,"_",c.m.solver,"/")
+results_dir=string("TEMP_implicit",c.m.name,"_",c.m.solver,"/")
 resultsDir!(n;results_name=results_dir,description=description);
 savePlantData!(n)
 if _pretty_defaults[:simulate];

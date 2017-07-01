@@ -15,7 +15,7 @@ export
 n=initializeAutonomousControl(c);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 2/1/2017, Last Modified: 6/30/2017 \n
+Date Create: 2/1/2017, Last Modified: 7/1/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializeAutonomousControl(c)
@@ -41,43 +41,49 @@ function initializeAutonomousControl(c)
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
-         # 1  2  3  4  5    6   7   8
+        # 1  2  3  4  5    6   7   8
 names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
 descriptions = ["X (m)","Y (m)","Lateral Velocity (m/s)", "Yaw Rate (rad/s)","Yaw Angle (rad)", "Steering Angle (rad)", "Longitudinal Velocity (m/s)", "Longitudinal Acceleration (m/s^2)"];
 states!(n,names,descriptions=descriptions)
 
-        # 1    2
+          # 1   2
  names = [:sr,:jx];
  descriptions = ["Steering Rate (rad/s)","Longitudinal Jerk (m/s^3)"];
  controls!(n,names,descriptions=descriptions)
 
  # dynamic constrains
- dx,FZ_RL_expr,FZ_RR_expr,Fyf_linear,Fyr_linear=ThreeDOFv2_expr(n)
+ dx,FZ_RL,FZ_RR,Fyf_linear,Fyr_linear,min_ax,max_ax=ThreeDOFv2_expr(n)
  dynamics!(n,dx)
 
  # solver settings
  SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
 
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
+ configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrImplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
 
  # vertical tire load
- FZ_RL=NLExpr(n,FZ_RL_expr)
- FZ_RR=NLExpr(n,FZ_RR_expr)
+ FZ_RL=NLExpr(n,FZ_RL)
+ FZ_RR=NLExpr(n,FZ_RR)
  FZ_rl_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RL[j] - Fz_min)
  FZ_rr_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= FZ_RR[j] - Fz_min)
  newConstraint!(n,FZ_rl_con,:FZ_rl_con);
  newConstraint!(n,FZ_rr_con,:FZ_rr_con);
 
  # linear tire constraint limits
-#=
  Fyf_linear=NLExpr(n,Fyf_linear)
  Fyr_linear=NLExpr(n,Fyr_linear)
  Fyf_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], Fyf_min <= Fyf_linear[j] <= Fyf_max)
  Fyr_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], Fyf_min <= Fyr_linear[j] <= Fyf_max)
  newConstraint!(n,Fyf_con,:Fyf_con);
  newConstraint!(n,Fyr_con,:Fyr_con);
-=#
+
+ # nonlinear acceleration constraints
+ min_ax=NLExpr(n,min_ax)
+ max_ax=NLExpr(n,max_ax)
+ min_ax_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], 0 <= min_ax[j] )
+ max_ax_con=@NLconstraint(n.mdl, [j=1:n.numStatePoints], max_ax[j] <= 0 )
+ newConstraint!(n,min_ax_con,:min_ax_con);
+ newConstraint!(n,max_ax_con,:max_ax_con);
 
  # add parameters
  Q = size(c.o.A)[1]; # number of obstacles

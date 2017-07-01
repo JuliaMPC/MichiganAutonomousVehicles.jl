@@ -13,8 +13,7 @@ using MAVs
 # 6) it is gettting a KNITRO error the first time, but not after that. maybe it is setup differently
 # 7) looking at the second iteration it seems like vehicle position did not getr updated, but the vehicle did turn
 c=defineCase(;(:mode=>:autoARC));
-setMisc!(c;mpc_max_iter=10,tex=0.5,max_cpu_time=5.0,Nck=[10,8,6]);
-#setMisc!(c;mpc_max_iter=10,tex=0.5,max_cpu_time=5.0,Nck=[40]);
+setMisc!(c;mpc_max_iter=50,tex=0.5,max_cpu_time=5.0,Nck=[10,8,6]);
 
 n=initializeAutonomousControl(c);
 
