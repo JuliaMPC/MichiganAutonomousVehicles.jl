@@ -23,7 +23,7 @@ description=string(
 * sy=",c.o.s_y,"\n
 ")
 
-results_dir=string("TEMP_implicit",c.m.name,"_",c.m.solver,"/")
+results_dir=string("obj_stacked",c.m.name,"/")
 resultsDir!(n;results_name=results_dir,description=description);
 savePlantData!(n)
 if _pretty_defaults[:simulate];
