@@ -26,7 +26,7 @@ function initializeAutonomousControl(c)
  XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, u_max, NaN];
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
  n=define(numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
- n.s.tf_max=15.0;
+ n.s.tf_max=10.0;
  n.params=[pa];   # vehicle parameters
 
  # set mpc parameters
@@ -37,7 +37,7 @@ function initializeAutonomousControl(c)
 
  # define tolerances
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
- XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
+ XF_tol=[c.m.sigma,c.m.sigma,NaN,NaN,NaN,NaN,NaN,NaN];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
          # 1  2  3  4  5    6   7   8
@@ -141,8 +141,9 @@ end
  #########################
  # intial optimization (s)
  ########################
- n.s.save=false; n.s.MPC=false; n.s.evalConstraints=false;
- for k in 1:3
+ n.s.save=true; # NOTE TEMP
+ n.s.MPC=false; n.s.evalConstraints=false;
+ for k in 1:1
   optimize!(n);
   if n.r.status==:Optimal; break; end
  end

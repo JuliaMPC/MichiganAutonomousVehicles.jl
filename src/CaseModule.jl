@@ -154,7 +154,7 @@ end
 o=defineObstacles(name)
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/28/2017, Last Modified: 4/3/2017 \n
+Date Create: 3/28/2017, Last Modified: 7/5/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function defineObstacles(name)
@@ -168,16 +168,17 @@ function defineObstacles(name)
     o.X0=[200.];
     o.Y0=[75.];
     o.status=falses(length(o.X0));
-  elseif name==:auto2
+  elseif name==:autoBench
     o.name=name;
-    o.A=[5.,10.,2.];
-    o.B=[5.,10.,2.];
-    o.s_x=[-2.,0.,0.];
-    o.s_y=[0.,0.,4.];
-    o.X0=[205.,180.,200.];
-    o.Y0=[50.,75.,30.];
+    o.A=[10.];
+    o.B=[5.];
+    o.s_x=[0.];
+    o.s_y=[0.];
+    o.X0=[200.];
+    o.Y0=[43.];
     o.status=falses(length(o.X0));
   elseif name==:autoARC
+    o.name=name;
     A=[2.5 1.5];      # small car
     B=[3.3 1.9];      # HUMMVEEs
     C=[9.8/2 3.65/2]; # tanks
@@ -272,6 +273,12 @@ function defineGoal(name)
     g.x_ref=200.;
     g.y_ref=125.;
     g.psi_ref=pi/2;
+  elseif name==:autoBench
+      g=Goal();
+      g.name=name;
+      g.x_ref=200.;
+      g.y_ref=100.;
+      g.psi_ref=pi/2;
   elseif name==:path # test case for testPathFollowing.jl
     g=Goal();
     g.name=name;
@@ -373,6 +380,24 @@ function defineMisc(name)
     m.PredictX0=true;
     m.FixedTp=true;
     m.Lr=50.;
+    m.L_rd=5.;
+  elseif name==:autoBench
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,15.0,0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=0.47;#0.41;
+    m.sm=5.0;
+    m.sigma=1.0;
+    m.Nck=[10,8,6];#[12,10,8,6];
+    m.solver=:Ipopt;
+    m.max_iter=500;
+    m.mpc_max_iter=60;
+    m.PredictX0=true;
+    m.FixedTp=true;
+    m.Lr=150. # not in play
     m.L_rd=5.;
   elseif name==:autoARC
     m.name=name;
@@ -550,7 +575,7 @@ c=defineCase(;(mode=>:path));
 
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/11/2017, Last Modified: 4/3/2017 \n
+Date Create: 3/11/2017, Last Modified: 7/4/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function defineCase(;name::Symbol=:auto,
@@ -573,13 +598,20 @@ function defineCase(;name::Symbol=:auto,
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
+   elseif mode==:autoBench
+     c.name=mode;
+     c.g=defineGoal(c.name);
+     c.o=defineObstacles(c.name);
+     c.w=defineWeights(:auto);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(c.name);
    elseif mode==:autoARC
-       c.name=:auto;
-       c.g=defineGoal(c.name);
-       c.o=defineObstacles(:autoARC);
-       c.w=defineWeights(c.name);
-       c.t=defineTrack(:NA);
-       c.m=defineMisc(:autoARC);
+     c.name=:auto;
+     c.g=defineGoal(c.name);
+     c.o=defineObstacles(:autoARC);
+     c.w=defineWeights(c.name);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(:autoARC);
    elseif mode==:path
      c.name=mode;
      c.g=defineGoal(c.name);
