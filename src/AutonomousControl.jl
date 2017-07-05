@@ -119,10 +119,10 @@ end
  obj_params=[w_goal_param,w_psi_param]
 
  # penalize distance to goal
- @NLexpression(n.mdl, goal_obj, w_goal_param*((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2)/((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2+EP))
+ goal_obj=@NLexpression(n.mdl,w_goal_param*((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2)/((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2+EP))
 
  # penalize difference between final heading angle and angle relative to the goal
- @NLexpression(n.mdl, psi_obj, w_psi_param*atan((c.g.y_ref-y[end])/(c.g.x_ref-x[end]+EP))*(atan(sin(psi[end]-c.g.psi_ref)/(cos(psi[end]-c.g.psi_ref)+EP)))^2 )
+ psi_obj=@NLexpression(n.mdl,w_psi_param*atan((c.g.y_ref-y[end])/(c.g.x_ref-x[end]+EP))*(atan(sin(psi[end]-c.g.psi_ref)/(cos(psi[end]-c.g.psi_ref)+EP)))^2 )
 
  # soft constraints on vertical tire load
  tire_obj=integrate!(n,tire_expr);
@@ -133,7 +133,7 @@ end
  # penalize control effort
  ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
 
- @NLobjective(n.mdl, Min, c.w.time*n.tf + ce_obj + c.w.Fz*tire_obj)
+ @NLobjective(n.mdl, Min, goal_obj + psi_obj + c.w.time*n.tf + ce_obj + c.w.Fz*tire_obj)
 
  #########################
  # intial optimization(s)

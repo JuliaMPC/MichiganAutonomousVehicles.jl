@@ -372,6 +372,8 @@ function defineMisc(name)
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
+    m.Lr=50.;
+    m.L_rd=5.;
   elseif name==:autoARC
     m.name=name;
     m.model=:ThreeDOFv2;
