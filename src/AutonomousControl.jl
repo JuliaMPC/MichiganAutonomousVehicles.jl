@@ -15,7 +15,7 @@ export
 n=initializeAutonomousControl(c);
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 2/1/2017, Last Modified: 7/04/2017 \n
+Date Create: 2/1/2017, Last Modified: 7/05/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function initializeAutonomousControl(c)
@@ -24,12 +24,10 @@ function initializeAutonomousControl(c)
  XF=[c.g.x_ref, c.g.y_ref, NaN, NaN, NaN, NaN, NaN, NaN];
  XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, u_min, NaN];
  XU=[x_max, y_max, NaN, NaN, psi_max, sa_max, u_max, NaN];
- #XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, u_min, NaN]; #NOTE this creates problems
- #XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, u_max, NaN];
  CL = [sr_min, jx_min]; CU = [sr_max, jx_max];
  n=define(numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU)
  n.s.tf_max=15.0;
- n.params = [pa];   # vehicle parameters
+ n.params=[pa];   # vehicle parameters
 
  # set mpc parameters
  initializeMPC!(n;FixedTp=c.m.FixedTp,PredictX0=c.m.PredictX0,tp=c.m.tp,tex=copy(c.m.tex),max_iter=c.m.mpc_max_iter);
@@ -38,8 +36,8 @@ function initializeAutonomousControl(c)
  n.mpc.modelEquations=ThreeDOFv2;
 
  # define tolerances
- XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
  X0_tol=[0.05,0.05,0.05,0.05,0.01,0.001,0.05,0.05];
+ XF_tol=[5.,5.,NaN,NaN,NaN,NaN,NaN,NaN];
  defineTolerances!(n;X0_tol=X0_tol,XF_tol=XF_tol);
 
          # 1  2  3  4  5    6   7   8
@@ -53,17 +51,20 @@ function initializeAutonomousControl(c)
  controls!(n,names,descriptions=descriptions)
 
  # dynamic constraints and additional constraints
- dx,con=ThreeDOFv2_expr(n)
+ dx,con,tire_expr=ThreeDOFv2_expr(n)
  dynamics!(n,dx)
  constraints!(n,con)
 
  # solver settings
- SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+ SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>100.)) # let the solver have more time for the initalization
 
  # configure problem
  configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
+ x=n.r.x[:,1];y=n.r.x[:,2];psi=n.r.x[:,5]; # pointers to JuMP variables
 
- # add parameters
+ #################################
+ # obstacle aviodance constraints
+ ################################
  Q = size(c.o.A)[1]; # number of obstacles
  @NLparameter(n.mdl, a[i=1:Q] == copy(c.o.A[i]));
  @NLparameter(n.mdl, b[i=1:Q] == copy(c.o.B[i]));
@@ -73,68 +74,86 @@ function initializeAutonomousControl(c)
  @NLparameter(n.mdl, speed_y[i=1:Q] == copy(c.o.s_y[i]));
  obs_params=[a,b,X_0,Y_0,speed_x,speed_y];
 
- #TODO add rest of terms in obj function
-#=
-#----------------------
-# OBJECTIVE FUNCTION #
-#----------------------
-# penalize distance to goal
-@NLparameter(mdl, w_goal_param == w_goal)  # temp values
-@NLexpression(mdl, goal_obj, w_goal_param*((x[1] - x_ref)^2 + (y[1] - y_ref)^2)/((x[N+1] - x_ref)^2 + (y[N+1] - y_ref)^2+EP))
-
-# penalize difference between final heading angle and angle relative to the goal
-@NLparameter(mdl, w_psi_param == w_psi)  # temp values NOTE THESE ARE SO we can set them to zero!  for contraints on getting to goal we can relax those parameters as well
-@NLexpression(mdl, psi_obj, w_psi_param*atan((y_ref-y[end])/(x_ref-x[end]+EP))*(atan(sin(psi[end]-psi_ref)/(cos(psi[end]-psi_ref)+EP)))^2 )
-
-# minimizing the integral over the entire prediction horizon of the line that passes through the goal
-@NLexpression(mdl, haf_obj, w_haf*sum{((sin(psi_ref)*(x[i]-x_ref)-cos(psi_ref)*(y[i]-y_ref))^2)*dt[i],i=1:N})
-
-# define objective function
-#@NLobjective(mdl, Min, aux_time[N+1] + goal_obj + psi_obj + haf_obj + ce_obj + Fz_obj )
-@NLobjective(mdl, Min, aux_time[N+1] + haf_obj + ce_obj + Fz_obj )
-=#
-  #----------------------
-  # OBJECTIVE FUNCTION #
-  #----------------------
- # prevent vehicle from operating at its vertical tire load limit
-# @NLexpression(n.mdl, Fz_obj, c.w.Fz*sum((tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)+tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) + KZYR*((FYF[i] + FYR[i])/m)-a_t)/b_t))*dt[i],i=1:N));
-
-
-#(tanh(-(0.5*(FzR0 + KZX*(ax[i] - v[i]*r[i])) - KZYR*((FYF[i] + FYR[i])/m) -a_t)/b_t)
-
- # penalize control effort
- ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
-
- @NLobjective(n.mdl, Min, c.w.time*n.tf + ce_obj )
-
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);
  Y_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], Y_0[j] + speed_y[j]*n.tV[i]);
 
  # constraint on position
- obs_con=@NLconstraint(n.mdl, [j=1:Q,i=1:n.numStatePoints-1], 1 <= ((n.r.x[(i+1),1]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((n.r.x[(i+1),2]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
+ obs_con=@NLconstraint(n.mdl, [j=1:Q,i=1:n.numStatePoints-1], 1 <= ((x[(i+1)]-X_obs[j,i])^2)/((a[j]+c.m.sm)^2) + ((y[(i+1)]-Y_obs[j,i])^2)/((b[j]+c.m.sm)^2));
  newConstraint!(n,obs_con,:obs_con);
 
- # position parameters
- @NLparameter(n.mdl, X0_params[j=1:2]==n.X0[j]);
+ ####################
+ # LiDAR constraints
+ ###################
+ # ensure that the final x and y states are near the LiDAR boundary
+ @NLparameter(n.mdl, LiDAR_param_1==(c.m.Lr + c.m.L_rd)^2);
+ @NLparameter(n.mdl, LiDAR_param_2==(c.m.Lr - c.m.L_rd)^2);
+ LiDAR_edge_high=@NLconstraint(n.mdl,[j=1], (x[end]-x[1])^2+(y[end]-y[1])^2  <= LiDAR_param_1);
+ LiDAR_edge_low=@NLconstraint(n.mdl,[j=1],  (x[end]-x[1])^2+(y[end]-y[1])^2  >= LiDAR_param_2);
+ newConstraint!(n,LiDAR_edge_high,:LiDAR_edge_high);
+ newConstraint!(n,LiDAR_edge_low,:LiDAR_edge_low);
 
- # LiDAR constraint: ensure that all of the points are in the LiDAR range TODO LiDAR range constrait with x y constraints are messing it up
-#  LiDAR_con=@NLconstraint(mdl, [i=1:n.numStatePoints-1], ((r.x[(i+1),1]-X0_params[1])^2+(r.x[(i+1),2]-X0_params[2])^2) <= (c.m.Lr + c.m.L_rd)^2); # not constraining the first state
-#  newConstraint!(r,LiDAR_con,:LiDAR_con);
+# constrain all state points to be within LiDAR boundary
+ LiDAR_range=@NLconstraint(n.mdl, [j=1:n.numStatePoints-1], (x[j+1]-x[1])^2+(y[j+1]-y[1])^2 <= (c.m.Lr + c.m.L_rd)^2 );
+ newConstraint!(n,LiDAR_range,:LiDAR_range);
 
-#  sm=createParallelModels(n,c,pa)
+ if goalRange!(n,c)   # relax LiDAR boundary constraints
+    setvalue(LiDAR_param_1, 1e6)
+    setvalue(LiDAR_param_2,-1e6)
+else                  # relax the constraints on the final x and y position
+    for st=1:2; for k=1:2; setRHS(n.r.xf_con[st,k],1e6); end; end
+end
+ LiDAR_params=[LiDAR_param_1,LiDAR_param_2]
+ #####################
+ # objective function
+ ####################
+ # parameters
+ if goalRange!(n,c)
+  println("\n goal in range")
+  @NLparameter(n.mdl, w_goal_param == 0.0)
+  @NLparameter(n.mdl, w_psi_param == 0.0)
+ else
+  @NLparameter(n.mdl, w_goal_param == c.w.goal)
+  @NLparameter(n.mdl, w_psi_param == c.w.psi)
+ end
+ obj_params=[w_goal_param,w_psi_param]
 
-# intial optimization
+ # penalize distance to goal
+ @NLexpression(n.mdl, goal_obj, w_goal_param*((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2)/((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2+EP))
+
+ # penalize difference between final heading angle and angle relative to the goal
+ @NLexpression(n.mdl, psi_obj, w_psi_param*atan((c.g.y_ref-y[end])/(c.g.x_ref-x[end]+EP))*(atan(sin(psi[end]-c.g.psi_ref)/(cos(psi[end]-c.g.psi_ref)+EP)))^2 )
+
+ # soft constraints on vertical tire load
+ tire_obj=integrate!(n,tire_expr);
+
+ # minimizing the integral over the entire prediction horizon of the line that passes through the goal
+ haf_obj=integrate!(n,:( ( sin($c.g.psi_ref)*(x[j]-$c.g.x_ref) - cos($c.g.psi_ref)*(y[j]-$c.g.y_ref) )^2 ) )
+
+ # penalize control effort
+ ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
+
+ @NLobjective(n.mdl, Min, c.w.time*n.tf + ce_obj + c.w.Fz*tire_obj)
+
+ #########################
+ # intial optimization(s)
+ ########################
  n.s.save=false; n.s.MPC=false; n.s.evalConstraints=false;
- optimize!(n);
+ for k in 1:3
+  optimize!(n);
+  if n.r.status==:Optimal; break; end
+ end
 
-         #  1    2          3
- n.params=[pa,obs_params,X0_params];
+ # modifify the maximum solver time
+ SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+ defineSolver!(n,SS)
+
+         #  1      2          3          4
+ n.params=[pa,obs_params,LiDAR_params,obj_params];
 
  # settings
  n.s.save=true;
 
- # save case data TODO    case_data, obs_data = case2dfs(c);
  return n
 end
 
@@ -142,17 +161,40 @@ end
 
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/20/2017, Last Modified: 4/11/2017 \n
+Date Create: 3/20/2017, Last Modified: 7/05/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function updateAutoParams!(n)
+function updateAutoParams!(n,c)
 
-  # vehicle position for LiDAR
-  setvalue(n.params[3][1],n.X0[1])
-  setvalue(n.params[3][2],n.X0[2])
+  # obstacle information-> only show if it is in range at the start TODO
 
-  # obstacle information
+  if goalRange!(n,c) # TODO make a flag that indicates this switch has been flipped
+    println("goal is in range")
+
+   # enforce final state constraints on x and y position
+   for st=1:2; for k=1:2; setRHS(n.r.xf_con[st,k], (n.XF[st]+n.XF_tol[st])); end; end
+
+   # relax LiDAR constraints
+   setvalue(n.params[3][1], 1e6)
+   setvalue(n.params[3][2],-1e6)
+
+   # remove terms in cost function
+   setvalue(n.params[4][1],0.0)
+   setvalue(n.params[4][2],0.0)
+  end
+  #NOTE assuming it is not going in and out of range
+
  return nothing
+end
+
+"""
+--------------------------------------------------------------------------------------\n
+Author: Huckleberry Febbo, Graduate Student, University of Michigan
+Date Create: 7/04/2017, Last Modified: 7/04/2017 \n
+--------------------------------------------------------------------------------------\n
+"""
+function goalRange!(n,c)
+ return ( (n.mpc.X0[end][1] - c.g.x_ref)^2 + (n.mpc.X0[end][2] - c.g.y_ref)^2 )^0.5 < c.m.Lr
 end
 
 
