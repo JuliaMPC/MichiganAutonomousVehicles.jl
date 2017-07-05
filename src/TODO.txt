@@ -22,3 +22,4 @@ TODO
  #XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, u_max, NaN];
 3) #  sm=createParallelModels(n,c,pa)
 4)  # save case data TODO    case_data, obs_data = case2dfs(c);
+5) make sure that the atan in lieu of atan2 is OK

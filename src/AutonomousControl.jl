@@ -119,24 +119,27 @@ end
  obj_params=[w_goal_param,w_psi_param]
 
  # penalize distance to goal
- goal_obj=@NLexpression(n.mdl,w_goal_param*((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2)/((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2+EP))
+ goal_obj=@NLexpression(n.mdl,w_goal_param*((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2)/((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2 + EP))
 
- # penalize difference between final heading angle and angle relative to the goal
- psi_obj=@NLexpression(n.mdl,w_psi_param*atan((c.g.y_ref-y[end])/(c.g.x_ref-x[end]+EP))*(atan(sin(psi[end]-c.g.psi_ref)/(cos(psi[end]-c.g.psi_ref)+EP)))^2 )
+ # penalize difference between final heading angle and angle relative to the goal TODO check this
+ #psi_frg=@NLexpression(n.mdl,asin(c.g.y_ref-y[end])/(acos(c.g.x_ref-x[end]) + EP) )
+ #psi_obj=@NLexpression(n.mdl,w_psi_param*(asin(sin(psi[end] - psi_frg))/(acos(cos(psi[end] - psi_frg)) + EP) )^2 )
+ psi_obj=0;
+# psi_obj=@NLexpression(n.mdl,w_psi_param*(asin(sin(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end])))/(acos(cos(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end]))) + EP) )^2 )
 
  # soft constraints on vertical tire load
  tire_obj=integrate!(n,tire_expr);
 
- # minimizing the integral over the entire prediction horizon of the line that passes through the goal
- haf_obj=integrate!(n,:( ( sin($c.g.psi_ref)*(x[j]-$c.g.x_ref) - cos($c.g.psi_ref)*(y[j]-$c.g.y_ref) )^2 ) )
-
+ # minimizing the integral over the entire prediction horizon of the line that passes through the goal TODO find paper that this is in..
+ #haf_obj=integrate!(n,:( c.w.haf*( sin($c.g.psi_ref)*(x[j]-$c.g.x_ref) - cos($c.g.psi_ref)*(y[j]-$c.g.y_ref) )^2 ) )
+ haf_obj=0;
  # penalize control effort
  ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
 
- @NLobjective(n.mdl, Min, goal_obj + psi_obj + c.w.time*n.tf + ce_obj + c.w.Fz*tire_obj)
+ @NLobjective(n.mdl, Min, goal_obj + psi_obj + c.w.Fz*tire_obj + haf_obj + c.w.time*n.tf + ce_obj )
 
  #########################
- # intial optimization(s)
+ # intial optimization (s)
  ########################
  n.s.save=false; n.s.MPC=false; n.s.evalConstraints=false;
  for k in 1:3
