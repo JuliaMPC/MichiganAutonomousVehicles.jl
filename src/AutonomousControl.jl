@@ -59,7 +59,7 @@ function initializeAutonomousControl(c)
  SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>100.)) # let the solver have more time for the initalization
 
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme=>:lgrExplicit),(:finalTimeDV=>true),(:solverSettings=>SS))
+ configure!(n,Nck=c.m.Nck;(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
  x=n.r.x[:,1];y=n.r.x[:,2];psi=n.r.x[:,5]; # pointers to JuMP variables
 
  #################################

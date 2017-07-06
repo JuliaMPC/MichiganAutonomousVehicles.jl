@@ -325,6 +325,7 @@ type Misc
   followDriver       # a bool to try and follow the driver
   followPath         # a bool to follow the path
   NF                 # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
+  integrationScheme
 end
 
 function Misc()
@@ -335,6 +336,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -399,6 +401,7 @@ function defineMisc(name)
     m.FixedTp=true;
     m.Lr=150. # not in play
     m.L_rd=5.;
+    m.integrationScheme=:lgrImplici
   elseif name==:autoARC
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -509,7 +512,8 @@ function setMisc!(c;
                 activeSafety=c.m.activeSafety,
                 followPath=c.m.followPath,
                 followDriver=c.m.followDriver,
-                NF=c.m.NF);
+                NF=c.m.NF,
+                integrationScheme=c.m.integrationScheme);
     c.m.Xlims=Xlims;
     c.m.Ylims=Ylims;
     c.m.UX=UX;
@@ -530,6 +534,7 @@ function setMisc!(c;
     c.m.followPath=followPath;
     c.m.followDriver=followDriver;
     c.m.NF=NF;
+    c.m.integrationScheme=integrationScheme;
     return nothing
 end
 
