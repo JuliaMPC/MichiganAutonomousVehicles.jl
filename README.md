@@ -51,6 +51,12 @@ catkin_make
 ```
 
 #### Running the Model
+
+Start roscore
+```terminal
+roscore
+```
+
 make sure that you are in the `~/MAVs/workspace/build/lidar_model` directory and run
 ```terminal
 gazebo --verbose /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/velodyne.world
@@ -61,6 +67,11 @@ gazebo --verbose /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/velodyne
 #### Dynamically Controlling the LiDAR:
 Go into the `~/MAVs/workspace/devel/lib/lidar_model` directory and type
 ```terminal
-ls
+~/MAVs/workspace/devel/lib/lidar_model$ ls
 vel
+```
+
+'vel' is a program that can be used to change the velocity of the LiDAR try:
+```terminal
+./vel 20
 ```
