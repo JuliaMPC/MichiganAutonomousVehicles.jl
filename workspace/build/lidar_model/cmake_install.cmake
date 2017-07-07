@@ -1,8 +1,8 @@
-# Install script for directory: /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model
+# Install script for directory: /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/febbo/.julia/v0.5/MAVs/workspace/install")
+  set(CMAKE_INSTALL_PREFIX "/home/febbo/.julia/v0.6/MAVs/workspace/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,17 +33,17 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_model.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_model.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lidar_model/cmake" TYPE FILE FILES
-    "/home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_modelConfig.cmake"
-    "/home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_modelConfig-version.cmake"
+    "/home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_modelConfig.cmake"
+    "/home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model/catkin_generated/installspace/lidar_modelConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lidar_model" TYPE FILE FILES "/home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lidar_model" TYPE FILE FILES "/home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/package.xml")
 endif()
 

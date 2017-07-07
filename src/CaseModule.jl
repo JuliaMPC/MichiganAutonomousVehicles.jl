@@ -383,6 +383,7 @@ function defineMisc(name)
     m.FixedTp=true;
     m.Lr=50.;
     m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
   elseif name==:autoBench
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -401,7 +402,7 @@ function defineMisc(name)
     m.FixedTp=true;
     m.Lr=150. # not in play
     m.L_rd=5.;
-    m.integrationScheme=:lgrImplici
+    m.integrationScheme=:lgrExplicit
   elseif name==:autoARC
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -420,6 +421,7 @@ function defineMisc(name)
     m.FixedTp=true;
     m.Lr=50.
     m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -438,6 +440,7 @@ function defineMisc(name)
     m.mpc_max_iter=30;
     m.PredictX0=true;
     m.FixedTp=true;
+    m.integrationScheme=:lgrExplicit
   elseif name==:caseStudy
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -460,6 +463,7 @@ function defineMisc(name)
     m.followPath=false;
     m.followDriver=false;
     m.NF=0;
+    m.integrationScheme=:lgrExplicit
   elseif name==:caseStudyPath # test case for testPathFollowing.jl with other model
     m.name=:caseStudy;
     m.model=:ThreeDOFv2;
@@ -479,6 +483,7 @@ function defineMisc(name)
     m.PredictX0=true;
     m.FixedTp=true;
     m.followPath=true;
+    m.integrationScheme=:lgrExplicit
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end

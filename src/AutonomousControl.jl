@@ -56,10 +56,11 @@ function initializeAutonomousControl(c)
  constraints!(n,con)
 
  # solver settings
- SS=((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>100.)) # let the solver have more time for the initalization
+ solver_time = (c.m.solver==:Ipopt) ? :max_cpu_time : :maxtime_real
+ SS=((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>100.)) # let the solver have more time for the initalization
 
  # configure problem
- configure!(n,Nck=c.m.Nck;(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
+ configure!(n;(Nck=c.m.Nck),(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
  x=n.r.x[:,1];y=n.r.x[:,2];psi=n.r.x[:,5]; # pointers to JuMP variables
 
  #################################
@@ -88,20 +89,20 @@ function initializeAutonomousControl(c)
  # ensure that the final x and y states are near the LiDAR boundary
  @NLparameter(n.mdl, LiDAR_param_1==(c.m.Lr + c.m.L_rd)^2);
  @NLparameter(n.mdl, LiDAR_param_2==(c.m.Lr - c.m.L_rd)^2);
- LiDAR_edge_high=@NLconstraint(n.mdl,[j=1], (x[end]-x[1])^2+(y[end]-y[1])^2  <= LiDAR_param_1);
- LiDAR_edge_low=@NLconstraint(n.mdl,[j=1],  (x[end]-x[1])^2+(y[end]-y[1])^2  >= LiDAR_param_2);
+ LiDAR_edge_high = @NLconstraint(n.mdl,[j=1], (x[end]-x[1])^2+(y[end]-y[1])^2  <= LiDAR_param_1);
+ LiDAR_edge_low = @NLconstraint(n.mdl,[j=1], (x[end]-x[1])^2+(y[end]-y[1])^2  >= LiDAR_param_2);
  newConstraint!(n,LiDAR_edge_high,:LiDAR_edge_high);
  newConstraint!(n,LiDAR_edge_low,:LiDAR_edge_low);
 
 # constrain all state points to be within LiDAR boundary
- LiDAR_range=@NLconstraint(n.mdl, [j=1:n.numStatePoints-1], (x[j+1]-x[1])^2+(y[j+1]-y[1])^2 <= (c.m.Lr + c.m.L_rd)^2 );
+ LiDAR_range = @NLconstraint(n.mdl, [j=1:n.numStatePoints-1], (x[j+1]-x[1])^2+(y[j+1]-y[1])^2 <= (c.m.Lr + c.m.L_rd)^2 );
  newConstraint!(n,LiDAR_range,:LiDAR_range);
 
  if goalRange!(n,c)   # relax LiDAR boundary constraints
     setvalue(LiDAR_param_1, 1e6)
     setvalue(LiDAR_param_2,-1e6)
-else                  # relax the constraints on the final x and y position
-    for st=1:2; for k=1:2; setRHS(n.r.xf_con[st,k],1e6); end; end
+else                  # relax constraints on the final x and y position
+    for st=1:2;for k in 1:2; setRHS(n.r.xf_con[st,k], 1e6); end; end
 end
  LiDAR_params=[LiDAR_param_1,LiDAR_param_2]
  #####################
@@ -121,17 +122,17 @@ end
  # penalize distance to goal
  goal_obj=@NLexpression(n.mdl,w_goal_param*((x[end] - c.g.x_ref)^2 + (y[end] - c.g.y_ref)^2)/((x[1] - c.g.x_ref)^2 + (y[1] - c.g.y_ref)^2 + EP))
 
- # penalize difference between final heading angle and angle relative to the goal TODO check this
+ # penalize difference between final heading angle and angle relative to the goal NOTE currently this is broken becasue atan2() is not available
  #psi_frg=@NLexpression(n.mdl,asin(c.g.y_ref-y[end])/(acos(c.g.x_ref-x[end]) + EP) )
  #psi_obj=@NLexpression(n.mdl,w_psi_param*(asin(sin(psi[end] - psi_frg))/(acos(cos(psi[end] - psi_frg)) + EP) )^2 )
  psi_obj=0;
-# psi_obj=@NLexpression(n.mdl,w_psi_param*(asin(sin(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end])))/(acos(cos(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end]))) + EP) )^2 )
+ # psi_obj=@NLexpression(n.mdl,w_psi_param*(asin(sin(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end])))/(acos(cos(psi[end] - asin(c.g.y_ref-y[end])/acos(c.g.x_ref-x[end]))) + EP) )^2 )
 
  # soft constraints on vertical tire load
  tire_obj=integrate!(n,tire_expr);
 
- # minimizing the integral over the entire prediction horizon of the line that passes through the goal TODO find paper that this is in..
- #haf_obj=integrate!(n,:( c.w.haf*( sin($c.g.psi_ref)*(x[j]-$c.g.x_ref) - cos($c.g.psi_ref)*(y[j]-$c.g.y_ref) )^2 ) )
+ # minimizing the integral over the entire prediction horizon of the line that passes through the goal
+ #haf_obj=integrate!(n,:( $c.w.haf*( sin($c.g.psi_ref)*(x[j]-$c.g.x_ref) - cos($c.g.psi_ref)*(y[j]-$c.g.y_ref) )^2 ) )
  haf_obj=0;
  # penalize control effort
  ce_obj=integrate!(n,:($c.w.ce*($c.w.sa*(sa[j]^2)+$c.w.sr*(sr[j]^2)+$c.w.jx*(jx[j]^2))) )
@@ -141,15 +142,14 @@ end
  #########################
  # intial optimization (s)
  ########################
- n.s.save=true; # NOTE TEMP
- n.s.MPC=false; n.s.evalConstraints=false;
+ n.s.save=true; n.s.MPC=false; n.s.evalConstraints=false;
  for k in 1:1
   optimize!(n);
   if n.r.status==:Optimal; break; end
  end
 
  # modifify the maximum solver time
- SS=Dict((:name=>:Ipopt),(:mpc_defaults=>true),(:max_cpu_time=>c.m.max_cpu_time))
+ SS=Dict((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>c.m.max_cpu_time))
  defineSolver!(n,SS)
 
          #  1      2          3          4
@@ -176,7 +176,10 @@ function updateAutoParams!(n,c)
     println("goal is in range")
 
    # enforce final state constraints on x and y position
-   for st=1:2; for k=1:2; setRHS(n.r.xf_con[st,k], (n.XF[st]+n.XF_tol[st])); end; end
+   for st=1:2;
+     setRHS(n.r.xf_con[st,1], +(n.XF[st]+n.XF_tol[st]));
+     setRHS(n.r.xf_con[st,2], -(n.XF[st]-n.XF_tol[st]));
+   end
 
    # relax LiDAR constraints
    setvalue(n.params[3][1], 1e6)

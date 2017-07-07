@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/src
+CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/build
+CMAKE_BINARY_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/build
 
 # Utility rule file for download_extra_data.
 
@@ -67,6 +67,6 @@ CMakeFiles/download_extra_data.dir/clean:
 .PHONY : CMakeFiles/download_extra_data.dir/clean
 
 CMakeFiles/download_extra_data.dir/depend:
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.5/MAVs/workspace/src /home/febbo/.julia/v0.5/MAVs/workspace/src /home/febbo/.julia/v0.5/MAVs/workspace/build /home/febbo/.julia/v0.5/MAVs/workspace/build /home/febbo/.julia/v0.5/MAVs/workspace/build/CMakeFiles/download_extra_data.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.6/MAVs/workspace/src /home/febbo/.julia/v0.6/MAVs/workspace/src /home/febbo/.julia/v0.6/MAVs/workspace/build /home/febbo/.julia/v0.6/MAVs/workspace/build /home/febbo/.julia/v0.6/MAVs/workspace/build/CMakeFiles/download_extra_data.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/download_extra_data.dir/depend
 

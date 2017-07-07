@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/src
+CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/build
+CMAKE_BINARY_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/build
 
 # Include any dependencies generated for this target.
 include lidar_model/CMakeFiles/vel.dir/depend.make
@@ -58,17 +58,17 @@ include lidar_model/CMakeFiles/vel.dir/progress.make
 include lidar_model/CMakeFiles/vel.dir/flags.make
 
 lidar_model/CMakeFiles/vel.dir/vel.cc.o: lidar_model/CMakeFiles/vel.dir/flags.make
-lidar_model/CMakeFiles/vel.dir/vel.cc.o: /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model/vel.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/febbo/.julia/v0.5/MAVs/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lidar_model/CMakeFiles/vel.dir/vel.cc.o"
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/vel.dir/vel.cc.o -c /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model/vel.cc
+lidar_model/CMakeFiles/vel.dir/vel.cc.o: /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/vel.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/febbo/.julia/v0.6/MAVs/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lidar_model/CMakeFiles/vel.dir/vel.cc.o"
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/vel.dir/vel.cc.o -c /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/vel.cc
 
 lidar_model/CMakeFiles/vel.dir/vel.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/vel.dir/vel.cc.i"
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model/vel.cc > CMakeFiles/vel.dir/vel.cc.i
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/vel.cc > CMakeFiles/vel.dir/vel.cc.i
 
 lidar_model/CMakeFiles/vel.dir/vel.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/vel.dir/vel.cc.s"
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model/vel.cc -o CMakeFiles/vel.dir/vel.cc.s
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model/vel.cc -o CMakeFiles/vel.dir/vel.cc.s
 
 lidar_model/CMakeFiles/vel.dir/vel.cc.o.requires:
 
@@ -88,112 +88,70 @@ vel_OBJECTS = \
 # External object files for target vel
 vel_EXTERNAL_OBJECTS =
 
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/vel.cc.o
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/build.make
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libSimTKsimbody.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libSimTKmath.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libSimTKcommon.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/libblas.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/liblapack.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/libblas.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_client.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gui.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_sensors.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_rendering.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_physics.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ode.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_transport.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_msgs.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_util.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_common.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gimpact.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opcode.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opende_ou.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_math.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ccd.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_signals.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_regex.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libprotobuf.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libsdformat.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreMain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreTerrain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgrePaging.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-transport3.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libprotobuf.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-msgs0.so.0.7.0
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-math3.so.3.0.0
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/liblapack.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_client.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gui.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_sensors.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_rendering.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_physics.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ode.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_transport.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_msgs.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_util.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_common.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gimpact.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opcode.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opende_ou.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_math.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ccd.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_signals.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_regex.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libsdformat.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreMain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreTerrain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgrePaging.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-transport3.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_signals.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_regex.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libsdformat.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreMain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreTerrain.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgrePaging.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-transport3.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libprotobuf.so
-/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/febbo/.julia/v0.5/MAVs/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable /home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel"
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vel.dir/link.txt --verbose=$(VERBOSE)
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/vel.cc.o
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/build.make
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_client.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gui.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_sensors.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_rendering.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_physics.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ode.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_transport.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_msgs.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_util.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_common.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_gimpact.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opcode.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_opende_ou.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_math.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libgazebo_ccd.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_signals.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_regex.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libprotobuf.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libsdformat.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-math2.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreMain.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreTerrain.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgrePaging.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libignition-math2.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_thread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_signals.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_system.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_program_options.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_regex.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_iostreams.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_date_time.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_chrono.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libboost_atomic.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libpthread.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libprotobuf.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libsdformat.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreMain.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgreTerrain.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: /usr/lib/x86_64-linux-gnu/libOgrePaging.so
+/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel: lidar_model/CMakeFiles/vel.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/febbo/.julia/v0.6/MAVs/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable /home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel"
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vel.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-lidar_model/CMakeFiles/vel.dir/build: /home/febbo/.julia/v0.5/MAVs/workspace/devel/lib/lidar_model/vel
+lidar_model/CMakeFiles/vel.dir/build: /home/febbo/.julia/v0.6/MAVs/workspace/devel/lib/lidar_model/vel
 
 .PHONY : lidar_model/CMakeFiles/vel.dir/build
 
@@ -202,10 +160,10 @@ lidar_model/CMakeFiles/vel.dir/requires: lidar_model/CMakeFiles/vel.dir/vel.cc.o
 .PHONY : lidar_model/CMakeFiles/vel.dir/requires
 
 lidar_model/CMakeFiles/vel.dir/clean:
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -P CMakeFiles/vel.dir/cmake_clean.cmake
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -P CMakeFiles/vel.dir/cmake_clean.cmake
 .PHONY : lidar_model/CMakeFiles/vel.dir/clean
 
 lidar_model/CMakeFiles/vel.dir/depend:
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.5/MAVs/workspace/src /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model /home/febbo/.julia/v0.5/MAVs/workspace/build /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model/CMakeFiles/vel.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.6/MAVs/workspace/src /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model /home/febbo/.julia/v0.6/MAVs/workspace/build /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model/CMakeFiles/vel.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : lidar_model/CMakeFiles/vel.dir/depend
 

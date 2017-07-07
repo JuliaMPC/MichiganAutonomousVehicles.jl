@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/src
+CMAKE_SOURCE_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/febbo/.julia/v0.5/MAVs/workspace/build
+CMAKE_BINARY_DIR = /home/febbo/.julia/v0.6/MAVs/workspace/build
 
 # Utility rule file for std_msgs_generate_messages_nodejs.
 
@@ -63,10 +63,10 @@ lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build: std_msgs_gen
 .PHONY : lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build
 
 lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/clean:
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -P CMakeFiles/std_msgs_generate_messages_nodejs.dir/cmake_clean.cmake
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model && $(CMAKE_COMMAND) -P CMakeFiles/std_msgs_generate_messages_nodejs.dir/cmake_clean.cmake
 .PHONY : lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/clean
 
 lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/depend:
-	cd /home/febbo/.julia/v0.5/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.5/MAVs/workspace/src /home/febbo/.julia/v0.5/MAVs/workspace/src/lidar_model /home/febbo/.julia/v0.5/MAVs/workspace/build /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model /home/febbo/.julia/v0.5/MAVs/workspace/build/lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/febbo/.julia/v0.6/MAVs/workspace/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/febbo/.julia/v0.6/MAVs/workspace/src /home/febbo/.julia/v0.6/MAVs/workspace/src/lidar_model /home/febbo/.julia/v0.6/MAVs/workspace/build /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model /home/febbo/.julia/v0.6/MAVs/workspace/build/lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : lidar_model/CMakeFiles/std_msgs_generate_messages_nodejs.dir/depend
 

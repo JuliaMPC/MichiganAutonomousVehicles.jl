@@ -1,8 +1,8 @@
-prefix=/home/febbo/.julia/v0.5/MAVs/workspace/devel
+prefix=/home/febbo/.julia/v0.6/MAVs/workspace/devel
 
 Name: lidar_model
 Description: Description of lidar_model
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/febbo/.julia/v0.5/MAVs/workspace/devel/lib 
+Libs: -L/home/febbo/.julia/v0.6/MAVs/workspace/devel/lib 
 Requires: 

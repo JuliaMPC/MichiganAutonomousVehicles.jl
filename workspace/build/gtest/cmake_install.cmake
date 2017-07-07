@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/febbo/.julia/v0.5/MAVs/workspace/install")
+  set(CMAKE_INSTALL_PREFIX "/home/febbo/.julia/v0.6/MAVs/workspace/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
