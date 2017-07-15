@@ -262,7 +262,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
         # environment at generation time
-        CMAKE_PREFIX_PATH = '/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated;/home/febbo/catkin_ws/devel;/opt/ros/kinetic'.split(';')
+        CMAKE_PREFIX_PATH = '/home/febbo/.julia/v0.6/MAVs/catkin_ws/devel;/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated;/opt/ros/kinetic'.split(';')
         # prepend current workspace if not already part of CPP
         base_path = os.path.dirname(__file__)
         if base_path not in CMAKE_PREFIX_PATH:

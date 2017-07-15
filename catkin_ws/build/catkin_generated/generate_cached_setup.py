@@ -12,7 +12,7 @@ try:
     from catkin.environment_cache import generate_environment_script
 except ImportError:
     # search for catkin package in all workspaces and prepend to path
-    for workspace in "/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated;/home/febbo/catkin_ws/devel;/opt/ros/kinetic".split(';'):
+    for workspace in "/home/febbo/.julia/v0.6/MAVs/catkin_ws/devel;/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated;/opt/ros/kinetic".split(';'):
         python_path = os.path.join(workspace, 'lib/python2.7/dist-packages')
         if os.path.isdir(os.path.join(python_path, 'catkin')):
             sys.path.insert(0, python_path)

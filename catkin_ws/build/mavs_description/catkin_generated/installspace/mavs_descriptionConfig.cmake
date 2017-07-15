@@ -122,7 +122,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/febbo/.julia/v0.6/MAVs/catkin_ws/install/lib;/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel/lib;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated/lib;/home/febbo/catkin_ws/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /home/febbo/.julia/v0.6/MAVs/catkin_ws/install/lib;/home/febbo/.julia/v0.6/MAVs/catkin_ws/devel/lib;/home/febbo/Documents/workspace/tutorials/velodyne_simulator/devel/lib;/home/febbo/Documents/workspace/tutorials/catographer_ws/install_isolated/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
