@@ -33,6 +33,10 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mavs_description/srv" TYPE FILE FILES "/home/febbo/.julia/v0.6/MAVs/catkin_ws/src/mavs_description/srv/AddTwoInts.srv")
+endif()
+
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_description/catkin_generated/installspace/mavs_description.pc")
 endif()
 
