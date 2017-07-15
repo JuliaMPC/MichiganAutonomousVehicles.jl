@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<robot name="mavs" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <!-- Necessary includes -->
+  <!--
+  <xacro:include filename="$(find mavs_description)/urdf/vehicle_structure.urdf.xacro" />
+  <xacro:include filename="$(find mavs_description)/urdf/vehicle_gazebo.urdf.xacro" />
+  -->
+
+  <!-- Bolt-on sensors go here -->
+  <xacro:include filename="$(find mavs_description)/urdf/sensors.urdf.xacro" />
+  <xacro:lidar name="lidar" parent_link="base_footprint" x="0.6" y="0" z="1.3" roll="0" pitch="0.6" yaw="0" />
+  <xacro:gps name="gps" parent_link="base_footprint" x="-0.8" y="0" z="1.45" rate="50.0" ref_lat="45.0" ref_lon="-81.0" />
+
+</robot>

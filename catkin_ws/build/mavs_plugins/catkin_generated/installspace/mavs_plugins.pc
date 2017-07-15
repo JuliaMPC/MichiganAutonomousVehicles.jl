@@ -1,0 +1,8 @@
+prefix=/home/febbo/.julia/v0.6/MAVs/catkin_ws/install
+
+Name: mavs_plugins
+Description: Description of mavs_plugins
+Version: 0.0.0
+Cflags: -I/home/febbo/.julia/v0.6/MAVs/catkin_ws/install/include
+Libs: -L/home/febbo/.julia/v0.6/MAVs/catkin_ws/install/lib -lgazebo_ros_velodyne_laser
+Requires: roscpp sensor_msgs gazebo_ros

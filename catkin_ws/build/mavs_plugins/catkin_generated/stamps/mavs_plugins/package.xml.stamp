@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mavs_plugins</name>
+  <version>0.0.0</version>
+  <description>
+    Gazebo plugin to provide simulated data from Velodyne laser scanners.
+  </description>
+
+  <license>TODO</license>
+  <maintainer email="febbo@umich.edu">febbo</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf</depend>
+  <depend>gazebo_ros</depend>
+
+  <export>
+  </export>
+
+</package>

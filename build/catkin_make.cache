@@ -1,2 +1,0 @@
-
--DCATKIN_DEVEL_PREFIX=/home/febbo/.julia/v0.6/MAVs/devel -DCMAKE_INSTALL_PREFIX=/home/febbo/.julia/v0.6/MAVs/install -G Unix Makefiles
