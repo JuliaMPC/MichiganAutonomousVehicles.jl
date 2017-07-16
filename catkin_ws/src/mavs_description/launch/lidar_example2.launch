@@ -1,0 +1,14 @@
+<!-- Spawn the LiDAR -->
+<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_description)/urdf/lidar_example.urdf.xacro'" />
+<node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param /robot_description -model lidar_example"/>
+<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+  <param name="publish_frequency" type="double" value="30.0" />
+</node>
+
+<launch>
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find mavs_description)/worlds/lidar.world"/>
+    <!-- more default parameters can be changed here -->
+  </include>
+</launch>

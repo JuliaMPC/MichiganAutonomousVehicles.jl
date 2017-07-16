@@ -7,6 +7,6 @@
 subdirs(gtest)
 subdirs(mavs_gazebo)
 subdirs(mavs_simulator)
-subdirs(mavs_description)
 subdirs(mavs_msgs)
 subdirs(mavs_plugins)
+subdirs(mavs_description)

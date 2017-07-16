@@ -14,13 +14,14 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_velodyne_laser
   CATKIN_DEPENDS roscpp sensor_msgs gazebo_ros
-  DEPENDS gazebo
+  DEPENDS gazebo roscpp gazebo_ros 
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
 )
 
 link_directories(
@@ -33,6 +34,9 @@ target_link_libraries(gazebo_ros_velodyne_laser
   ${GAZEBO_LIBRARIES}
   RayPlugin
 )
+
+add_library(model_push SHARED src/model_push.cc)
+target_link_libraries(model_push ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
 
 install(TARGETS gazebo_ros_velodyne_laser
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

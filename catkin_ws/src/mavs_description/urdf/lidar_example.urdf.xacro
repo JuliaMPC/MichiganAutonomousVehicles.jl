@@ -32,6 +32,6 @@
 
   <!-- Bolt-on sensors go here -->
   <xacro:include filename="$(find mavs_description)/urdf/lidar_vlp_16.urdf.xacro"/>
-  <xacro:lidar parent="base_link" name="velodyne" topic="/velodyne_points" x="0" y="0" z="0.4" roll="0" pitch="0" yaw="0" />
+  <xacro:lidar parent="base_link" name="velodyne" topic1="/speed" topic2="/velodyne_points" x="0" y="0" z="0.4" roll="0" pitch="0" yaw="0" />
 
 </robot>

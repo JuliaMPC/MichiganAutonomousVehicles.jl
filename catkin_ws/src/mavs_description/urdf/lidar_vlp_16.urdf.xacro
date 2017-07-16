@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="VLP-16">
   <xacro:property name="M_PI" value="3.1415926535897931" />
-  <xacro:macro name="lidar" params="parent name topic x y z roll pitch yaw">
+  <xacro:macro name="lidar" params="parent name topic1 topic2 x y z roll pitch yaw">
 
     <joint name="${name}_base_mount_joint" type="fixed">
       <parent link="${parent}"/>
@@ -53,6 +53,13 @@
       </visual>
     </link>
 
+    <gazebo>
+      <!-- reference to plugin -->
+      <plugin name="model_push" filename="libmodel_push.so">
+          <topicName>${topic1}</topicName>
+      </plugin>
+    </gazebo>
+
     <!-- Gazebo requires the velodyne_gazebo_plugins package -->
     <gazebo reference="${name}">
       <sensor type="ray" name="${name}-VLP16">
@@ -86,7 +93,7 @@
           </noise>
         </ray>
         <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
-          <topicName>${topic}</topicName>
+          <topicName>${topic2}</topicName>
           <frameName>/${name}</frameName>
           <min_range>0.9</min_range>
           <max_range>130.0</max_range>
@@ -96,4 +103,6 @@
     </gazebo>
 
   </xacro:macro>
+
+
 </robot>

@@ -119,9 +119,9 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/gtest/cmake_install.cmake")
   include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_gazebo/cmake_install.cmake")
   include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_simulator/cmake_install.cmake")
-  include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_description/cmake_install.cmake")
   include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_msgs/cmake_install.cmake")
   include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_plugins/cmake_install.cmake")
+  include("/home/febbo/.julia/v0.6/MAVs/catkin_ws/build/mavs_description/cmake_install.cmake")
 
 endif()
 

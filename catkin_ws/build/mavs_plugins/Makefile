@@ -166,6 +166,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+mavs_plugins/CMakeFiles/model_push.dir/rule:
+	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 mavs_plugins/CMakeFiles/model_push.dir/rule
+.PHONY : mavs_plugins/CMakeFiles/model_push.dir/rule
+
+# Convenience name for target.
+model_push: mavs_plugins/CMakeFiles/model_push.dir/rule
+
+.PHONY : model_push
+
+# fast build rule for target.
+model_push/fast:
+	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f mavs_plugins/CMakeFiles/model_push.dir/build.make mavs_plugins/CMakeFiles/model_push.dir/build
+.PHONY : model_push/fast
+
+# Convenience name for target.
 mavs_plugins/CMakeFiles/trajectory_msgs_generate_messages_py.dir/rule:
 	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 mavs_plugins/CMakeFiles/trajectory_msgs_generate_messages_py.dir/rule
 .PHONY : mavs_plugins/CMakeFiles/trajectory_msgs_generate_messages_py.dir/rule
@@ -912,6 +927,33 @@ src/GazeboRosVelodyneLaser.cpp.s:
 	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f mavs_plugins/CMakeFiles/gazebo_ros_velodyne_laser.dir/build.make mavs_plugins/CMakeFiles/gazebo_ros_velodyne_laser.dir/src/GazeboRosVelodyneLaser.cpp.s
 .PHONY : src/GazeboRosVelodyneLaser.cpp.s
 
+src/model_push.o: src/model_push.cc.o
+
+.PHONY : src/model_push.o
+
+# target to build an object file
+src/model_push.cc.o:
+	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f mavs_plugins/CMakeFiles/model_push.dir/build.make mavs_plugins/CMakeFiles/model_push.dir/src/model_push.cc.o
+.PHONY : src/model_push.cc.o
+
+src/model_push.i: src/model_push.cc.i
+
+.PHONY : src/model_push.i
+
+# target to preprocess a source file
+src/model_push.cc.i:
+	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f mavs_plugins/CMakeFiles/model_push.dir/build.make mavs_plugins/CMakeFiles/model_push.dir/src/model_push.cc.i
+.PHONY : src/model_push.cc.i
+
+src/model_push.s: src/model_push.cc.s
+
+.PHONY : src/model_push.s
+
+# target to generate assembly for a file
+src/model_push.cc.s:
+	cd /home/febbo/.julia/v0.6/MAVs/catkin_ws/build && $(MAKE) -f mavs_plugins/CMakeFiles/model_push.dir/build.make mavs_plugins/CMakeFiles/model_push.dir/src/model_push.cc.s
+.PHONY : src/model_push.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -922,6 +964,7 @@ help:
 	@echo "... install"
 	@echo "... edit_cache"
 	@echo "... install/strip"
+	@echo "... model_push"
 	@echo "... trajectory_msgs_generate_messages_py"
 	@echo "... tf2_msgs_generate_messages_eus"
 	@echo "... actionlib_msgs_generate_messages_py"
@@ -976,6 +1019,9 @@ help:
 	@echo "... src/GazeboRosVelodyneLaser.o"
 	@echo "... src/GazeboRosVelodyneLaser.i"
 	@echo "... src/GazeboRosVelodyneLaser.s"
+	@echo "... src/model_push.o"
+	@echo "... src/model_push.i"
+	@echo "... src/model_push.s"
 .PHONY : help
 
 

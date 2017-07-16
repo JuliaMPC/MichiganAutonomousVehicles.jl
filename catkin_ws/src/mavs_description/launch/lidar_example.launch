@@ -19,7 +19,7 @@
     <arg name="world_name" value="$(arg world_name)"/>
   </include>
 
-  <!-- Spawn the example robot -->
+  <!-- Spawn the LiDAR -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_description)/urdf/lidar_example.urdf.xacro'" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param /robot_description -model lidar_example"/>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
