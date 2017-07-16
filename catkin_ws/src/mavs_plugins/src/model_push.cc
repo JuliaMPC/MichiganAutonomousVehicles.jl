@@ -1,5 +1,6 @@
 #include <boost/bind.hpp>
 #include <gazebo/gazebo.hh>
+#include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <stdio.h>
@@ -25,6 +26,7 @@ namespace gazebo
       // Apply a small linear velocity to the model.
       this->model->SetLinearVel(math::Vector3(.03, 0, 0));
     }
+
 
     // Pointer to the model
     private: physics::ModelPtr model;

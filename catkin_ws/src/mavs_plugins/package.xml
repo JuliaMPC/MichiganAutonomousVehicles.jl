@@ -12,9 +12,11 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>roscpp</depend>
+  <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>gazebo_ros</depend>
+  <depend>gazebo</depend>
 
   <export>
       <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="VLP-16">
+
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:macro name="lidar" params="parent name topic1 topic2 x y z roll pitch yaw">
 
@@ -55,8 +56,10 @@
 
     <gazebo>
       <!-- reference to plugin -->
-      <plugin name="model_push" filename="libmodel_push.so">
+      <!-- plugin name="model_push" filename="libmodel_push.so" -->
+      <plugin name="model_push" filename="libvelodyne_plugin.so">
           <topicName>${topic1}</topicName>
+          <frameName>"push_frame"</frameName>
       </plugin>
     </gazebo>
 
