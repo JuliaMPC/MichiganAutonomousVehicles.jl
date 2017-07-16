@@ -1,7 +1,0 @@
-In this test:
-default
-
- RESULTS DISCUSSION:
- * reduce tp back to 3.0s
- * decrease the weight on sr from 1 to 0.01
-* better than 7, but could use some more tuning

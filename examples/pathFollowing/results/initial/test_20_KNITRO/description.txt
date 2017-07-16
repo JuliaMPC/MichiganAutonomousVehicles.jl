@@ -1,7 +1,0 @@
-In this test: 
-default
-
- RESULTS DISCUSSION:  
-
-* changed speed to 30/2.2
- 
