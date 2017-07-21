@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>mavs_plugins</name>
+  <name>mavs_control</name>
   <version>0.0.0</version>
   <description>
     Gazebo plugin to provide simulated data from Velodyne laser scanners.
@@ -12,14 +12,10 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>roscpp</depend>
-  <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>gazebo_ros</depend>
-  <depend>gazebo</depend>
-
-  <export>
-      <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
-  </export>
+  <depend>gazebo_msgs</depend>
+  <depend>std_msgs</depend>
 
 </package>

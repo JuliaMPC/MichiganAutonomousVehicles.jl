@@ -4,23 +4,28 @@
   <version>0.0.0</version>
   <description>The mavs_description package</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="febbo@todo.todo">febbo</maintainer>
-
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <license>MIT</license>
+  <author email="febboh@umich.edu">Huckleberry Febbo</author>
+  <maintainer email="febbo@umich.edu">Huckleberry Febbo</maintainer>
 
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
   <depend>gazebo_ros</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_srvs</depend>
 
-  <depend>mavs_plugins</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>robot_state_publisher</depend>
 
+  <depend>roscpp</depend>
+  <depend>tf</depend>
+  <depend>rviz</depend>
+  <depend>xacro</depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

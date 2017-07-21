@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot  name="blockBot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="block" params="base_link *block_origin *base_geometry">
+
+    <!-- Base Footprint -->
+    <link name="base_footprint"/>
+
+    <!-- Base Link -->
+    <joint name="joint1" type="fixed" >
+      <parent link="base_footprint" />
+      <child link="${base_link}" />
+      <xacro:insert_block name="block_origin" />
+    </joint>
+
+    <link name="${base_link}" >
+      <visual>
+        <xacro:insert_block name="base_geometry" />
+      </visual>
+      <collision>
+        <xacro:insert_block name="base_geometry" />
+      </collision>
+      <inertial>
+        <mass value="10"/>
+        <inertia ixx="3.0" ixy="0.0" ixz="0.0"
+                 iyy="3.0" iyz="0.0"
+                 izz="3.0" />
+      </inertial>
+    </link>
+
+    <!-- Link1 -->
+    <gazebo reference="${base_link}">
+      <material>Gazebo/Orange</material>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

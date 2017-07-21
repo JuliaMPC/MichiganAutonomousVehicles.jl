@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mavs_plugins)
+project(mavs_control)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   gazebo_ros
   gazebo
+  gazebo_msgs
 )
 
 catkin_package(
@@ -43,11 +44,3 @@ install(TARGETS gazebo_ros_velodyne_laser
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
-
-# Build our plugin
-add_library(velodyne_plugin SHARED src/velodyne_plugin.cc)
-target_link_libraries(velodyne_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
-
-# Build the stand-alone test program
-add_executable(vel src/vel.cc)
-target_link_libraries(vel ${GAZEBO_LIBRARIES})
