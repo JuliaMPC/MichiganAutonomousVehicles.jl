@@ -11,21 +11,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>message_generation</depend>
-  <depend>message_runtime</depend>
-
-  <depend>gazebo_ros</depend>
-  <depend>gazebo_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>std_srvs</depend>
-
-  <depend>joint_state_publisher</depend>
-  <depend>robot_state_publisher</depend>
-
   <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
   <depend>tf</depend>
-  <depend>rviz</depend>
-  <depend>xacro</depend>
+  <depend>gazebo_ros</depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

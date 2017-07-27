@@ -18,7 +18,7 @@ using gazebo_msgs.srv
 
 function loop(set_state,get_state)
     loop_rate = Rate(5.0)
-    modelName = "example"
+    modelName = "robot"
 
     while ! is_shutdown()
 

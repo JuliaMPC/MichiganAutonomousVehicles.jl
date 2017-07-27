@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
-<robot  name="blockBot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="block" params="base_link *block_origin *base_geometry">
 
     <!-- Base Footprint -->
     <link name="base_footprint"/>
+
+   <gazebo reference="base_footprint">
+     <turnGravityOff>false</turnGravityOff>
+   </gazebo>
 
     <!-- Base Link -->
     <joint name="joint1" type="fixed" >
@@ -31,6 +35,7 @@
     <!-- Link1 -->
     <gazebo reference="${base_link}">
       <material>Gazebo/Orange</material>
+      <turnGravityOff>false</turnGravityOff>
     </gazebo>
 
   </xacro:macro>
