@@ -3,18 +3,11 @@
 
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_description)/urdf/velodyne_16_bot.xacro'" />
 
-  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_pub">
-    <param name="rate" type="double" value="30.0"/>
-  </node>
-
-  <!-- convert joint states to TF transforms for rviz, etc -->
-  <node name="state_pub" pkg="robot_state_publisher" type="robot_state_publisher"
-    respawn="false" output="screen">
-    <remap from="robot_description" to="robot_description" />
-    <remap from="joint_states" to="joint_states" />
-  </node>
-
   <!-- Spawn a robot into Gazebo -->
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model robot" />
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="state_pub" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="joint_pub" pkg="joint_state_publisher" type="joint_state_publisher"/>
 
 </launch>

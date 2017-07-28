@@ -7,24 +7,17 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   gazebo_ros
 )
+# Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_velodyne_laser
-  CATKIN_DEPENDS roscpp sensor_msgs tf gazebo_ros 
-  DEPENDS gazebo
-)
-
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
-)
-
-link_directories(
-  ${GAZEBO_LIBRARY_DIRS}
+  CATKIN_DEPENDS roscpp sensor_msgs tf gazebo_ros
 )
 
 add_library(gazebo_ros_velodyne_laser src/GazeboRosVelodyneLaser.cpp)

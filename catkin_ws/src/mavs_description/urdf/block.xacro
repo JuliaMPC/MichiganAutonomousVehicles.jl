@@ -32,6 +32,51 @@
       </inertial>
     </link>
 
+    <link name="steer_fl">
+     <inertial>
+       <origin xyz="-0.013054 -0.0295 0" rpy="0 0 0"/>
+       <mass value="1.0"/>
+       <inertia ixx="0.037227" ixy="0" ixz="0" iyy="0.04" iyz="0" izz="0.06"/>
+     </inertial>
+   </link>
+
+    <link name="wheel_fl">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 -3.141593 0"/>
+        <mass value="10.0"/>
+        <inertia ixx="0.305583" ixy="0" ixz="0" iyy="0.305583" iyz="0" izz="0.5445"/>
+      </inertial>
+      <visual name="wheel_fl_visual">
+        <origin xyz="0 0 0.0385" rpy="-1.570796 -1.570796 0"/>
+        <geometry>
+          <mesh filename="package://mavs_description/meshes/wheel.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="carpaint_002"/>
+      </visual>
+      <collision name="wheel_fl_collision">
+        <origin xyz="0 0 0" rpy="0 -3.141593 0"/>
+        <geometry>
+          <cylinder radius="0.33" length="0.2"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="steer_fl" type="revolute">
+      <origin xyz="1.435054 0.817 0.33" rpy="0 0 0"/>
+      <parent link="${base_link}"/>
+      <child link="steer_fl"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-0.6" upper="0.6" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="wheel_fl" type="continuous">
+      <origin xyz="-0.012654 -0.0295 -0.33" rpy="1.570796 0 -3.141593"/>
+      <parent link="steer_fl"/>
+      <child link="wheel_fl"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="22.0"/>
+    </joint>
+
     <!-- Link1 -->
     <gazebo reference="${base_link}">
       <material>Gazebo/Orange</material>

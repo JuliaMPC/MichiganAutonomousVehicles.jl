@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <arg name="sim_param_file" default="$(find mavs_gazebo)/yaml/default_sim_params.yaml" />
+  <arg name="urdf_file" default="$(find mavs_gazebo)/urdf/hmmwv.xacro" />
+
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="false"/>
+  <arg name="world_name" default="worlds/empty.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+
+  <!-- Start gazebo and load the world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="world_name" value="$(arg world_name)"/>
+  </include>
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_description)/urdf/hmmwv.xacro'" />
+
+  <!-- Spawn a robot into Gazebo -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model robot" />
+
+
+</launch>
