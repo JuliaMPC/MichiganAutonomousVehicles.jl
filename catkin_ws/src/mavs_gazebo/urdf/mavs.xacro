@@ -40,4 +40,5 @@
   <!-- Bolt-on sensors go here -->
   <xacro:include filename="$(find mavs_description)/urdf/velodyne_16.xacro"/>
   <velodyne_16 parent="${base_link}" lidar_x="${lidar_x}" lidar_z="${lidar_z}"/>
+
 </robot>

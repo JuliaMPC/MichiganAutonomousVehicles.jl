@@ -4,7 +4,6 @@
 
   <xacro:property name="wheel_friction" value="1.2" />
 
-
   <gazebo reference="base_link" >
     <mu1>0.5</mu1>
     <mu2>0.5</mu2>
@@ -29,6 +28,5 @@
     <mu1>${wheel_friction}</mu1>
     <mu2>${wheel_friction}</mu2>
   </gazebo>
-
 
 </robot>

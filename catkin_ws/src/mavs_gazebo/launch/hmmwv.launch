@@ -4,6 +4,8 @@
   <!-- Start gazebo and load the world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 
+  <include file="$(find mavs_description)/launch/tf_data.launch"/>
+
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_gazebo)/urdf/mavs.xacro'" />
 
   <!-- Spawn a robot into Gazebo -->
@@ -12,4 +14,9 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
   </node>
+
+  <include file="$(find mavs_description)/launch/lidar_data.launch"/>
+  
+  <include file="$(find mavs_control)/launch/teliop.launch"/>
+
 </launch>
