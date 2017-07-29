@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="block" params="base_link *base_geometry">
+
+    <!-- Base Footprint -->
+    <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
+    <link name="base_footprint">
+      <inertial>
+        <mass value="0.0001" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+            iyy="0.0001" iyz="0.0"
+            izz="0.0001" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+            <box size="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+    </link>
+
+   <gazebo reference="base_footprint">
+     <turnGravityOff>false</turnGravityOff>
+   </gazebo>
+
+    <joint name="joint1" type="fixed" >
+      <origin xyz="0 0 ${base_clearance}" rpy="0 0 0" />
+      <parent link="base_footprint" />
+      <child link="${base_link}" />
+    </joint>
+
+    <!-- Base Link -->
+    <!--Actual body/chassis of the robot-->
+    <link name="${base_link}" >
+      <visual>
+        <xacro:if value="${mesh_mode == 1}">
+          <origin xyz="0 0 ${-wheel_radius}" rpy="0 0 ${M_PI}" />
+          <geometry>
+            <mesh filename="package://mavs_description/meshes/body.dae" scale=" ${scale_factor} ${scale_factor} ${scale_factor}"/>
+          </geometry>
+        </xacro:if>
+        <xacro:if value="${mesh_mode == 0}">
+          <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" />
+          <xacro:insert_block name="base_geometry" />
+        </xacro:if>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" />
+        <xacro:insert_block name="base_geometry" />
+      </collision>
+      <inertial>
+        <mass value="10"/>
+        <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+        <inertia ixx="3.0" ixy="0.0" ixz="0.0"
+                 iyy="3.0" iyz="0.0"
+                 izz="3.0" />
+      </inertial>
+    </link>
+
+    <!-- Link1 -->
+    <gazebo reference="${base_link}">
+      <!--material>Gazebo/Orange</material-->
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
