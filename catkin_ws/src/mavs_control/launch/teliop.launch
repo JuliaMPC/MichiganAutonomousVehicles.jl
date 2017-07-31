@@ -1,4 +1,0 @@
-<launch>
-  <node name="teliop_keys" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
-  <node name="teliop" pkg="mavs_control" type="teliop_velodyne.jl" output="screen"/>
-</launch>

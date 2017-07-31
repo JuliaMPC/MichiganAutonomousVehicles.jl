@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<robot name="front_wheel" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+<robot name="hmmwv" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
   <!-- Vehicle modeled as a giant block -->
   <xacro:include filename="$(find mavs_description)/urdf/body.xacro"/>
-  <block base_link="${base_link}">
+  <body base_link="${base_link}">
     <xacro:insert_block name="base_geometry" />
-  </block>
+  </body>
 
   <xacro:include filename="$(find mavs_description)/urdf/wheel.xacro"/>
   <xacro:wheel fb="front" lr="right" parent="base_link"/>

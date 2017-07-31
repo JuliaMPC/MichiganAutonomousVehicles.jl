@@ -96,9 +96,11 @@
       <!-- Transmission is important to link the joints and the controller -->
       <transmission name="steer_${lr}_wheel_joint_trans">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="steer_${lr}_wheel_joint" />
+        <joint name="steer_${lr}_wheel_joint">
+          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
         <actuator name="${lr}_wheel_joint_motor">
-          <hardwareInterface>EffortJointInterface</hardwareInterface>
+          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
       </transmission>
@@ -107,9 +109,11 @@
     <!-- Transmission is important to link the joints and the controller -->
     <transmission name="${fb}_${lr}_wheel_joint_trans">
       <type>transmission_interface/SimpleTransmission</type>
-      <joint name="${fb}_${lr}_wheel_joint" />
+      <joint name="${fb}_${lr}_wheel_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
       <actuator name="${fb}_${lr}_wheel_joint_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>

@@ -1,16 +1,31 @@
 <?xml version="1.0"?>
-<package format="2">
+<package>
   <name>mavs_control</name>
   <version>0.0.0</version>
-  <description>
-    Gazebo plugin to provide simulated data from Velodyne laser scanners.
-  </description>
+  <description>The mavs_control package</description>
 
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="febbo@todo.todo">febbo</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>TODO</license>
-  <maintainer email="febbo@umich.edu">febbo</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>controller_manager</run_depend>
+  <run_depend>joint_state_controller</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
 
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>effort_controllers</run_depend>
+
+
+  <export>
+  </export>
 
 </package>

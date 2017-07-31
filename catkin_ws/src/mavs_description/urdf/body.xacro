@@ -1,25 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="block" params="base_link *base_geometry">
+  <xacro:macro name="body" params="base_link *base_geometry">
 
     <!-- Base Footprint -->
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
-    <link name="base_footprint">
-      <inertial>
-        <mass value="0.0001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-            iyy="0.0001" iyz="0.0"
-            izz="0.0001" />
-      </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-            <box size="0.001 0.001 0.001" />
-        </geometry>
-      </visual>
-    </link>
+    <link name="base_footprint"/>
 
    <gazebo reference="base_footprint">
      <turnGravityOff>false</turnGravityOff>
@@ -64,6 +50,7 @@
       <!--material>Gazebo/Orange</material-->
       <turnGravityOff>false</turnGravityOff>
     </gazebo>
+
 
   </xacro:macro>
 

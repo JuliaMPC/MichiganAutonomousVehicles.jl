@@ -6,8 +6,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   tf
-  turtlesim
   gazebo_ros
+  geometry_msgs
 )
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -37,9 +37,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-add_executable(turtle_tf_broadcaster src/turtle_tf_broadcaster.cpp)
-target_link_libraries(turtle_tf_broadcaster ${catkin_LIBRARIES})
-add_executable(turtle_tf_listener src/turtle_tf_listener.cpp)
-target_link_libraries(turtle_tf_listener ${catkin_LIBRARIES})
 add_executable(frame_tf_broadcaster src/frame_tf_broadcaster.cpp)
 target_link_libraries(frame_tf_broadcaster ${catkin_LIBRARIES})
+
+add_executable(position_broadcaster src/position_broadcaster.cpp)
+target_link_libraries(position_broadcaster ${catkin_LIBRARIES})

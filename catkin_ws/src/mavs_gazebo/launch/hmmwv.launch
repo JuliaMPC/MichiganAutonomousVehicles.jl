@@ -1,22 +1,40 @@
 <?xml version="1.0"?>
 <launch>
 
+  <!-- TODO use the robot name parametrically in all files, teliop.jl, position.jl -->
+  <arg name="name" default="robot"/>
+  <arg name="model" default="$(find mavs_gazebo)/urdf/mavs.xacro"/>
+
+  <arg name="world_frame" default="/world"/>
+  <arg name="base_link_frame" default="base_link"/>
+
+  <!-- send the robot XML to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)' base_link_frame:=$(arg base_link_frame) world_frame:=$(arg world_frame)" />
+  <param name="base_link_frame" type="string" value="$(arg base_link_frame)"/>
+  <param name="world_frame" type="string" value="$(arg world_frame)"/>
+
   <!-- Start gazebo and load the world -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
-
-  <include file="$(find mavs_description)/launch/tf_data.launch"/>
-
-  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mavs_gazebo)/urdf/mavs.xacro'" />
+  <include file="$(find mavs_gazebo)/launch/world.launch"/>
 
   <!-- Spawn a robot into Gazebo -->
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model robot" />
-
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+        args="-param robot_description
+           -urdf
+           -model $(arg name)"
+           respawn="false" output="screen"/>
+  <!--node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
-  </node>
+  </node TODO  look into using this as well as tf-->
 
+  <!-- publish the global position of the robot -->
+  <node name="postion" pkg="mavs_control" type="position.jl" output="screen"/>
+  <node pkg="mavs_description" type="frame_tf_broadcaster" name="velodyne_top_link_tf_broadcaster" />
+  <node pkg="mavs_description" type="position_broadcaster" args="$(arg name)" name="postion_broadcaster" />
+
+  <!-- LiDAR data precessing -->
   <include file="$(find mavs_description)/launch/lidar_data.launch"/>
-  
-  <include file="$(find mavs_control)/launch/teliop.launch"/>
 
+  <!-- teliop TODO make this optional with args-->
+  <node name="teliop_keys" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
+  <node name="teliop" pkg="mavs_control" type="teliop.jl" output="screen"/>
 </launch>

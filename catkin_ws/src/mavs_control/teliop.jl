@@ -36,7 +36,6 @@ function callback(twist_msg::Twist, get_state::ServiceProxy{GetModelState}, set_
     # Set the state of the Gazebo model
     ss = SetModelStateRequest()
     ss.model_state = ms
-    println("Calling 'gazebo/set_model_state' service...")
     ss_r = set_state(ss)
 
     if !ss_r.success

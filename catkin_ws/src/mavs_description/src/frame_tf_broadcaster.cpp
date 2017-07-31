@@ -2,19 +2,18 @@
 #include <tf/transform_broadcaster.h>
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "my_tf_broadcaster");
-  ros::NodeHandle node;
+  ros::init(argc, argv, "robot_tf_publisher");
+  ros::NodeHandle n;
 
-  tf::TransformBroadcaster br;
-  tf::Transform transform;
+  ros::Rate r(100);
 
-  ros::Rate rate(10.0);
-  while (node.ok()){
-    transform.setOrigin( tf::Vector3(0.0, 2.0, 0.0) );
-    transform.setRotation( tf::Quaternion(0, 0, 0, 1) );
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "turtle1", "carrot1"));
-    rate.sleep();
+  tf::TransformBroadcaster broadcaster;
+
+  while(n.ok()){
+    broadcaster.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(1.55, 0.0, 0.738)),
+        ros::Time::now(),"base_link", "velodyne_top_link"));
+    r.sleep();
   }
-  return 0;
-};
-
+}

@@ -10,14 +10,13 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>turtlesim</depend>
 
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>gazebo_ros</depend>
-
+  <depend>geometry_msgs</depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
