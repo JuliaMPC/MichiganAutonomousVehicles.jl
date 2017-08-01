@@ -29,8 +29,8 @@
   <xacro:property name="wheel_base" value="1" />
 
   <!-- LiDAR properties -->
-  <xacro:property name="lidar_z" value="${base_height/2 + 0.1}" />
-  <xacro:property name="lidar_x" value="${base_length/2-0.1}" />
+  <xacro:property name="lidar_z" value="${base_height/2 + 0.5}" />
+  <xacro:property name="lidar_x" value="${base_length/2 + 0.1}" />
   <xacro:property name="topic" value="/lidar_points" />
 
   <!-- Necessary includes -->

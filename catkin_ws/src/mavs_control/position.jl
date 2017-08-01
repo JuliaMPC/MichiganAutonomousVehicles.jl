@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-
 using RobotOS
 @rosimport geometry_msgs.msg: Point, Pose, Pose2D, PoseStamped, Vector3, Twist
 @rosimport std_srvs.srv: Empty, SetBool
@@ -16,7 +15,7 @@ using gazebo_msgs.srv
 using gazebo_msgs.msg
 
 function loop(get_state, pub)
-    loop_rate = Rate(5.0)
+    loop_rate = Rate(100.0)
     while ! is_shutdown()
         modelName = "robot"  # TODO make this a parameter
 

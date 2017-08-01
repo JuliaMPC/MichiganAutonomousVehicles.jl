@@ -22,7 +22,7 @@
   <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_worker" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet $(arg manager)">
 
       <remap from="cloud_in" to="/voxel_grid/output"/>
-      <remap from="scan" to="/frontscanner"/>
+      <remap from="scan" to="front_scan"/>
       <rosparam>
           target_frame: velodyne_top_link
           transform_tolerance: 0.01

@@ -5,8 +5,11 @@
   <arg name="name" default="robot"/>
   <arg name="model" default="$(find mavs_gazebo)/urdf/mavs.xacro"/>
 
+  <!-- TODO figure this out.. why do we need this -->
   <arg name="world_frame" default="/world"/>
   <arg name="base_link_frame" default="base_link"/>
+  <arg name="lidar_frame" default="velodyne_top_link"/>
+  <!-- TODO use the robot name parametrically in all files,obstacle_detector, velodyne.xacro -->
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)' base_link_frame:=$(arg base_link_frame) world_frame:=$(arg world_frame)" />
@@ -31,8 +34,12 @@
   <node pkg="mavs_description" type="frame_tf_broadcaster" name="velodyne_top_link_tf_broadcaster" />
   <node pkg="mavs_description" type="position_broadcaster" args="$(arg name)" name="postion_broadcaster" />
 
-  <!-- LiDAR data precessing -->
+  <!-- LiDAR data processing -->
   <include file="$(find mavs_description)/launch/lidar_data.launch"/>
+  <include file="$(find obstacle_detector)/launch/mavs.launch"/>
+
+  <!-- Obstacle Avoidance-->
+  <node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/>
 
   <!-- teliop TODO make this optional with args-->
   <node name="teliop_keys" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>

@@ -142,7 +142,10 @@ end
  #########################
  # intial optimization (s)
  ########################
- n.s.save=true; n.s.MPC=false; n.s.evalConstraints=false;
+ n.s.save=false; n.s.MPC=false; n.s.evalConstraints=false;
+ if n.s.save
+  warn("saving initial optimization results where functions where cashed!")
+ end
  for k in 1:1
   optimize!(n);
   if n.r.status==:Optimal; break; end
@@ -155,8 +158,9 @@ end
          #  1      2          3          4
  n.params=[pa,obs_params,LiDAR_params,obj_params];
 
- # settings
- n.s.save=true;
+ n.s.save=true; # settings
+
+ #n.s.evalConstraints=true
 
  return n
 end

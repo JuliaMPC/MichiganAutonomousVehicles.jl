@@ -23,7 +23,7 @@ description=string(
 * sy=",c.o.s_y,"\n
 ")
 
-results_dir=string("obj_haf_",c.m.name,"/")
+results_dir=string("gazebo_zero_1",c.m.name,"/")
 resultsDir!(n;results_name=results_dir,description=description);
 savePlantData!(n)
 if _pretty_defaults[:simulate];

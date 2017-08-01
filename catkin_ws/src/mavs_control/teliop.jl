@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-
 using RobotOS
 @rosimport geometry_msgs.msg: Point, Pose, Pose2D, PoseStamped, Vector3, Twist
 @rosimport std_srvs.srv: Empty, SetBool
