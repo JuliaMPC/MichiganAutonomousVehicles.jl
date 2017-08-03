@@ -17,13 +17,27 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <!-- for obstacle message service -->
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>obstacle_detector</run_depend>
+  <build_depend>obstacle_detector</build_depend>
+  <run_depend>rospy</run_depend>
+  <build_depend>rospy</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>std_msgs</run_depend>
+  <build_depend>std_msgs</build_depend>
+  <!-- for obstacle message service -->
+
+
+  <!-- currently not in use -->
   <run_depend>controller_manager</run_depend>
   <run_depend>joint_state_controller</run_depend>
   <run_depend>robot_state_publisher</run_depend>
-
   <run_depend>rqt_gui</run_depend>
   <run_depend>effort_controllers</run_depend>
-
+  <!-- currently not in use -->
 
   <export>
   </export>

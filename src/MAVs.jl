@@ -27,8 +27,8 @@ export
       setupResults,
       case2dfs,  # currently not working
       dataSet,
-      Obstacles,
-      defineObstacles,
+      Obs,
+      defineObs,
 
       # AutonomousControl.jl
       initializeAutonomousControl,

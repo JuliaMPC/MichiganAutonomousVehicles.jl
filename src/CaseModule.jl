@@ -10,8 +10,8 @@ export
       setupResults,
       case2dfs,  # currently not working
       dataSet,
-      Obstacles,
-      defineObstacles
+      Obs,
+      defineObs
 ################################################################################
 # Basic Types
 ################################################################################
@@ -128,7 +128,7 @@ function setWeights!(c;
     return nothing
 end
 ############################### obstacle info ########################################
-type Obstacles
+type Obs
   name
   A
   B
@@ -139,8 +139,8 @@ type Obstacles
   status
 end
 
-function Obstacles()
-  Obstacles([],
+function Obs()
+  Obs([],
             [],
             [],
             [],
@@ -151,14 +151,14 @@ function Obstacles()
 end
 
 """
-o=defineObstacles(name)
+o=defineObs(name)
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 3/28/2017, Last Modified: 7/5/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function defineObstacles(name)
-  o=Obstacles();
+function defineObs(name)
+  o=Obs();
   if name==:auto
     o.name=name;
     o.A=[5.];
@@ -582,7 +582,7 @@ abstract type AbstractCase end
 type Case <: AbstractCase
  name
  g::Goal        # goal data
- o::Obstacles   # obstacle data
+ o::Obs   # obstacle data
  w::Weights     # weight data
  t::Track       # track data
  m::Misc        # miscelaneous data
@@ -599,7 +599,7 @@ Date Create: 3/11/2017, Last Modified: 3/28/2017 \n
 function Case()
  Case(Any,
       Goal(),
-      Obstacles(),
+      Obs(),
       Weights(),
       Track(),
       Misc()
@@ -636,49 +636,49 @@ function defineCase(;name::Symbol=:auto,
    if mode==:auto
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
    elseif mode==:autoBench
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(:auto);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
    elseif mode==:autoGazebo
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(:auto);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
    elseif mode==:autoARC
      c.name=:auto;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(:autoARC);
+     c.o=defineObs(:autoARC);
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(:autoARC);
    elseif mode==:path
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(c.name);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);
    elseif mode==:caseStudy
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);
    elseif mode==:caseStudyPath
      c.name=:caseStudy;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(:caseStudyPath);
+     c.o=defineObs(:caseStudyPath);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(:caseStudyPath);
@@ -686,7 +686,7 @@ function defineCase(;name::Symbol=:auto,
      name=:user;
      c.name=name;
      c.g=defineGoal(goal);
-     c.o=defineObstacles(obstacles);
+     c.o=defineObs(obstacles);
      c.w=defineWeights(weights);
      c.t=defineTrack(:NA);
      c.m=defineMisc(misc);

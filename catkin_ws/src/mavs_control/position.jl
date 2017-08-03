@@ -23,10 +23,10 @@ function loop(get_state, pub)
         gs = GetModelStateRequest()
         gs.model_name = modelName
         gs_r = get_state(gs)
-
         if !gs_r.success
             error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
         end
+        
         npt = gs_r.pose
         publish(pub, npt)
         rossleep(loop_rate)

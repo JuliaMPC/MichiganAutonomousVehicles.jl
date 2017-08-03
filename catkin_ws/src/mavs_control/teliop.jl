@@ -52,7 +52,7 @@ function main()
     wait_for_service("gazebo/set_model_state")
 
     # Set up service to get Gazebo model state
-    const get_state = ServiceProxy("/gazebo/get_model_state",GetModelState)
+    const get_state = ServiceProxy("/gazebo/get_model_state", GetModelState)
     println("Waiting for 'gazebo/get_model_state' service...")
     wait_for_service("gazebo/get_model_state")
 

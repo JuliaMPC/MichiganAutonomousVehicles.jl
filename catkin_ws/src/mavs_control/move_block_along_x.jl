@@ -20,7 +20,7 @@ function loop(set_state,get_state)
     loop_rate = Rate(5.0)
     modelName = "robot"
 
-    while ! is_shutdown()
+    while !is_shutdown()
 
         # Get the current position of the Gazebo model
         gs = GetModelStateRequest()
