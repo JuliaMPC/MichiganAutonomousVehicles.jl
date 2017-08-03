@@ -28,7 +28,7 @@ using KNITRO
 # 4) pause Gazebo at the start until everything is ready
 # 5) pass these parameters to a service or something -> needs to happen on a seperate node!
 # 6) update OCP based off of current gazebo model position
-
+# 7) if it is set up for 4 obstacles and it only sees two make a case for the rest
 
 """
 
@@ -45,32 +45,30 @@ function setObstacleData(params)
   vx=deepcopy(RobotOS.get_param("obstacle_vx"))
   vy=deepcopy(RobotOS.get_param("obstacle_vy"))
 
-  if r!=NaN
-    # update obstacle feild
-  #  if length(r)==1 # single obstacle
-  #    setvalue(params[2][1],r[1]);
-  #    setvalue(params[2][2],r[1]);
-  #    setvalue(params[2][3],x[1]);
-  #    setvalue(params[2][4],y[1]);
-  #    setvalue(params[2][5],vx[1]);
-  #    setvalue(params[2][6],vy[1]);
-  #  else
-      for i in 1:length(r)
-        setvalue(params[2][1][i],r[i]);
-        setvalue(params[2][2][i],r[i]);
-        setvalue(params[2][3][i],x[i]);
-        setvalue(params[2][4][i],y[i]);
-        setvalue(params[2][5][i],vx[i]);
-        setvalue(params[2][6][i],vy[i]);
-      end
-  #  end
-  else # setting the obstacles off the field
-    setvalue(params[2][1][:],1.0);
-    setvalue(params[2][2][:],1.0);
-    setvalue(params[2][3][:],-100.0);
-    setvalue(params[2][4][:],-100.0);
-    setvalue(params[2][5][:],0.0);
-    setvalue(params[2][6][:],0.0);
+  Q = getvalue(params[2][7]); # number of obstacles the algorithm can handle
+  L = length(r)               # number of obstacles detected
+  N = Q - L;
+  if N < 0
+    warn(" \n The number of obstacles detected exceeds the number of obstacles the algorithm was designed for! \n
+           Consider increasing the number of obstacles the algorithm can handle \n!")
+  end
+
+  for i in 1:Q
+    if i <= L          # add obstacle
+      setvalue(params[2][1][i],r[i]);
+      setvalue(params[2][2][i],r[i]);
+      setvalue(params[2][3][i],x[i]);
+      setvalue(params[2][4][i],y[i]);
+      setvalue(params[2][5][i],vx[i]);
+      setvalue(params[2][6][i],vy[i]);
+    else              # set obstacle off field
+      setvalue(params[2][1][:],1.0);
+      setvalue(params[2][2][:],1.0);
+      setvalue(params[2][3][:],-100.0);
+      setvalue(params[2][4][:],-100.0);
+      setvalue(params[2][5][:],0.0);
+      setvalue(params[2][6][:],0.0);
+    end
   end
 
   return nothing

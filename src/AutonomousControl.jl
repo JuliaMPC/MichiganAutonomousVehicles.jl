@@ -73,7 +73,7 @@ function initializeAutonomousControl(c)
  @NLparameter(n.mdl, Y_0[i=1:Q] == copy(c.o.Y0[i]));
  @NLparameter(n.mdl, speed_x[i=1:Q] == copy(c.o.s_x[i]));
  @NLparameter(n.mdl, speed_y[i=1:Q] == copy(c.o.s_y[i]));
- obs_params=[a,b,X_0,Y_0,speed_x,speed_y];
+ obs_params=[a,b,X_0,Y_0,speed_x,speed_y,Q];
 
  # obstacle postion after the intial postion
  X_obs=@NLexpression(n.mdl, [j=1:Q,i=1:n.numStatePoints], X_0[j] + speed_x[j]*n.tV[i]);
