@@ -30,6 +30,10 @@
   <build_depend>std_msgs</build_depend>
   <!-- for obstacle message service -->
 
+  <!-- for optimal control signals -->
+  <run_depend>genmsg</run_depend>
+  <build_depend>genmsg</build_depend>
+  <!-- for optimal control signals -->
 
   <!-- currently not in use -->
   <run_depend>controller_manager</run_depend>

@@ -1,18 +1,20 @@
+
 cmake_minimum_required(VERSION 2.8.3)
 project(mavs_control)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  genmsg
   message_generation
   geometry_msgs
   obstacle_detector
 )
 
-add_service_files(
-  FILES
-  GetObstacleData.srv
-)
+
+## Declare ROS messages and services
+add_message_files(DIRECTORY msg FILES Control.msg)
+add_service_files(FILES GetObstacleData.srv)
 
 install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
@@ -24,7 +26,6 @@ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 catkin_python_setup()
 
 ## Generate added messages and services with any dependencies
-generate_messages(DEPENDENCIES
-                  obstacle_detector)
+generate_messages(DEPENDENCIES obstacle_detector std_msgs)
 
 catkin_package()

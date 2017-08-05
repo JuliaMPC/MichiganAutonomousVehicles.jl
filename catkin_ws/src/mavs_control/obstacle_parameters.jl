@@ -9,7 +9,6 @@ function setObstacleParams(msg::Obstacles)
 
   if L > 0
     r=zeros(L);x=r;y=r;vx=r;vy=r;
-
     r = (); x = (); y = (); vx = (); vy = ();
     for i in 1:L
       r = (r..., msg.circles[i].radius)
@@ -17,13 +16,7 @@ function setObstacleParams(msg::Obstacles)
       y = (y..., msg.circles[i].center.y)
       vx = (vx..., msg.circles[i].velocity.x)
       vy = (vy..., msg.circles[i].velocity.y)
-      #r[i]=msg.circles[i].radius
-      #x[i]=msg.circles[i].center.x
-      #y[i]=msg.circles[i].center.y
-      #vx[i]=msg.circles[i].velocity.x
-      #vy[i]=msg.circles[i].velocity.y
     end
-
 
     # update obstacle field parameters
     RobotOS.set_param("obstacle_radius",r)
