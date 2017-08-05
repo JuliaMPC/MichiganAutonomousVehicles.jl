@@ -6,6 +6,7 @@ using RobotOS
 @rosimport gazebo_msgs.msg: ModelState, ModelStates
 @rosimport gazebo_msgs.srv: SetModelState, GetModelState, GetWorldProperties
 @rosimport obstacle_detector.msg: Obstacles, CircleObstacle
+@rosimport mavs_control.msg: Control
 
 rostypegen()
 using geometry_msgs.msg
@@ -15,6 +16,7 @@ using nav_msgs.srv.GetPlan
 using gazebo_msgs.srv
 using gazebo_msgs.msg
 using obstacle_detector.msg
+using mavs_control.msg
 
 using NLOptControl
 using VehicleModels
@@ -25,10 +27,10 @@ using KNITRO
 # TODO
 # 1) detect crash
 # 3) get the Gazebo sim time
-# 4) pause Gazebo at the start until everything is ready
 # 5) pass these parameters to a service or something -> needs to happen on a seperate node!
 # 6) update OCP based off of current gazebo model position
-# 7) if it is set up for 4 obstacles and it only sees two make a case for the rest
+# 7) get the current position of Gazebo model => need all of the states!!
+# 8) get time from the Gazebo world
 
 """
 
@@ -50,7 +52,7 @@ function setObstacleData(params)
   N = Q - L;
   if N < 0
     warn(" \n The number of obstacles detected exceeds the number of obstacles the algorithm was designed for! \n
-           Consider increasing the number of obstacles the algorithm can handle \n!")
+              Consider increasing the number of obstacles the algorithm can handle \n!")
   end
 
   for i in 1:Q
@@ -74,6 +76,17 @@ function setObstacleData(params)
   return nothing
 end
 
+function sendOptData(n)
+
+  X0=n.X0
+  t=n.r.t_ctr+n.mpc.t0
+  U=n.r.U
+  t0=n.mpc.t0_actual
+  tf=n.r.eval_num*n.mpc.tex
+
+  return nothing
+end
+
 # TODO make an inner loop that runs faster and sets the position of the robot
 
 function main()
@@ -91,6 +104,9 @@ function main()
   const get_state = ServiceProxy("/gazebo/get_model_state",GetModelState)
   println("Waiting for 'gazebo/get_model_state' service...")
   wait_for_service("gazebo/get_model_state")
+
+  # message for solution to optimal control problem
+  const pub = Publisher{Control}("/mavs/optimal_control", queue_size=10)
 
   # set up services and messages
   ###############################
@@ -110,10 +126,36 @@ function main()
   while ! is_shutdown()
     println("Running model for the: ",n.r.eval_num," time");
     setObstacleData(n.params)
-    updateAutoParams!(n,c);                      # update model parameters
+    updateAutoParams!(n,c);  # check to see if goal is in range
+
+    # get the current position of Gazebo model
+    gs = GetModelStateRequest()
+    gs.model_name = modelName
+    gs_r = get_state(gs)
+    if !gs_r.success
+        error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
+    end
+    X0 = zeros(8)
+    X0[1] = gs_r.pose.position.x
+    X0[2] = gs_r.pose.position.y
+    X0[3] = X0p[3]
+    X0[4] = X0p[4]
+    X0[5] = gs_r.pose.orientation.z
+    X0[6] = X0p[6]
+    X0[7] = X0p[7]
+    X0[8] = X0p[8]
+    updateX0!(n,X0;(:userUpdate=>true));
     status=autonomousControl!(n);                # rerun optimization
+    # NOTE not sure what this is doing currently
     n.mpc.t0_actual=(n.r.eval_num-1)*n.mpc.tex;  # external so that it can be updated easily in PathFollowing
-    simPlant!(n)
+    msg = Control()
+    msg.t = n.r.t_st
+    msg.x = n.r.X[:,1]
+    msg.y = n.r.X[:,2]
+    msg.psi = n.r.X[:,5]
+    msg.sa = n.r.X[:,6]
+    msg.vx = n.r.X[:,7]
+    publish(pub,msg)
 
     rossleep(loop_rate)
   end
