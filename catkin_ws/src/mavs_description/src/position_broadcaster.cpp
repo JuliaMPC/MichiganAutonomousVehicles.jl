@@ -12,7 +12,7 @@ void poseCallback(const geometry_msgs::Pose& msg){
   tf::Quaternion q;
   q.setRPY(msg.orientation.x,msg.orientation.y,msg.orientation.z);
   transform.setRotation(q);
-  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(),"map", "base_link")); //TODO get this parameter
+  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(),"map", "base_footprint")); //TODO get this parameter
 }
 
 int main(int argc, char** argv){
@@ -22,7 +22,7 @@ int main(int argc, char** argv){
   robot_name = argv[1];
 
   ros::NodeHandle node;
-  ros::Subscriber sub = node.subscribe(robot_name+"/pose", 10, &poseCallback);
+  ros::Subscriber sub = node.subscribe(robot_name+"/base_footprint_link_pose", 10, &poseCallback);
 
   ros::spin();
   return 0;

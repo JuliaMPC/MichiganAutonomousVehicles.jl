@@ -15,7 +15,7 @@ using gazebo_msgs.srv
 using gazebo_msgs.msg
 
 function callback(twist_msg::Twist, get_state::ServiceProxy{GetModelState}, set_state::ServiceProxy{SetModelState})
-    modelName = "robot"  # TODO make this a parameter
+    modelName = "hmmwv"  # TODO make this a parameter
 
     # Get the current position of the Gazebo model
     gs = GetModelStateRequest()

@@ -183,8 +183,8 @@ function defineObs(name)
     o.B=[1.];
     o.s_x=[0.];
     o.s_y=[0.];
-    o.X0=[-100.];
-    o.Y0=[-100.];
+    o.X0=[200.];
+    o.Y0=[50.];
     o.status=falses(length(o.X0));
   elseif name==:autoARC
     o.name=name;

@@ -9,6 +9,13 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   obstacle_detector
+  controller_manager
+  joint_state_controller
+  controller_interface
+  joint_state_controller
+  robot_state_publisher
+  rqt_gui
+  effort_controllers
 )
 
 

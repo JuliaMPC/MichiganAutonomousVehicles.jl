@@ -17,7 +17,7 @@ using gazebo_msgs.msg
 function loop(get_state, pub)
     loop_rate = Rate(100.0)
     while ! is_shutdown()
-        modelName = "robot"  # TODO make this a parameter
+        modelName = "hmmwv"  # TODO make this a parameter
 
         # Get the current position of the Gazebo model
         gs = GetModelStateRequest()
@@ -26,7 +26,7 @@ function loop(get_state, pub)
         if !gs_r.success
             error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
         end
-        
+
         npt = gs_r.pose
         publish(pub, npt)
         rossleep(loop_rate)

@@ -35,13 +35,25 @@
   <build_depend>genmsg</build_depend>
   <!-- for optimal control signals -->
 
-  <!-- currently not in use -->
+  <!-- joint control -->
   <run_depend>controller_manager</run_depend>
+  <build_depend>controller_manager</build_depend>
+
   <run_depend>joint_state_controller</run_depend>
+  <build_depend>joint_state_controller</build_depend>
+
+  <run_depend>controller_interface</run_depend>
+  <build_depend>controller_interface</build_depend>
+
   <run_depend>robot_state_publisher</run_depend>
+  <build_depend>robot_state_publisher</build_depend>
+
   <run_depend>rqt_gui</run_depend>
+  <build_depend>rqt_gui</build_depend>
+
   <run_depend>effort_controllers</run_depend>
-  <!-- currently not in use -->
+  <build_depend>effort_controllers</build_depend>
+  <!-- joint control -->
 
   <export>
   </export>

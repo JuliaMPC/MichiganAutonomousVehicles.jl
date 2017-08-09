@@ -13,8 +13,8 @@
 
     <!-- Another an object -->
     <include>
-      <!--static>true</static-->
-      <pose>10 0 1.5 0 0 0</pose>
+      <static>true</static>
+      <pose>200 50 1.5 0 0 0</pose>
       <uri>model://cylinder</uri>
     </include>
 

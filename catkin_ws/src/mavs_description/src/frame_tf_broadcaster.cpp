@@ -7,10 +7,16 @@ int main(int argc, char** argv){
 
   ros::Rate r(100);
 
-  tf::TransformBroadcaster broadcaster;
+  tf::TransformBroadcaster broadcaster1;
+  tf::TransformBroadcaster broadcaster2;
 
   while(n.ok()){
-    broadcaster.sendTransform(
+    broadcaster1.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0.0, 0.0, 0.5)),
+        ros::Time::now(),"base_footprint", "base_link"));
+
+    broadcaster2.sendTransform(
       tf::StampedTransform(
         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(1.55, 0.0, 0.738)),
         ros::Time::now(),"base_link", "velodyne_top_link"));

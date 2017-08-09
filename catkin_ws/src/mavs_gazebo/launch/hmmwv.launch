@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
+  <!-- TODO fix gazebo and RViz views on hmmwv -->
 
   <!-- TODO use the robot name parametrically in all files, teliop.jl, position.jl -->
-  <arg name="name" default="robot"/>
+  <arg name="name" default="hmmwv"/>
   <arg name="model" default="$(find mavs_gazebo)/urdf/mavs.xacro"/>
 
   <!-- TODO figure this out.. why do we need this -->
@@ -29,13 +30,18 @@
     <param name="publish_frequency" type="double" value="30.0" />
   </node TODO  look into using this as well as tf-->
 
+  <!-- Load joint controllers -->
+  <include file="$(find mavs_control)/launch/mavs_control.launch"/>
+
   <!-- publish the global position of the robot -->
-  <node name="postion" pkg="mavs_control" type="position.jl" output="screen"/>
+  <node name="postion" pkg="mavs_control" type="link_positions.jl" output="screen"/>
   <node pkg="mavs_description" type="frame_tf_broadcaster" name="velodyne_top_link_tf_broadcaster" />
   <node pkg="mavs_description" type="position_broadcaster" args="$(arg name)" name="postion_broadcaster" />
 
   <!-- LiDAR data processing -->
   <include file="$(find mavs_description)/launch/lidar_data.launch"/>
+  <!-- TODO update obstacle detector min max based off of senario, currently this is hardcoded in-->
+  <!-- TODO consider pushing senario to yaml file, or at least the common params -->
   <include file="$(find obstacle_detector)/launch/mavs.launch"/>
 
   <!-- teliop TODO make this optional with args-->
@@ -44,6 +50,7 @@
 
   <!-- Obstacle Avoidance-->
   <node name="obstacle_paramameters" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/>
-  <!--node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/-->
+  <node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/>
+  <node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/>
 
 </launch>

@@ -175,27 +175,27 @@ Date Create: 3/20/2017, Last Modified: 7/05/2017 \n
 function updateAutoParams!(n,c)
 
   # obstacle information-> only show if it is in range at the start TODO
-
-  if goalRange!(n,c) # TODO make a flag that indicates this switch has been flipped
+  goal_in_range = goalRange!(n,c)
+  if goal_in_range # TODO make a flag that indicates this switch has been flipped
     println("goal is in range")
 
-   # enforce final state constraints on x and y position
-   for st=1:2;
-     setRHS(n.r.xf_con[st,1], +(n.XF[st]+n.XF_tol[st]));
-     setRHS(n.r.xf_con[st,2], -(n.XF[st]-n.XF_tol[st]));
-   end
+    # enforce final state constraints on x and y position
+    for st=1:2;
+      setRHS(n.r.xf_con[st,1], +(n.XF[st]+n.XF_tol[st]));
+      setRHS(n.r.xf_con[st,2], -(n.XF[st]-n.XF_tol[st]));
+    end
 
-   # relax LiDAR constraints
-   setvalue(n.params[3][1], 1e6)
-   setvalue(n.params[3][2],-1e6)
+    # relax LiDAR constraints
+    setvalue(n.params[3][1], 1e6)
+    setvalue(n.params[3][2],-1e6)
 
-   # remove terms in cost function
-   setvalue(n.params[4][1],0.0)
-   setvalue(n.params[4][2],0.0)
+    # remove terms in cost function
+    setvalue(n.params[4][1],0.0)
+    setvalue(n.params[4][2],0.0)
   end
   #NOTE assuming it is not going in and out of range
 
- return nothing
+ return goal_in_range
 end
 
 """
