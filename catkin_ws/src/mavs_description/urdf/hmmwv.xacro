@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="hmmwv" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-  <!-- Vehicle modeled as a giant block -->
+  <!-- Vehicle body-->
   <xacro:include filename="$(find mavs_description)/urdf/body.xacro"/>
   <body base_link="${base_link}">
     <xacro:insert_block name="base_geometry" />

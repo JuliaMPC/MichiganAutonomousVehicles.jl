@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot name="obstacles" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <!-- obstacles-->
+  <xacro:include filename="$(find mavs_description)/urdf/obstacle.urdf.xacro"/>
+
+  <xacro:property name="sim_params_file" value="$(find mavs_gazebo)/config/default_sim_params.yaml"/>
+  <xacro:property name="sim" value="${load_yaml(sim_params_file)}"/>
+
+  <xacro:property name="radius" value="${sim['mavs']['obs']['radius']}" />
+  <xacro:property name="length" value="${sim['mavs']['obs']['length']}" />
+  <xacro:property name="x0" value="${sim['mavs']['obs']['x0']}" />
+  <xacro:property name="y0" value="${sim['mavs']['obs']['y0']}" />
+
+  <obstacle idx="0"/>
+  <!-- xacro:obstacle/-->
+
+</robot>
+
+
+
+<!--TODO add speed-->

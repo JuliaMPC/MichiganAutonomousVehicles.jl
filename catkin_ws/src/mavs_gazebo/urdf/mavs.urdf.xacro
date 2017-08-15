@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<robot name="mavs" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <xacro:property name="hmmwv_params_file" value="$(find mavs_description)/config/hmmwv_params.yaml"/>
+  <xacro:property name="vehicle" value="${load_yaml(hmmwv_params_file)}"/>
+
+  <xacro:property name="sim_params_file" value="$(find mavs_gazebo)/config/default_sim_params.yaml"/>
+  <xacro:property name="sim" value="${load_yaml(sim_params_file)}"/>
+
+  <!-- initial vehicle states -->
+  <xacro:property name="x0" value="${sim['mavs']['X0']['x']}" />
+  <xacro:property name="y0" value="${sim['mavs']['X0']['y']}" />
+  <xacro:property name="psi0" value="${sim['mavs']['X0']['psi']}" />
+
+  <xacro:property name="scale_factor" value="${vehicle['scale_factor']}" />
+  <xacro:property name="mesh_mode" value="1"/>
+
+  <!-- Vehicle geometry -->
+  <xacro:property name="base_link" value="${vehicle['base_link']}" />
+  <xacro:property name="base_width" value="${vehicle['base_width']}" />
+  <xacro:property name="base_length" value="${vehicle['base_length']}" />
+  <xacro:property name="base_height" value="${vehicle['base_height']}" />
+  <xacro:property name="base_clearance" value="${vehicle['base_clearance']}" />
+
+  <xacro:property name="base_geometry">
+    <geometry>
+      <box size="${base_length} ${base_width} ${base_height}" />
+    </geometry>
+  </xacro:property>
+
+  <!-- Wheels -->
+  <xacro:property name="wheel_radius" value="${vehicle['wheel_radius']}" />
+  <xacro:property name="wheel_width" value="${vehicle['wheel_width']}" />
+  <xacro:property name="wheel_mass" value="${vehicle['wheel_mass']}" /> <!-- in kg-->
+
+  <xacro:property name="la" value="${vehicle['la']}" />
+  <xacro:property name="lb" value="${vehicle['lb']}"/>
+  <xacro:property name="wheel_base" value="${vehicle['wheel_base']}" />
+
+  <!-- LiDAR properties -->
+  <xacro:property name="lidar_z" value="${vehicle['lidar_z']}"/>
+  <xacro:property name="lidar_x" value="${vehicle['lidar_x']}"/>
+  <xacro:property name="topic" value="${vehicle['topic']}"/>
+
+  <!-- Necessary includes -->
+  <xacro:include filename="$(find mavs_description)/urdf/hmmwv.xacro" />
+  <xacro:include filename="$(find mavs_description)/urdf/vehicle_gazebo.urdf.xacro" />
+
+  <!-- Bolt-on sensors go here -->
+  <xacro:include filename="$(find mavs_description)/urdf/velodyne_16.xacro"/>
+  <velodyne_16 parent="${base_link}" lidar_x="${lidar_x}" lidar_z="${lidar_z}"/>
+
+</robot>

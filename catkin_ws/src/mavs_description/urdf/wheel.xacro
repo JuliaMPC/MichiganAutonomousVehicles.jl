@@ -17,7 +17,7 @@
           </geometry>
         </xacro:if>
         <xacro:if value="${mesh_mode == 0}">
-          <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+          <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
           <geometry>
             <cylinder length="${wheel_width}" radius="${wheel_radius}" />
           </geometry>
@@ -25,14 +25,14 @@
         </xacro:if>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0 " />
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0 " />
         <geometry>
           <cylinder length="${wheel_width}" radius="${wheel_radius}" />
         </geometry>
       </collision>
       <inertial>
         <mass value="${wheel_mass}" />
-        <origin xyz="0 0 0 "  rpy="${M_PI/2} 0 0" />
+        <origin xyz="0 0 0 "  rpy="${pi/2} 0 0" />
         <xacro:cylinder_inertia  m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}" />
       </inertial>
     </link>
@@ -55,7 +55,7 @@
       <xacro:if value="${fb == 'rear'}">
         <parent link="${parent}"/>
         <xacro:if value="${lr == 'right'}">
-          <origin xyz="${-lb} ${-wheel_base} 0" rpy="0 0 ${M_PI}" />
+          <origin xyz="${-lb} ${-wheel_base} 0" rpy="0 0 ${pi}" />
         </xacro:if>
 
         <xacro:if value="${lr == 'left'}">
@@ -81,7 +81,7 @@
       <joint name="steer_${lr}_wheel_joint" type="revolute">
 
         <xacro:if value="${lr == 'right'}">
-          <origin xyz="${la} ${-wheel_base} 0" rpy="0 0 ${M_PI}" />
+          <origin xyz="${la} ${-wheel_base} 0" rpy="0 0 ${pi}" />
         </xacro:if>
 
         <xacro:if value="${lr == 'left'}">

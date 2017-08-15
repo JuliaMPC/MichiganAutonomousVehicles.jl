@@ -12,7 +12,7 @@
    </gazebo>
 
     <joint name="joint1" type="fixed" >
-      <origin xyz="0 0 ${base_clearance}" rpy="0 0 0" />
+      <origin xyz="${x0} ${y0} ${base_clearance}" rpy="0 0 ${psi0}" />
       <parent link="base_footprint" />
       <child link="${base_link}" />
     </joint>
@@ -22,7 +22,7 @@
     <link name="${base_link}" >
       <visual>
         <xacro:if value="${mesh_mode == 1}">
-          <origin xyz="0 0 ${-wheel_radius}" rpy="0 0 ${M_PI}" />
+          <origin xyz="0 0 ${-wheel_radius}" rpy="0 0 ${pi}" />
           <geometry>
             <mesh filename="package://mavs_description/meshes/body.dae" scale=" ${scale_factor} ${scale_factor} ${scale_factor}"/>
           </geometry>

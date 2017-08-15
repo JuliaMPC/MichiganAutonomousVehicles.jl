@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   gazebo_ros
   geometry_msgs
+  nav_msgs
 )
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -41,3 +42,6 @@ target_link_libraries(frame_tf_broadcaster ${catkin_LIBRARIES})
 
 add_executable(position_broadcaster src/position_broadcaster.cpp)
 target_link_libraries(position_broadcaster ${catkin_LIBRARIES})
+
+add_executable(odom src/odom.cpp)
+target_link_libraries(odom ${catkin_LIBRARIES})

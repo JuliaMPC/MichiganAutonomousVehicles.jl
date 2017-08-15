@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="obstacle" params="idx">
+
+    <link name="obstacle" type="fixed">
+
+      <inertial>
+        <origin xyz="${x0[idx]} ${y0[idx]} ${length[idx]/2}" rpy="0 0 0"/>
+        <mass value="1.0" />
+        <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+      </inertial>
+
+      <visual>
+        <origin xyz="${x0[idx]} ${y0[idx]} ${length[idx]/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${radius[idx]}" length="${length[idx]}"  />
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="${x0[idx]} ${y0[idx]} ${length[idx]/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${radius[idx]}" length="${length[idx]}" />
+        </geometry>
+      </collision>
+
+    </link>
+
+    <gazebo>
+      <static>true</static>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
