@@ -15,6 +15,10 @@ wheel_mass: 2.5
 la: 1.6
 lb: 1.7
 wheel_base: 1
+mu1: 0.9
+mu2: 0.9
+minDepth: 0.005
+kp: 1e8
 
 # LiDAR properties
 lidar_z: 1.1

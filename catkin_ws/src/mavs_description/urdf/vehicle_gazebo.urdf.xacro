@@ -2,39 +2,51 @@
 
 <robot name="mavs_gazebo" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:property name="wheel_friction" value="1.2" />
-
-  <gazebo reference="base_link" >
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
-  </gazebo>
-
+  <!--- Surface properties -->
   <gazebo reference="wheel_fl" >
-    <mu1>${wheel_friction}</mu1>
-    <mu2>${wheel_friction}</mu2>
+    <mu1>${mu1}</mu1>
+    <mu2>${mu2}</mu2>
+    <minDepth>${minDepth}</minDepth>
+    <kp>${kp}</kp>
   </gazebo>
 
   <gazebo reference="wheel_fr" >
-    <mu1>${wheel_friction}</mu1>
-    <mu2>${wheel_friction}</mu2>
+    <mu1>${mu1}</mu1>
+    <mu2>${mu2}</mu2>
+    <minDepth>${minDepth}</minDepth>
+    <kp>${kp}</kp>
   </gazebo>
 
   <gazebo reference="wheel_rl" >
-    <mu1>${wheel_friction}</mu1>
-    <mu2>${wheel_friction}</mu2>
+    <mu1>${mu1}</mu1>
+    <mu2>${mu2}</mu2>
+    <minDepth>${minDepth}</minDepth>
+    <kp>${kp}</kp>
   </gazebo>
 
   <gazebo reference="wheel_rr" >
-    <mu1>${wheel_friction}</mu1>
-    <mu2>${wheel_friction}</mu2>
+    <mu1>${mu1}</mu1>
+    <mu2>${mu2}</mu2>
+    <minDepth>${minDepth}</minDepth>
+    <kp>${kp}</kp>
   </gazebo>
 
   <!-- ros_control plugin -->
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/mavs</robotNamespace>
+      <robotNamespace>${robotNamespace}</robotNamespace>
       <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
     </plugin>
   </gazebo>
+
+  <gazebo>
+    <plugin name="p3d" filename="libgazebo_ros_p3d.so">
+      <!-- <robotNamespace>/hmmwv</robotNamespace> -->
+      <bodyName>${base_link}</bodyName>
+      <topicName>${ground_truth_topic}</topicName>
+      <frameName>${map}</frameName>
+      <updateRate>100.0</updateRate>
+    </plugin>
+ </gazebo>
 
 </robot>

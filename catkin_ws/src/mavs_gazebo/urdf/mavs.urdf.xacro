@@ -2,16 +2,27 @@
 
 <robot name="mavs" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-  <xacro:property name="hmmwv_params_file" value="$(find mavs_description)/config/hmmwv_params.yaml"/>
-  <xacro:property name="vehicle" value="${load_yaml(hmmwv_params_file)}"/>
+  <xacro:property name="global_params_file" value="$(find mavs_gazebo)/config/global_params.yaml"/>
+  <xacro:property name="global_params" value="${load_yaml(global_params_file)}"/>
 
-  <xacro:property name="sim_params_file" value="$(find mavs_gazebo)/config/default_sim_params.yaml"/>
-  <xacro:property name="sim" value="${load_yaml(sim_params_file)}"/>
+  <xacro:property name="vehicle_params_file" value="$(find mavs_description)/config/hmmwv_params.yaml"/>
+  <xacro:property name="vehicle" value="${load_yaml(vehicle_params_file)}"/>
+
+  <xacro:property name="mavs_params_file" value="$(find mavs_gazebo)/config/mavs_params.yaml"/>
+  <xacro:property name="mavs" value="${load_yaml(mavs_params_file)}"/>
+
+
+  <!-- Frames, topics and names -->
+  <xacro:property name="robotNamespace" value="${global_params['robotNamespace']}" />
+  <xacro:property name="robotName" value="${global_params['robotName']}" />
+  <xacro:property name="map" value="${global_params['map']}" />
+  <xacro:property name="ground_truth_topic" value="${global_params['ground_truth_topic']}" />
+
 
   <!-- initial vehicle states -->
-  <xacro:property name="x0" value="${sim['mavs']['X0']['x']}" />
-  <xacro:property name="y0" value="${sim['mavs']['X0']['y']}" />
-  <xacro:property name="psi0" value="${sim['mavs']['X0']['psi']}" />
+  <xacro:property name="x0" value="${mavs['mavs']['X0']['x']}" />
+  <xacro:property name="y0" value="${mavs['mavs']['X0']['y']}" />
+  <xacro:property name="psi0" value="${mavs['mavs']['X0']['psi']}" />
 
   <xacro:property name="scale_factor" value="${vehicle['scale_factor']}" />
   <xacro:property name="mesh_mode" value="1"/>
@@ -37,6 +48,11 @@
   <xacro:property name="la" value="${vehicle['la']}" />
   <xacro:property name="lb" value="${vehicle['lb']}"/>
   <xacro:property name="wheel_base" value="${vehicle['wheel_base']}" />
+
+  <xacro:property name="mu1" value="${vehicle['mu1']}" />
+  <xacro:property name="mu2" value="${vehicle['mu2']}" />
+  <xacro:property name="minDepth" value="${vehicle['minDepth']}" />
+  <xacro:property name="kp" value="${vehicle['kp']}" />
 
   <!-- LiDAR properties -->
   <xacro:property name="lidar_z" value="${vehicle['lidar_z']}"/>

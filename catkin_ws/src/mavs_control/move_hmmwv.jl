@@ -31,7 +31,7 @@ function callback(ctr_msg::Control, get_state::ServiceProxy{GetModelState}, set_
     sp_Y=Linear_Spline(ctr_msg.t,ctr_msg.y);
     sp_PSI=Linear_Spline(ctr_msg.t,ctr_msg.psi);
 
-    modelName = "hmmwv"
+    modelName = RobotOS.get_param("robotName")
     println(" service...")
 
     t=to_sec(get_rostime())

@@ -97,7 +97,8 @@ end
 function main()
   init_node("rosjl_obstacles")
   #linkName = "base_footprint"  # TODO make this a parameter
-  modelName = "hmmwv"  # TODO make this a parameter
+
+  modelName = RobotOS.get_param("robotName")
 
   ###############################
   # set up services and messages

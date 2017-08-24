@@ -7,10 +7,6 @@
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
     <link name="base_footprint"/>
 
-   <gazebo reference="base_footprint">
-     <turnGravityOff>false</turnGravityOff>
-   </gazebo>
-
     <joint name="joint1" type="fixed" >
       <origin xyz="${x0} ${y0} ${base_clearance}" rpy="0 0 ${psi0}" />
       <parent link="base_footprint" />
@@ -33,15 +29,14 @@
         </xacro:if>
       </visual>
       <collision>
+        <!--selfCollide>false</selfCollide-->
         <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" />
         <xacro:insert_block name="base_geometry" />
       </collision>
       <inertial>
-        <mass value="10"/>
+        <mass value="1500"/>
         <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
-        <inertia ixx="3.0" ixy="0.0" ixz="0.0"
-                 iyy="3.0" iyz="0.0"
-                 izz="3.0" />
+        <inertia ixx="1000.0" ixy="0" ixz="0" iyy="1000.0" iyz="0" izz="1000.0"/>
       </inertial>
     </link>
 

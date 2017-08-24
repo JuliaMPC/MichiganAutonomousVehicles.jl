@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
 <launch>
 
-  <!-- nodelet manager TODO make nodelet_manger a parameter -->
+  <!-- nodelet manager -->
   <arg name="manager" default="nodelet_manager" doc="Name of the nodelet manager"/>
   <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen">
     <param name="num_worker_threads" value="20"/>
   </node>
+
   <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
   <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid $(arg manager)" output="screen">
     <remap from="~input" to="/lidar_points"/>

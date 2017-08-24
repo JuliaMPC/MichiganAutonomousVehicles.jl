@@ -29,6 +29,7 @@
         <geometry>
           <cylinder length="${wheel_width}" radius="${wheel_radius}" />
         </geometry>
+        <!--selfCollide>false</selfCollide-->
       </collision>
       <inertial>
         <mass value="${wheel_mass}" />

@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-  <!--rosparam command="load" file="$(find mavs_gazebo)/yaml/default_sim_params.yaml" /-->
+
+  <!--  ************** Global Parameters ***************  -->
+  <!--param name="/use_sim_time" value="true"/-->
+
+  <rosparam command="load" file="$(find mavs_gazebo)/config/global_params.yaml" />
 
   <!-- TODO fix gazebo and RViz views on hmmwv -->
 
-  <!-- TODO use the robot name parametrically in all files, teliop.jl, position.jl -->
+  <!-- TODO use the robot name parametrically in all files-->
   <arg name="name" default="hmmwv"/>
 
   <!-- start gazebo and load the world -->
@@ -17,10 +21,6 @@
   <!-- spawn robot into Gazebo -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mavs_gazebo)/urdf/mavs.urdf.xacro" />
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model hmmwv"/>
-
-  <!--node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
-    <param name="publish_frequency" type="double" value="30.0" />
-  </node TODO  look into using this as well as tf-->
 
   <!-- Load joint controllers -->
   <include file="$(find mavs_control)/launch/mavs_control.launch"/>
@@ -36,7 +36,6 @@
   <!-- LiDAR data processing -->
   <include file="$(find mavs_description)/launch/lidar_data.launch"/>
   <!-- TODO update obstacle detector min max based off of senario, currently this is hardcoded in-->
-  <!-- TODO consider pushing senario to yaml file, or at least the common params -->
   <include file="$(find obstacle_detector)/launch/mavs.launch"/>
 
   <!-- teliop TODO make this optional with args-->
@@ -46,6 +45,6 @@
   <!-- Obstacle Avoidance-->
   <node name="obstacle_paramameters" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/>
   <!--node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/-->
-  <node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/>
+  <!--node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/-->
 
 </launch>
