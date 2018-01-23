@@ -18,7 +18,7 @@
   <depend>tf</depend>
   <depend>gazebo_ros</depend>
   <depend>geometry_msgs</depend>
-
+  <depend>nodelet</depend>
   <depend>eigen3</depend>
 
   <!-- The export tag contains other, unspecified, tags -->

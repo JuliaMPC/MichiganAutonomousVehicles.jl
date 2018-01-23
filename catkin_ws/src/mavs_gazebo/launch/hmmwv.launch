@@ -29,12 +29,12 @@
   <node name="postion" pkg="mavs_control" type="link_positions.jl" output="screen"/>
   <node pkg="mavs_description" type="frame_tf_broadcaster" name="velodyne_top_link_tf_broadcaster" />
   <!-- TODO try to remove this and use odom and gps-->
-  <node pkg="mavs_description" type="position_broadcaster" args="$(arg name)" name="postion_broadcaster" />
+  <node pkg="mavs_description" type="position_broadcaster" name="postion_broadcaster" args="$(arg name)"/>
 
-  <node pkg="mavs_description" type="odom" name="odom_broadcaster" />
+  <!--node pkg="mavs_description" type="odom" name="odom_broadcaster" /-->
 
   <!-- LiDAR data processing -->
-  <include file="$(find mavs_description)/launch/lidar_data.launch"/>
+  <!--include file="$(find mavs_description)/launch/lidar_data.launch"/-->
   <!-- TODO update obstacle detector min max based off of senario, currently this is hardcoded in-->
   <include file="$(find obstacle_detector)/launch/mavs.launch"/>
 
@@ -43,7 +43,7 @@
   <node name="teliop" pkg="mavs_control" type="teliop.jl" output="screen"/>
 
   <!-- Obstacle Avoidance-->
-  <node name="obstacle_paramameters" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/>
+  <!--node name="obstacle_paramameters" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/-->
   <!--node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/-->
   <!--node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/-->
 

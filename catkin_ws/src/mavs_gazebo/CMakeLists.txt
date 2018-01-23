@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf
   gazebo_ros
+  pcl_ros
 )
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -20,4 +21,5 @@ catkin_package(
   sensor_msgs
   tf
   gazebo_ros
+  pcl_ros
 )
