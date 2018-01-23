@@ -1,5 +1,0 @@
-In this test: 
-ThreeDOFv1
-
- RESULTS DISCUSSION:  
- * 

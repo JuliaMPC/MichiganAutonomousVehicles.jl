@@ -1,12 +1,15 @@
 using PrettyPlots
-using Plots
 
+#gr()
 #pgfplots()
-pyplot()
+a=2;
+#pyplot(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))
+#a=0.25;
+#default(guidefont=font(a*17),tickfont=font(a*15),legendfont=font(a*12),titlefont=font(a*20))
+plotSettings(;(:simulate=>true),(:mpc_markers =>(:circle,:blueviolet,0.0,0.0)),(:plant=>true),(:plantOnly=>false),(:size=>(a*900,a*600)),(:format=>"png"));
 
-description = string(
+description=string(
 "In this test: \n",c.m.name,"\n
-* m.Ni=",c.m.Ni," \n
 * m.Nck=",c.m.Nck,"\n
 * m.tp=",c.m.tp," \n
 * m.tex=",c.m.tex,"\n
@@ -19,20 +22,17 @@ description = string(
 * sx=",c.o.s_x,"\n
 * sy=",c.o.s_y,"\n
 ")
-results_dir=string("posterA_",c.m.name,"_",c.m.solver,"/")
-resultsDir!(r,results_dir;description=description);
 
-println("Plotting the Final Results!")
-if r.eval_num>1;
- anim = @animate for ii in 1:length(r.dfs_plant)
-    mainSim(n,r,s,c,pa,ii);
-  end
-  gif(anim, string(r.results_dir,"mainSim.gif"), fps = Int(ceil(1/c.m.tex)));
-  cd(r.results_dir)
-    run(`ffmpeg -f gif -i mainSim.gif RESULT.mp4`)
-    write("description.txt", description)
-  cd(r.main_dir)
+results_dir=string("gazebo_zero_1",c.m.name,"/")
+resultsDir!(n;results_name=results_dir,description=description);
+savePlantData!(n)
+if _pretty_defaults[:simulate];
+  println("Plotting the Final Results!")
+  mainSim(n,c;(:mode=>:open1))
 end
 
-#s=Settings(;save=true,MPC=true,simulate=false,format=:png);
-#allPlots(n,r,s,2)
+optPlot(n)
+posterP(n,c)
+
+
+#plot(rand(10),xaxis=("test",(:guidefont=>20)))

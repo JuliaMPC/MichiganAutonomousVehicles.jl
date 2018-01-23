@@ -41,7 +41,7 @@ x.s1 = UDPSocket();bind(x.s1,ip"73.113.149.41",36880); # change this ip to the s
 x.s2 = UDPSocket();bind(x.s2,ip"73.113.149.41",12000); # change this ip to the server (or julia code)
 
 global pa=params[1];
-global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
+global s=Settings(;reset=false,save=true,simulate=true,MPC=true);
 r.eval_num=1;count=1;
 # set infeasible_counter for active safety
 x.infeasible_counter=100; x.infeasible_counter_max=3;  # initially the condition will be false

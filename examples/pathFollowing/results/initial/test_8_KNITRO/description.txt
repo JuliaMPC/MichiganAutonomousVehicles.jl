@@ -1,7 +1,0 @@
-In this test:
-default
-
- RESULTS DISCUSSION:
- * tp was increased to 8 s
- * the number of points remained the same
- * Improved the path following performance

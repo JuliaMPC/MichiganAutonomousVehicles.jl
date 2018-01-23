@@ -1,12 +1,5 @@
 module SharedControl
 
-using NLOptControl
-using VehicleModels
-using JuMP
-using DataFrames
-using Parameters
-using Ranges
-
 using MathProgBase # for checkFeasibility!
 
 include("CaseModule.jl")
@@ -88,8 +81,7 @@ function initializeSharedControl!(c)
     else
       pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.10,sr_max=0.10); #0.12
     end
-
-    n=NLOpt(); @unpack_Vpara pa;
+    @unpack_Vpara pa;
 
     XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
   #  XL=[x_min, y_min, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
@@ -97,7 +89,7 @@ function initializeSharedControl!(c)
     XL=[NaN, NaN, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
     XU=[NaN, NaN, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
     CL = [sr_min, 0.0]; CU = [sr_max, 0.0];
-    define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
+    n=define(ThreeDOFv2;numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
 
     # variable names
              # 1  2  3  4  5    6   7   8
@@ -110,7 +102,7 @@ function initializeSharedControl!(c)
     controlNames!(n,names,descriptions);
 
     # configure problem
-    configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
+    configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
     mdl=defineSolver!(n,c);
 
     # define tolerances

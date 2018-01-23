@@ -1,6 +1,0 @@
-In this test:
-default
-
- RESULTS DISCUSSION:
- * c.m.Ni=4;
- c.m.Nck=[9,7,8,6];

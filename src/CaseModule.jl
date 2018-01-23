@@ -10,8 +10,8 @@ export
       setupResults,
       case2dfs,  # currently not working
       dataSet,
-      Obstacles,
-      defineObstacles
+      Obs,
+      defineObs
 ################################################################################
 # Basic Types
 ################################################################################
@@ -88,9 +88,9 @@ function Weights()
           1.,      # w_ce
           0.1,     # w_sa
           1.,      # w_sr
-          0.01,   # w_jx
-          1.0,    # path following
-          1.0,    # follow driver steering angle
+          0.01,    # w_jx
+          1.0,     # path following
+          1.0,     # follow driver steering angle
           );
 end
 
@@ -125,10 +125,10 @@ function setWeights!(c;
     c.w.sr=sr;
     c.w.path=path;
     c.w.driver=driver;
-    nothing
+    return nothing
 end
 ############################### obstacle info ########################################
-type Obstacles
+type Obs
   name
   A
   B
@@ -139,8 +139,8 @@ type Obstacles
   status
 end
 
-function Obstacles()
-  Obstacles([],
+function Obs()
+  Obs([],
             [],
             [],
             [],
@@ -151,14 +151,14 @@ function Obstacles()
 end
 
 """
-o=defineObstacles(name)
+o=defineObs(name)
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/28/2017, Last Modified: 4/3/2017 \n
+Date Create: 3/28/2017, Last Modified: 7/5/2017 \n
 --------------------------------------------------------------------------------------\n
 """
-function defineObstacles(name)
-  o=Obstacles();
+function defineObs(name)
+  o=Obs();
   if name==:auto
     o.name=name;
     o.A=[5.];
@@ -168,15 +168,36 @@ function defineObstacles(name)
     o.X0=[200.];
     o.Y0=[75.];
     o.status=falses(length(o.X0));
-  elseif name==:auto2
+  elseif name==:autoBench
     o.name=name;
-    o.A=[5.,10.,2.];
-    o.B=[5.,10.,2.];
-    o.s_x=[-2.,0.,0.];
-    o.s_y=[0.,0.,4.];
-    o.X0=[205.,180.,200.];
-    o.Y0=[50.,75.,30.];
+    o.A=[10.];
+    o.B=[5.];
+    o.s_x=[0.];
+    o.s_y=[0.];
+    o.X0=[200.];
+    o.Y0=[43.];
     o.status=falses(length(o.X0));
+  elseif name==:autoGazebo
+    o.name=name;
+    o.A=[1.];
+    o.B=[1.];
+    o.s_x=[0.];
+    o.s_y=[0.];
+    o.X0=[200.];
+    o.Y0=[50.];
+    o.status=falses(length(o.X0));
+  elseif name==:autoARC
+    o.name=name;
+    A=[2.5 1.5];      # small car
+    B=[3.3 1.9];      # HUMMVEEs
+    C=[9.8/2 3.65/2]; # tanks
+    random=[0 0.6 1 0.25 0.6 0.5495 0.4852 0.8905 0.7990 1];
+    o.X0=[225,225,220,170,220,165,200];
+    o.Y0=[25,30,45,60,75,95,50];
+    o.A=[B[1],B[1],B[1],C[1],A[1],C[1],C[2]];
+    o.B=[B[2],B[2],B[2],C[2],A[2],C[2],C[1]];
+    o.s_x=[-5,-5.5,-6,6,-5,4,-2];
+    o.s_y=[0,0,0,0,0,0,5];
   elseif name==:path  # test case for testPathFollowing.jl
     o.name=name;
     o.A=[5.,4.,10.]
@@ -261,6 +282,18 @@ function defineGoal(name)
     g.x_ref=200.;
     g.y_ref=125.;
     g.psi_ref=pi/2;
+  elseif name==:autoBench
+    g=Goal();
+    g.name=name;
+    g.x_ref=200.;
+    g.y_ref=100.;
+    g.psi_ref=pi/2;
+  elseif name==:autoGazebo
+    g=Goal();
+    g.name=name;
+    g.x_ref=200.;
+    g.y_ref=100.;
+    g.psi_ref=pi/2;
   elseif name==:path # test case for testPathFollowing.jl
     g=Goal();
     g.name=name;
@@ -285,29 +318,29 @@ end
 ############################### misc info ########################################
 type Misc
   name
-  model  # function name
-  X0     # intial state (at the start of the simulation)
-  Xlims  # limit for x
-  Ylims  # limit for Y
-  UX     # vehicle speed (m/s)
-  tp     # prediction horizon (s)
-  tex    # execution horizon (s)
-  max_cpu_time  # maximum time the algorithm has
-  sm            # (m) distance to make sure we don't hit obstacle
-  Lr            # LiDAR range (m)
-  L_rd          # relaxation distance to LiDAR range
-  sigma         # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
-  Ni       # number of intervals
-  Nck      # number of points per interval
-  solver   # either :IPOPT or :KNITRO
-  max_iter # max evaluations in optimization
-  mpc_max_iter # an MPC parameter
-  PredictX0    # if the state that the vehicle will be at when the optimization is finished is to be predicted
-  FixedTp      # fixed final time for predicting X0
-  activeSafety # a bool if the system is only used to avoid collisions with obstacles
-  followDriver # a bool to try and follow the driver
-  followPath   # a bool to follow the path
-  NF           # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
+  model              # function name
+  X0                 # intial state (at the start of the simulation)
+  Xlims              # limit for x
+  Ylims              # limit for Y
+  UX                 # vehicle speed (m/s)
+  tp                 # prediction horizon (s)
+  tex                # execution horizon (s)
+  max_cpu_time       # maximum time the algorithm has
+  sm                 # (m) distance to make sure we don't hit obstacle
+  Lr                 # LiDAR range (m)
+  L_rd               # relaxation distance to LiDAR range
+  sigma              # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
+  Nck                # number of points per interval
+  solver             # either :IPOPT or :KNITRO
+  max_iter           # max evaluations in optimization
+  mpc_max_iter       # an MPC parameter
+  PredictX0          # if the state that the vehicle will be at when the optimization is finished is to be predicted
+  FixedTp            # fixed final time for predicting X0
+  activeSafety       # a bool if the system is only used to avoid collisions with obstacles
+  followDriver       # a bool to try and follow the driver
+  followPath         # a bool to follow the path
+  NF                 # number to subtract off the constraint check vector-> used for activeSafety mode so driver sees obstacle before autonomy
+  integrationScheme
 end
 
 function Misc()
@@ -356,16 +389,73 @@ function defineMisc(name)
     m.tex=0.5;
     m.max_cpu_time=m.tex;
     m.sm=2.0;
-    m.Lr=100.;
-    m.L_rd=1.;
     m.sigma=1.0;
-    m.Ni=4;
     m.Nck=[12,10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=50;
+    m.max_iter=500;
     m.mpc_max_iter=600;
     m.PredictX0=true;
     m.FixedTp=true;
+    m.Lr=50.;
+    m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
+  elseif name==:autoBench
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,15.0,0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=0.47;#0.41;
+    m.sm=5.0;
+    m.sigma=1.0;
+    m.Nck=[10,8,6];#[12,10,8,6];
+    m.solver=:Ipopt;
+    m.max_iter=500;
+    m.mpc_max_iter=60;
+    m.PredictX0=true;
+    m.FixedTp=true;
+    m.Lr=150. # not in play
+    m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
+  elseif name==:autoGazebo
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2, 0.0, 0.0, 0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=0.47;#0.41;
+    m.sm=5.0;
+    m.sigma=1.0;
+    m.Nck=[10,8,6];#[12,10,8,6];
+    m.solver=:KNITRO;
+    m.max_iter=500;
+    m.mpc_max_iter=60;
+    m.PredictX0=true;
+    m.FixedTp=true;
+    m.Lr= 50. # not in play
+    m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
+  elseif name==:autoARC
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2,0.0,17.0,0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=0.47;#0.41;
+    m.sm=2.6;
+    m.sigma=1.0;
+    m.Nck=[10,8,6];#[12,10,8,6];
+    m.solver=:KNITRO;
+    m.max_iter=500;
+    m.mpc_max_iter=600;
+    m.PredictX0=true;
+    m.FixedTp=true;
+    m.Lr=50.
+    m.L_rd=5.;
+    m.integrationScheme=:lgrExplicit
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -376,17 +466,15 @@ function defineMisc(name)
     m.tp=6.0;
     m.tex=0.5;
     m.max_cpu_time=m.tex;
-    m.sm=2.0;
-    m.Lr=100.;
-    m.L_rd=1.;
+    m.sm=2.6;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
-    m.max_iter=50;
+    m.max_iter=500;
     m.mpc_max_iter=30;
     m.PredictX0=true;
     m.FixedTp=true;
+    m.integrationScheme=:lgrExplicit
   elseif name==:caseStudy
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -398,10 +486,7 @@ function defineMisc(name)
     m.tex=0.3;
     m.max_cpu_time=0.25;  #NOTE:this needs to match Matlab model!
     m.sm=2.0;
-    m.Lr=60.;
-    m.L_rd=1.;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=450;
@@ -412,21 +497,19 @@ function defineMisc(name)
     m.followPath=false;
     m.followDriver=false;
     m.NF=0;
+    m.integrationScheme=:lgrExplicit
   elseif name==:caseStudyPath # test case for testPathFollowing.jl with other model
     m.name=:caseStudy;
     m.model=:ThreeDOFv2;
     m.UX=10.0;
     m.X0=[0.0,0.0, 0.0, 0.0,1.2037,0.0,m.UX,0.0];
-    m.Xlims=[-10., 750.]
+    m.Xlims=[-10., 730.]
     m.Ylims=[-10., 200.]
     m.tp=7.0;
     m.tex=0.3;
     m.max_cpu_time=0.25;
     m.sm=2.0;
-    m.Lr=70.;
-    m.L_rd=1.;
     m.sigma=1.0;
-    m.Ni=3;
     m.Nck=[10,8,6];
     m.solver=:KNITRO;
     m.max_iter=300;
@@ -434,12 +517,13 @@ function defineMisc(name)
     m.PredictX0=true;
     m.FixedTp=true;
     m.followPath=true;
+    m.integrationScheme=:lgrExplicit
   elseif name!==:NA
     error("\n Pick a name for misc data! \n")
   end
   return m
 end
-#TODO merge this with misc()?
+
 """
 setMisc!(c;activeSafety=true,followPath=false,followDriver=false,predictX0=false,fixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.26,Ni=3,Nck=[10,8,6]);
 --------------------------------------------------------------------------------------\n
@@ -450,7 +534,6 @@ Date Create: 3/28/2017, Last Modified: 4/7/2017 \n
 function setMisc!(c;
                 Xlims=c.m.Xlims,
                 Ylims=c.m.Ylims,
-                UX=c.m.UX,
                 tp=c.m.tp,
                 tex=c.m.tex,
                 max_cpu_time=c.m.max_cpu_time,
@@ -458,7 +541,6 @@ function setMisc!(c;
                 Lr=c.m.Lr,
                 L_rd=c.m.L_rd,
                 sigma=c.m.sigma,
-                Ni=c.m.Ni,
                 Nck=c.m.Nck,
                 solver=c.m.solver,
                 max_iter=c.m.max_iter,
@@ -468,10 +550,10 @@ function setMisc!(c;
                 activeSafety=c.m.activeSafety,
                 followPath=c.m.followPath,
                 followDriver=c.m.followDriver,
-                NF=c.m.NF);
+                NF=c.m.NF,
+                integrationScheme=c.m.integrationScheme);
     c.m.Xlims=Xlims;
     c.m.Ylims=Ylims;
-    c.m.UX=UX;
     c.m.tp=tp;
     c.m.tex=tex;
     c.m.max_cpu_time=max_cpu_time;
@@ -479,7 +561,6 @@ function setMisc!(c;
     c.m.Lr=Lr;
     c.m.L_rd=L_rd;
     c.m.sigma=sigma;
-    c.m.Ni=Ni;
     c.m.Nck=Nck;
     c.m.solver=solver;
     c.m.max_iter=max_iter;
@@ -490,17 +571,18 @@ function setMisc!(c;
     c.m.followPath=followPath;
     c.m.followDriver=followDriver;
     c.m.NF=NF;
-    nothing
+    c.m.integrationScheme=integrationScheme;
+    return nothing
 end
 
 ################################################################################
 # Model Class
 ################################################################################
-abstract AbstractCase
+abstract type AbstractCase end
 type Case <: AbstractCase
  name
  g::Goal        # goal data
- o::Obstacles   # obstacle data
+ o::Obs   # obstacle data
  w::Weights     # weight data
  t::Track       # track data
  m::Misc        # miscelaneous data
@@ -517,7 +599,7 @@ Date Create: 3/11/2017, Last Modified: 3/28/2017 \n
 function Case()
  Case(Any,
       Goal(),
-      Obstacles(),
+      Obs(),
       Weights(),
       Track(),
       Misc()
@@ -535,7 +617,7 @@ c=defineCase(;(mode=>:path));
 
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
-Date Create: 3/11/2017, Last Modified: 4/3/2017 \n
+Date Create: 3/11/2017, Last Modified: 7/4/2017 \n
 --------------------------------------------------------------------------------------\n
 """
 function defineCase(;name::Symbol=:auto,
@@ -554,28 +636,49 @@ function defineCase(;name::Symbol=:auto,
    if mode==:auto
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
+   elseif mode==:autoBench
+     c.name=mode;
+     c.g=defineGoal(c.name);
+     c.o=defineObs(c.name);
+     c.w=defineWeights(:auto);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(c.name);
+   elseif mode==:autoGazebo
+     c.name=mode;
+     c.g=defineGoal(c.name);
+     c.o=defineObs(c.name);
+     c.w=defineWeights(:auto);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(c.name);
+   elseif mode==:autoARC
+     c.name=:auto;
+     c.g=defineGoal(c.name);
+     c.o=defineObs(:autoARC);
+     c.w=defineWeights(c.name);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(:autoARC);
    elseif mode==:path
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(c.name);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);
    elseif mode==:caseStudy
      c.name=mode;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(c.name);
+     c.o=defineObs(c.name);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(c.name);
    elseif mode==:caseStudyPath
      c.name=:caseStudy;
      c.g=defineGoal(c.name);
-     c.o=defineObstacles(:caseStudyPath);
+     c.o=defineObs(:caseStudyPath);
      c.w=defineWeights(:path);
      c.t=defineTrack(c.name);
      c.m=defineMisc(:caseStudyPath);
@@ -583,7 +686,7 @@ function defineCase(;name::Symbol=:auto,
      name=:user;
      c.name=name;
      c.g=defineGoal(goal);
-     c.o=defineObstacles(obstacles);
+     c.o=defineObs(obstacles);
      c.w=defineWeights(weights);
      c.t=defineTrack(:NA);
      c.m=defineMisc(misc);
@@ -609,7 +712,6 @@ function dataSet(set,path)
   cd(main_dir)
   return dfs
 end
-
 
 """
 case2dfs(c)

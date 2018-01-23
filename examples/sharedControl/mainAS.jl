@@ -39,7 +39,7 @@ x.s2 = UDPSocket();bind(x.s2,ip"73.113.149.41",12000); # change this ip to the s
 
 global pa=params[1];
 #global s=Settings(;reset=false,save=true,simulate=true,MPC=true,format=:png);
-global s=Settings(;reset=false,save=true,evalConstraints=false,simulate=true,MPC=true,format=:png);
+global s=Settings(;reset=false,save=true,evalConstraints=false,MPC=true);
 
 r.eval_num=1;count=1;
 # set infeasible_counter for active safety

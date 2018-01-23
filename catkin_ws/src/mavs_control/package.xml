@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<package>
+  <name>mavs_control</name>
+  <version>0.0.0</version>
+  <description>The mavs_control package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="febbo@todo.todo">febbo</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- for obstacle message service -->
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>obstacle_detector</run_depend>
+  <build_depend>obstacle_detector</build_depend>
+  <run_depend>rospy</run_depend>
+  <build_depend>rospy</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>std_msgs</run_depend>
+  <build_depend>std_msgs</build_depend>
+  <!-- for obstacle message service -->
+
+  <!-- for optimal control signals -->
+  <run_depend>genmsg</run_depend>
+  <build_depend>genmsg</build_depend>
+  <!-- for optimal control signals -->
+
+  <!-- joint control -->
+  <run_depend>controller_manager</run_depend>
+  <build_depend>controller_manager</build_depend>
+
+  <run_depend>joint_state_controller</run_depend>
+  <build_depend>joint_state_controller</build_depend>
+
+  <run_depend>controller_interface</run_depend>
+  <build_depend>controller_interface</build_depend>
+
+  <run_depend>robot_state_publisher</run_depend>
+  <build_depend>robot_state_publisher</build_depend>
+
+  <run_depend>rqt_gui</run_depend>
+  <build_depend>rqt_gui</build_depend>
+
+  <run_depend>effort_controllers</run_depend>
+  <build_depend>effort_controllers</build_depend>
+  <!-- joint control -->
+
+  <export>
+  </export>
+
+</package>

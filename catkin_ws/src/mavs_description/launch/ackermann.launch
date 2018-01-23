@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- start gazebo and load the world -->
+  <include file="$(find mavs_gazebo)/launch/world.launch" />
+
+  <param command="$(find xacro)/xacro --inorder $(find mavs_description)/urdf/ackermann.urdf.xacro " name="ackermann" />
+  <node args="-urdf -param ackermann -model robot" name="spawn_vehicle" output="screen" pkg="gazebo_ros" respawn="false" type="spawn_model" />
+
+</launch>

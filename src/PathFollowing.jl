@@ -2,9 +2,6 @@ module PathFollowing
 
 using NLOptControl
 using VehicleModels
-using JuMP
-using DataFrames
-using Parameters
 
 include("CaseModule.jl")
 using .CaseModule
@@ -22,13 +19,13 @@ Date Create: 3/28/2017, Last Modified: 4/3/2017 \n
 """
 function initializePathFollowing(c)  #TODO add in some sort of a window around the vehicle where it only sees certain obstacles
   pa=Vpara(x_min=c.m.Xlims[1],x_max=c.m.Xlims[2],y_min=c.m.Ylims[1],y_max=c.m.Ylims[2],sr_min=-0.18,sr_max=0.18);
-  n=NLOpt(); @unpack_Vpara pa;
+  @unpack_Vpara pa;
 
   XF=[  NaN, NaN,   NaN, NaN,     NaN,    NaN,    NaN, NaN];
   XL=[NaN,NaN, NaN, NaN, psi_min, sa_min, c.m.UX, 0.0];
   XU=[NaN,NaN, NaN, NaN, psi_max, sa_max, c.m.UX, 0.0];
   CL = [sr_min, 0.0]; CU = [sr_max, 0.0];
-  define!(n,stateEquations=ThreeDOFv2,numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
+  n=define(ThreeDOFv2;numStates=8,numControls=2,X0=copy(c.m.X0),XF=XF,XL=XL,XU=XU,CL=CL,CU=CU);
   # variable names
            # 1  2  3  4  5    6   7   8
   names = [:x,:y,:v,:r,:psi,:sa,:ux,:ax];
@@ -40,7 +37,7 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   controlNames!(n,names,descriptions);
 
   # configure problem
-  configure!(n,Ni=c.m.Ni,Nck=c.m.Nck;(:integrationMethod => :ps),(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
+  configure!(n,Nck=c.m.Nck;(:integrationScheme => :lgrExplicit),(:finalTimeDV => false),(:tf => c.m.tp))
   mdl=defineSolver!(n,c);
 
   # define tolerances
@@ -64,7 +61,8 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   n.mpc.X0=[copy(c.m.X0)];
 
   # define ocp
-  r=OCPdef!(mdl,n,Settings(;save=false,MPC=true),[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
+  s=Settings(;save=false,MPC=true);
+  r=OCPdef!(mdl,n,s,[pa,ux_param]);  # need pa out of params -> also need speed for c.m.model==:ThreeDOFv1
 
   # define objective function
   obj=0;
@@ -109,7 +107,7 @@ function initializePathFollowing(c)  #TODO add in some sort of a window around t
   optimize!(mdl,n,r,s);
 
         #  1    2          3         4
-  params=[pa,ux_param,obs_params,X0_params];
+  n.params=[pa,ux_param,obs_params,X0_params];
 
   return mdl,n,r,params
 end

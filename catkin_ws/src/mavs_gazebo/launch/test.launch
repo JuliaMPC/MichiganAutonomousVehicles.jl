@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+
+  <rosparam command="load" file="$(find mavs_gazebo)/yaml/default_sim_params.yaml" />
+  <arg name="urdf_file" default="$(find mavs_gazebo)/urdf/mavs.xacro" />
+
+  <!-- Start gazebo and load the world -->
+  <include file="$(find mavs_gazebo)/launch/world.launch" >
+    <arg name="world_name" value="test1.world" />
+  </include>
+
+
+  <!-- TODO fix gazebo and RViz views on hmmwv -->
+
+  <!-- TODO use the robot name parametrically in all files,obstacle_detector, velodyne.xacro -->
+
+
+  <!-- Spawn a robot into Gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen">
+     <param name="urdf_file" value="$(arg urdf_file)" />
+  </node>
+
+</launch>
+
+<arg name="model" default="$(find mavs_gazebo)/urdf/mavs.xacro"/>
+
+
+<!-- TODO figure this out.. why do we need this -->
+<arg name="world_frame" default="/world"/>
+<arg name="base_link_frame" default="base_link"/>
+<arg name="lidar_frame" default="velodyne_top_link"/>
+<!-- TODO use the robot name parametrically in all files,obstacle_detector, velodyne.xacro -->
+
+<!-- send the robot XML to param server -->
+<param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)'"/>
+
+<!--param name="base_link_frame" type="string" value="$(arg base_link_frame)"/-->
+<!--param name="world_frame" type="string" value="$(arg world_frame)"/-->
+
+
+<!--param name="robot_description" command="$(find xacro)/xacro --inorder '$(arg model)' base_link_frame:=$(arg base_link_frame) world_frame:=$(arg world_frame)" /-->
+<!-- Spawn a robot into Gazebo -->
+<node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+      args="-param robot_description
+         -urdf
+         -model $(arg name)"
+         respawn="false" output="screen"/>
