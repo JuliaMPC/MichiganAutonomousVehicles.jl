@@ -20,6 +20,7 @@
   <depend>geometry_msgs</depend>
   <depend>nodelet</depend>
   <depend>eigen3</depend>
+  <depend>velodyne_description</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

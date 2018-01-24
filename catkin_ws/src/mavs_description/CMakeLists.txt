@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   geometry_msgs
   nav_msgs
+  velodyne_description
 )
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
