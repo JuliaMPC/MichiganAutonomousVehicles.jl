@@ -23,6 +23,7 @@ c=defineCase(;(:mode=>:caseStudy));
 #setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.25,Ni=2,Nck=[10,10]);
 #setWeights!(c;sr=0.05,path=10.0,driver=0.0)
 
+
 setMisc!(c;activeSafety=false,followPath=true,followDriver=false,PredictX0=false,FixedTp=false,tp=5.0,tex=0.3,max_cpu_time=0.25,Ni=2,Nck=[10,10]);
 setWeights!(c;sr=0.05,path=10.0,driver=0.0)
 
@@ -36,8 +37,8 @@ setWeights!(c;sr=0.05,path=10.0,driver=0.0)
 mdl,n,r,params,x,d=initializeSharedControl!(c)
 
 # setup UDP port and UDP communication
-x.s1 = UDPSocket();bind(x.s1,ip"141.212.140.176",36880); # change this ip to the server (or julia code)
-x.s2 = UDPSocket();bind(x.s2,ip"141.212.140.176",12000); # change this ip to the server (or julia code)
+x.s1 = UDPSocket();bind(x.s1,ip"73.113.149.41",36880); # change this ip to the server (or julia code)
+x.s2 = UDPSocket();bind(x.s2,ip"73.113.149.41",12000); # change this ip to the server (or julia code)
 
 global pa=params[1];
 global s=Settings(;reset=false,save=true,simulate=true,MPC=true);
