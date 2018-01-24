@@ -22,4 +22,8 @@
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mavs_gazebo)/urdf/mavs.urdf.xacro" />
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model hmmwv"/>
 
+  <!-- teliop TODO make this optional with args-->
+  <node name="teliop_keys" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
+  <node name="teliop" pkg="mavs_control" type="teliop.jl" output="screen"/>
+
 </launch>

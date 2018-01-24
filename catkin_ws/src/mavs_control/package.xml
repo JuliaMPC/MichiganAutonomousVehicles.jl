@@ -53,6 +53,9 @@
 
   <run_depend>effort_controllers</run_depend>
   <build_depend>effort_controllers</build_depend>
+
+  <run_depend>teleop_twist_keyboard</run_depend>
+  <build_depend>teleop_twist_keyboard</build_depend>
   <!-- joint control -->
 
   <export>

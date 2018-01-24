@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   robot_state_publisher
   rqt_gui
   effort_controllers
+  teleop_twist_keyboard
 )
 
 
