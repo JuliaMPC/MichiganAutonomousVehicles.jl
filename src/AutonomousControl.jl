@@ -158,7 +158,8 @@ end
  end
 
  # modifify the maximum solver time
- SS=Dict((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>c.m.max_cpu_time))
+ # SS=Dict((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>c.m.max_cpu_time))
+ SS=((:name=>c.m.solver)) # NOTE using KNITRO and IPOPT defaults
  defineSolver!(n,SS)
 
          #  1      2          3          4
