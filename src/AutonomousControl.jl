@@ -8,8 +8,8 @@ using .CaseModule
 
 export
       initializeAutonomousControl,
-      autonomousControl,
-      updateAutoParams!
+      updateAutoParams!,
+      avMpc
 
 """
 n=initializeAutonomousControl(c);
@@ -57,10 +57,16 @@ function initializeAutonomousControl(c)
 
  # solver settings
  solver_time = (c.m.solver==:Ipopt) ? :max_cpu_time : :maxtime_real
- SS=((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>100.)) # let the solver have more time for the initalization
+ #SS=((:name=>c.m.solver),(:mpc_defaults=>true),(solver_time=>100.)) # let the solver have more time for the initalization
+ SS=((:name=>c.m.solver)) # NOTE using KNITRO and IPOPT defaults
 
  # configure problem
- configure!(n;(Nck=c.m.Nck),(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
+ if c.m.integrationScheme==:lgrImplicit || c.m.integrationScheme==:lgrExplicit
+   configure!(n;(:Nck=>c.m.Nck),(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
+ else
+   configure!(n;(:N=>c.m.Nck),(:integrationScheme=>c.m.integrationScheme),(:finalTimeDV=>true),(:solverSettings=>SS))
+ end
+
  x=n.r.x[:,1];y=n.r.x[:,2];psi=n.r.x[:,5]; # pointers to JuMP variables
 
  #################################
@@ -198,6 +204,42 @@ function updateAutoParams!(n,c)
  return goal_in_range
 end
 
+"""
+--------------------------------------------------------------------------------------\n
+Author: Huckleberry Febbo, Graduate Student, University of Michigan
+Date Create: 2/06/2018, Last Modified: 2/06/2018 \n
+--------------------------------------------------------------------------------------\n
+"""
+function avMpc(c)
+ n = initializeAutonomousControl(c);
+ driveStraight!(n)
+ for ii = 1:n.mpc.max_iter
+     println("Running model for the: ",n.r.eval_num," time")
+     updateAutoParams!(n,c)                        # update model parameters
+     status = autonomousControl!(n)                # rerun optimization
+     n.mpc.t0_actual = (n.r.eval_num-1)*n.mpc.tex  # external so that it can be updated easily in PathFollowing
+     simPlant!(n)
+
+     println("checkCrash: ",checkCrash(n,c,300,c.m.sm-1))
+     println("n.r.status: ",n.r.status)
+
+     if n.r.status==:Optimal || n.r.status==:Suboptimal || n.r.status==:UserLimit
+       println("Passing Optimized Signals to 3DOF Vehicle Model");
+     elseif n.r.status==:Infeasible
+       println("\n FINISH:Pass PREVIOUSLY Optimized Signals to 3DOF Vehicle Model \n"); break;
+     else
+       println("\n There status is nor Optimal or Infeaible -> create logic for this case!\n"); break;
+     end
+   if n.r.eval_num==n.mpc.max_iter
+     warn(" \n The maximum number of iterations has been reached while closing the loop; consider increasing (max_iteration) \n")
+   end
+   if ((n.r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (n.r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.XF_tol[1]
+      println("Goal Attained! \n"); n.mpc.goal_reached=true;
+      break;
+   end
+ end
+ return n
+end
 """
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan

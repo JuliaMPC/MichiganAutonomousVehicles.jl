@@ -32,8 +32,8 @@ export
 
       # AutonomousControl.jl
       initializeAutonomousControl,
-      autonomousControl!,
-      updateAutoParams!
+      updateAutoParams!,
+      avMpc
 
       # SharedControl.jl
     #  initializeSharedControl!,

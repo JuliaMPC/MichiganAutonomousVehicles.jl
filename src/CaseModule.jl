@@ -331,6 +331,7 @@ type Misc
   L_rd               # relaxation distance to LiDAR range
   sigma              # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
   Nck                # number of points per interval
+  N                  # number of points in :tm methods
   solver             # either :IPOPT or :KNITRO
   max_iter           # max evaluations in optimization
   mpc_max_iter       # an MPC parameter
@@ -351,6 +352,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -456,6 +458,26 @@ function defineMisc(name)
     m.Lr=50.
     m.L_rd=5.;
     m.integrationScheme=:lgrExplicit
+  elseif name==:RTPP
+    m.name=name;
+    m.model=:ThreeDOFv2;
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2, 0.0, 0.0, 0.0];
+    m.Xlims=[111.,250.]
+    m.Ylims=[-1., 140.]
+    m.tex=0.5;
+    m.max_cpu_time=300.;
+    m.sm=5.0;
+    m.sigma=1.0;
+    #m.Nck=[10,8,6];#[12,10,8,6];
+    #m.n.N=
+    #m.solver=:KNITRO;
+    m.max_iter=500;
+    m.mpc_max_iter=60;
+    m.PredictX0=true;
+    m.FixedTp=true;
+    m.Lr= 50. # not in play, why?
+    m.L_rd=5.;
+  #  m.integrationScheme=:lgrExplicit
   elseif name==:path
     m.name=name;
     m.model=:ThreeDOFv2;
@@ -661,6 +683,13 @@ function defineCase(;name::Symbol=:auto,
      c.w=defineWeights(c.name);
      c.t=defineTrack(:NA);
      c.m=defineMisc(:autoARC);
+   elseif mode==:RTPP
+     c.name=mode
+     c.g=defineGoal(:autoGazebo);
+     c.o=defineObs(:autoGazebo);
+     c.w=defineWeights(:auto);
+     c.t=defineTrack(:NA);
+     c.m=defineMisc(c.name);
    elseif mode==:path
      c.name=mode;
      c.g=defineGoal(c.name);
