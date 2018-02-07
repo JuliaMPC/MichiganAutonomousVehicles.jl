@@ -7,9 +7,9 @@ project(ros_chrono)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-SET(Chrono_DIR "/home/shreyas/chrono/chrono_build/cmake")
+SET(Chrono_DIR "/opt/chrono/chrono_build/cmake")
 
-LIST(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/home/shreyas/chrono/chrono_build/lib64")
+LIST(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/opt/chrono/chrono_build/lib64")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -114,8 +114,8 @@ find_package(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_chrono
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+   CATKIN_DEPENDS roscpp rospy std_msgs
+#   DEPENDS system_lib Chrono
 )
 
 ###########
@@ -130,6 +130,7 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
   ${CHRONO_INCLUDE_DIRS}
+  ${CH_IRRLICHTINC}
 #  ${Irrlicht_INCLUDE_DIRS}
 )
 
@@ -154,11 +155,13 @@ endif()
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+MESSAGE(STATUS "...add hmmwv_model")
+
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/ros_chrono_node.cpp)
-add_executable(myexe src/my_example.cpp)
+add_executable(hmmwv_model src/hmmwv_model.cpp)
 
 #--------------------------------------------------------------
 # Set properties for your executable target
@@ -169,10 +172,10 @@ add_executable(myexe src/my_example.cpp)
 # install tree (if using an installed version of Chrono).
 #--------------------------------------------------------------
 
-set_target_properties(myexe PROPERTIES
-	    COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
+set_target_properties(hmmwv_model PROPERTIES
+	    COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${CH_CXX_FLAGS} ${CH_IRRLICHT_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
 	    COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
-	    LINK_FLAGS "${CHRONO_LINKER_FLAGS}")
+	    LINK_FLAGS "${CHRONO_LINKER_FLAGS} ${LINKERFLAG_EXE}")
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -187,7 +190,12 @@ set_target_properties(myexe PROPERTIES
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(myexe ${CHRONO_LIBRARIES})
+target_link_libraries(hmmwv_model
+  ChronoEngine
+  ChronoEngine_irrlicht
+  ChronoEngine_vehicle
+  ChronoModels_vehicle
+  ${CHRONO_LIBRARIES})
 #############
 ## Install ##
 #############
