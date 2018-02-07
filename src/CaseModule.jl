@@ -177,6 +177,64 @@ function defineObs(name)
     o.X0=[200.];
     o.Y0=[43.];
     o.status=falses(length(o.X0));
+  elseif name==:s1
+    o.name=name;
+    o.A=[1.] # 5
+    o.B=[1.] # 5
+    o.s_x=[0.]
+    o.s_y=[0.]
+    o.X0=[200.]
+    o.Y0=[50.]
+    o.status=falses(length(o.X0));
+  elseif name==:s2
+    o.name=name;
+    o.A=[1.]
+    o.B=[1.]
+    o.s_x=[2.]
+    o.s_y=[0.]
+    o.X0=[190]
+    o.Y0=[50]
+    o.status=falses(length(o.X0));
+  elseif name==:s3
+    o.name=name;
+    o.A=[5.,10.,2.]
+    o.B=[5.,10.,2.]
+    o.s_x=[0.,0.,0.]
+    o.s_y=[0.,0.,0.]
+    o.X0=[205.,180.,200.]
+    o.Y0=[50.,75.,30.]
+    o.status=falses(length(o.X0));
+  elseif name==:s4
+    o.name=name;
+    o.A=[5,4,2]
+    o.B=[5,4,2]
+    o.s_x=[-2,-1,0]
+    o.s_y=[0,1,4.5]
+    o.X0=[205,180,200]
+    o.Y0=[57,75,30]
+    o.status=falses(length(o.X0));
+  elseif name==:s5
+    o.name=name;
+    A=[2.5 1.5];      # small car
+    B=[3.3 1.9];      # HUMMVEEs
+    C=[9.8/2 3.65/2]; # tanks
+    random=[0 0.6 1 0.25 0.6 0.5495 0.4852 0.8905 0.7990 1];
+    o.X0=[225,225,220,170,220,165,200];
+    o.Y0=[25,30,45,60,75,95,50];
+    o.A=[B[1],B[1],B[1],C[1],A[1],C[1],C[2]];
+    o.B=[B[2],B[2],B[2],C[2],A[2],C[2],C[1]];
+    o.s_x=[-5,-5.5,-6,6,-5,4,-2];
+    o.s_y=[0,0,0,0,0,0,5];
+    o.status=falses(length(o.X0));
+  elseif name==:s6
+    o.name=name;
+    o.A=[10,2]
+    o.B=[10,2]
+    o.s_x=[0,0]
+    o.s_y=[0,4]
+    o.X0=[180,200]
+    o.Y0=[75,30]
+    o.status=falses(length(o.X0));
   elseif name==:autoGazebo
     o.name=name;
     o.A=[1.];
@@ -461,12 +519,12 @@ function defineMisc(name)
   elseif name==:RTPP
     m.name=name;
     m.model=:ThreeDOFv2;
-    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2, 0.0, 0.0, 0.0];
+    m.X0=[200.0, 0.0, 0.0, 0.0, pi/2, 0.0, 17.0, 0.0];
     m.Xlims=[111.,250.]
     m.Ylims=[-1., 140.]
     m.tex=0.5;
     m.max_cpu_time=300.;
-    m.sm=5.0;
+    m.sm=2.6;
     m.sigma=1.0;
     #m.Nck=[10,8,6];#[12,10,8,6];
     #m.n.N=
@@ -475,7 +533,7 @@ function defineMisc(name)
     m.mpc_max_iter=60;
     m.PredictX0=true;
     m.FixedTp=true;
-    m.Lr= 50. # not in play, why?
+    m.Lr= 50. # not in play
     m.L_rd=5.;
   #  m.integrationScheme=:lgrExplicit
   elseif name==:path
@@ -564,6 +622,7 @@ function setMisc!(c;
                 L_rd=c.m.L_rd,
                 sigma=c.m.sigma,
                 Nck=c.m.Nck,
+                N=c.m.N,
                 solver=c.m.solver,
                 max_iter=c.m.max_iter,
                 mpc_max_iter=c.m.mpc_max_iter,
@@ -584,6 +643,7 @@ function setMisc!(c;
     c.m.L_rd=L_rd;
     c.m.sigma=sigma;
     c.m.Nck=Nck;
+    c.m.N=N;
     c.m.solver=solver;
     c.m.max_iter=max_iter;
     c.m.mpc_max_iter=mpc_max_iter;
