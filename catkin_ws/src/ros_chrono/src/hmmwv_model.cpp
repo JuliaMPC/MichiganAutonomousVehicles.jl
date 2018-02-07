@@ -18,11 +18,14 @@
 // Y pointing to the left.
 //
 // =============================================================================
-
+#include <fstream>
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/utils/ChFilters.h"
+#include "ros/ros.h"
+#include "std_msgs/String.h"
 
+#include <sstream>
 #include "chrono_vehicle/ChVehicleModelData.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
 #include "chrono_vehicle/driver/ChIrrGuiDriver.h"
@@ -38,7 +41,8 @@ using namespace chrono::vehicle::hmmwv;
 
 // =============================================================================
 // Problem parameters
-
+// Main Data Path
+std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
 // Contact method type
 ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 
@@ -46,7 +50,8 @@ ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 TireModelType tire_model = TireModelType::RIGID;
 
 // Input file name for PACEJKA tires if they are selected
-std::string pacejka_tire_file("src/HMMWV_pacejka.tir");
+std::string pacejka_tire_file(data_path+"hmmwv/tire/HMMWV_pacejka.tir");
+//std::string pacejka_tire_file("hmmwv/tire/HMMWV_pacejka.tir");
 
 // Type of powertrain model (SHAFTS or SIMPLE)
 PowertrainModelType powertrain_model = PowertrainModelType::SHAFTS;
@@ -62,12 +67,15 @@ VisualizationType wheel_vis_type = VisualizationType::NONE;
 VisualizationType tire_vis_type = VisualizationType::PRIMITIVES;
 
 // Input file names for the path-follower driver model
-std::string steering_controller_file("src/SteeringController.json");
-std::string speed_controller_file("src/SpeedController.json");
+std::string steering_controller_file(data_path+"generic/driver/SteeringController.json");
+//std::string steering_controller_file("generic/driver/SteeringController.json");
+std::string speed_controller_file(data_path+"generic/driver/SpeedController.json");
+//std::string speed_controller_file("generic/driver/SpeedController.json");
 // std::string path_file("paths/straight.txt");
 // std::string path_file("paths/curve.txt");
 // std::string path_file("paths/NATO_double_lane_change.txt");
-std::string path_file("src/ISO_double_lane_change.txt");
+std::string path_file(data_path+"paths/ISO_double_lane_change.txt");
+//std::string path_file("paths/ISO_double_lane_change.txt");
 
 // Initial vehicle location and orientation
 ChVector<> initLoc(-125, -125, 0.5);
@@ -188,13 +196,24 @@ class ChDriverSelector : public irr::IEventReceiver {
 
 int main(int argc, char* argv[]) {
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
+  //  std::string ros::package::getPath('ros_chrono');
+  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/ISO_double_lane_change.txt");
+  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/SpeedController.json");
+  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/SteeringController.json");
+  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/HMMWV_pacejka.tir");
+   SetChronoDataPath(CHRONO_DATA_DIR);
+   vehicle::SetDataPath("opt/chrono/chrono/data/vehicle");
+
+   std::cout << GetChronoDataPath() << "\n";
+  //    std::cout << file.is_open() << "\n";
+
 
     // ------------------------------
     // Create the vehicle and terrain
     // ------------------------------
 
     // Create the HMMWV vehicle, set parameters, and initialize
-    HMMWV_Full my_hmmwv;
+    HMMWV_Reduced my_hmmwv;
     my_hmmwv.SetContactMethod(contact_method);
     my_hmmwv.SetChassisFixed(false);
     my_hmmwv.SetInitPosition(ChCoordsys<>(initLoc, initRot));
@@ -217,14 +236,16 @@ int main(int argc, char* argv[]) {
     terrain.SetContactRestitutionCoefficient(0.01f);
     terrain.SetContactMaterialProperties(2e7f, 0.3f);
     terrain.SetColor(ChColor(1, 1, 1));
-    terrain.SetTexture(vehicle::GetDataFile("terrain/textures/tile4.jpg"), 200, 200);
+    //terrain.SetTexture(chrono::vehicle::GetDataFile("terrain/textures/tile4.jpg"), 200, 200);
+    terrain.SetTexture(data_path+"terrain/textures/tile4.jpg", 200, 200);
     terrain.Initialize(terrainHeight, terrainLength, terrainWidth);
 
     // ----------------------
     // Create the Bezier path
     // ----------------------
 
-    auto path = ChBezierCurve::read(vehicle::GetDataFile(path_file));
+//  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
+auto path = ChBezierCurve::read(path_file);
     ////path->write("my_path.txt");
 
     // ---------------------------------------
@@ -266,8 +287,8 @@ int main(int argc, char* argv[]) {
     driver_follower.GetSteeringController().SetGains(0.5, 0, 0);
     driver_follower.GetSpeedController().SetGains(0.4, 0, 0);
     */
-    ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), vehicle::GetDataFile(steering_controller_file),
-                                         vehicle::GetDataFile(speed_controller_file), path, "my_path", target_speed);
+    ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
+                                         speed_controller_file, path, "my_path", target_speed);
     driver_follower.Initialize();
 
     // Create and register a custom Irrlicht event receiver to allow selecting the
