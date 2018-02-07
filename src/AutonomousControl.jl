@@ -119,7 +119,7 @@ end
   @NLparameter(n.mdl, w_goal_param == 0.0)
   @NLparameter(n.mdl, w_psi_param == 0.0)
  else
-  @NLparameter(n.mdl, w_goal_param == c.w.goal)
+  @NLparameter(n.mdl, w_goal_param == 100*c.w.goal)
   @NLparameter(n.mdl, w_psi_param == c.w.psi)
  end
  obj_params=[w_goal_param,w_psi_param]
@@ -151,7 +151,7 @@ end
  if n.s.save
   warn("saving initial optimization results where functions where cashed!")
  end
- for k in 1:1
+ for k in 1:3
   optimize!(n);
   if n.r.status==:Optimal; break; end
  end
@@ -163,10 +163,8 @@ end
          #  1      2          3          4
  n.params=[pa,obs_params,LiDAR_params,obj_params];
 
- n.s.save=true; # settings
-
- #n.s.evalConstraints=true
-
+ n.s.save=true;
+ n.s.evalConstraints=true
  return n
 end
 
@@ -220,9 +218,6 @@ function avMpc(c)
      simPlant!(n)  # simulating out here even if it is not :Optimal so that we can look at final solution
      if n.r.status==:Optimal || n.r.status==:Suboptimal || n.r.status==:UserLimit
        println("Passing Optimized Signals to 3DOF Vehicle Model");
-       if checkCrash(n,c,c.m.sm-1;(:plant=>true))
-         warn(" \n The vehicle crashed -> stopping simulation! \n"); break;
-       end
      elseif n.r.status==:Infeasible
        println("\n FINISH:Pass PREVIOUSLY Optimized Signals to 3DOF Vehicle Model \n"); break;
      else
@@ -234,6 +229,9 @@ function avMpc(c)
    if ((n.r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (n.r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.XF_tol[1]
       println("Goal Attained! \n"); n.mpc.goal_reached=true;
       break;
+   end
+   if checkCrash(n,c,c.m.sm-1;(:plant=>true))
+     warn(" \n The vehicle crashed -> stopping simulation! \n"); break;
    end
  end
  return n

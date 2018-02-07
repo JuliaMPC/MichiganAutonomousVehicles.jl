@@ -228,12 +228,12 @@ function defineObs(name)
     o.status=falses(length(o.X0));
   elseif name==:s6
     o.name=name;
-    o.A=[10,2]
-    o.B=[10,2]
-    o.s_x=[0,0]
-    o.s_y=[0,4]
-    o.X0=[180,200]
-    o.Y0=[75,30]
+    o.A=[10,2,5,3]
+    o.B=[10,2,5,3]
+    o.s_x=[-3,4,-2,0]
+    o.s_y=[-2,4,2.5,0]
+    o.X0=[180,180,220,200]
+    o.Y0=[75,40,60,100]
     o.status=falses(length(o.X0));
   elseif name==:autoGazebo
     o.name=name;
@@ -351,6 +351,12 @@ function defineGoal(name)
     g.name=name;
     g.x_ref=200.;
     g.y_ref=100.;
+    g.psi_ref=pi/2;
+  elseif name==:RTPP
+    g=Goal();
+    g.name=name;
+    g.x_ref=200.;
+    g.y_ref=125.;
     g.psi_ref=pi/2;
   elseif name==:path # test case for testPathFollowing.jl
     g=Goal();
@@ -745,8 +751,8 @@ function defineCase(;name::Symbol=:auto,
      c.m=defineMisc(:autoARC);
    elseif mode==:RTPP
      c.name=mode
-     c.g=defineGoal(:autoGazebo);
-     c.o=defineObs(:autoGazebo);
+     c.g=defineGoal(:RTPP);
+  #   c.o=defineObs(:autoGazebo);
      c.w=defineWeights(:auto);
      c.t=defineTrack(:NA);
      c.m=defineMisc(c.name);
