@@ -244,7 +244,7 @@ function avMpc(c)
       println("Goal Attained! \n"); n.mpc.goal_reached=true;
       break;
    end
-   if checkCrash(n,c,c.m.sm-1;(:plant=>true))
+   if checkCrash(n,c,c.m.sm2;(:plant=>true))
      warn(" \n The vehicle crashed -> stopping simulation! \n"); break;
    end
  end

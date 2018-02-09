@@ -390,7 +390,8 @@ type Misc
   tp                 # prediction horizon (s)
   tex                # execution horizon (s)
   max_cpu_time       # maximum time the algorithm has
-  sm                 # (m) distance to make sure we don't hit obstacle
+  sm                 # (m) distance to make sure we don't hit obstacle (for optimization)
+  sm2                # (m) distance to make sure we don't hit obstacle (for crash checking)
   Lr                 # LiDAR range (m)
   L_rd               # relaxation distance to LiDAR range
   sigma              # 0.05 (m)small margin, if the vehicle is within this margin, then the target is considered to be reached
@@ -416,6 +417,7 @@ function Misc()
             [],
             0.0,
             0.0,
+            [],
             [],
             [],
             [],
@@ -530,7 +532,8 @@ function defineMisc(name)
     m.Ylims=[-1., 140.]
     m.tex=0.5;
     m.max_cpu_time=300.;
-    m.sm=2.6;
+    m.sm=4.5;
+    m.sm2=3;
     m.sigma=1.0;
     #m.Nck=[10,8,6];#[12,10,8,6];
     #m.n.N=
