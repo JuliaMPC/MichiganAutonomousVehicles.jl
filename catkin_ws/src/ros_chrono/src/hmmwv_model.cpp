@@ -93,7 +93,7 @@ double terrainWidth = 300.0;   // size in Y direction
 ChVector<> trackPoint(0.0, 0.0, 1.75);
 
 // Simulation step size
-double step_size = 1e-3;
+double step_size = 10e-3;
 double tire_step_size = step_size;
 
 // Simulation end time
@@ -208,7 +208,7 @@ int main(int argc, char* argv[]) {
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
     ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
-    ros::Rate loop_rate(5);
+    //ros::Rate loop_rate(5);
 
     // ------------------------------
     // Create the vehicle and terrain
@@ -453,7 +453,7 @@ int main(int argc, char* argv[]) {
 
 
         //ChPacejkaTire<> slip_angle = GetSlipAngle()
-        //double slip_angle = PacejkaTire.GetSlipAngle();
+        double slip_angle = my_hmmwv.GetTire(0)->GetLongitudinalSlip();
 
         ros_chrono_msgs::veh_status data_out;
         data_out.t_chrono=time; //time in chrono simulation
@@ -461,7 +461,7 @@ int main(int argc, char* argv[]) {
         data_out.y_pos=global_pos[1];
         data_out.x_v=my_hmmwv.GetVehicle().GetVehicleSpeed(); //speed measured at the origin of the chassis reference frame.
         data_out.yaw_curr=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3)); //in radians
-        //data_out.sa=slip_angle;
+        data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]
         data_out.str_in=steering_input; //steeering input in the range [-1,+1]
@@ -469,7 +469,7 @@ int main(int argc, char* argv[]) {
 
         vehicleinfo_pub.publish(data_out);
       //  ros::spinOnce();
-        loop_rate.sleep();
+      //  loop_rate.sleep();
     }
 
     if (state_output){
