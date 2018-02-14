@@ -196,18 +196,16 @@ class ChDriverSelector : public irr::IEventReceiver {
 
 int main(int argc, char* argv[]) {
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
-  //  std::string ros::package::getPath('ros_chrono');
-  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/ISO_double_lane_change.txt");
-  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/SpeedController.json");
-  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/SteeringController.json");
-  //  std::ifstream file("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/devel/lib/ros_chrono/HMMWV_pacejka.tir");
-   SetChronoDataPath(CHRONO_DATA_DIR);
-   vehicle::SetDataPath("opt/chrono/chrono/data/vehicle");
 
-   std::cout << GetChronoDataPath() << "\n";
-  //    std::cout << file.is_open() << "\n";
+    SetChronoDataPath(CHRONO_DATA_DIR);
+    vehicle::SetDataPath("opt/chrono/chrono/data/vehicle");
 
-
+    // std::cout << GetChronoDataPath() << "\n"; check path of chrono data folder
+    // Initialize ROS Chrono node and set node handle to n
+    ros::init(argc, argv, "Chronode");
+    ros::NodeHandle n;
+    ros::Publisher vehicleinfo_pub = n.advertise<std_msgs::String>("vehicleinfo", 1000);
+    ros::Rate loop_rate(10);
     // ------------------------------
     // Create the vehicle and terrain
     // ------------------------------
