@@ -1,0 +1,9 @@
+float64 t_chrono
+float64 x_pos
+float64 y_pos
+float64 x_v
+float64 yaw_curr
+float64 sa
+float64 thrt_in
+float64 brk_in
+float64 str_in
