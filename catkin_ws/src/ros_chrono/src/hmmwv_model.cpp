@@ -24,16 +24,16 @@
 #include "chrono/utils/ChFilters.h"
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-
+#include "ros_chrono_msgs/veh_status.h"
 #include <sstream>
 #include "chrono_vehicle/ChVehicleModelData.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
 #include "chrono_vehicle/driver/ChIrrGuiDriver.h"
 #include "chrono_vehicle/driver/ChPathFollowerDriver.h"
 #include "chrono_vehicle/wheeled_vehicle/utils/ChWheeledVehicleIrrApp.h"
-
+#include <math.h>
 #include "chrono_models/vehicle/hmmwv/HMMWV.h"
-
+//using veh_status.msg
 using namespace chrono;
 using namespace chrono::geometry;
 using namespace chrono::vehicle;
@@ -54,7 +54,7 @@ std::string pacejka_tire_file(data_path+"hmmwv/tire/HMMWV_pacejka.tir");
 //std::string pacejka_tire_file("hmmwv/tire/HMMWV_pacejka.tir");
 
 // Type of powertrain model (SHAFTS or SIMPLE)
-PowertrainModelType powertrain_model = PowertrainModelType::SHAFTS;
+PowertrainModelType powertrain_model = PowertrainModelType::SIMPLE;
 
 // Drive type (FWD, RWD, or AWD)
 DrivelineType drive_type = DrivelineType::RWD;
@@ -195,6 +195,8 @@ class ChDriverSelector : public irr::IEventReceiver {
 // =============================================================================
 
 int main(int argc, char* argv[]) {
+//while (ros::ok())
+//{
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     SetChronoDataPath(CHRONO_DATA_DIR);
@@ -202,10 +204,12 @@ int main(int argc, char* argv[]) {
 
     // std::cout << GetChronoDataPath() << "\n"; check path of chrono data folder
     // Initialize ROS Chrono node and set node handle to n
+
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
-    ros::Publisher vehicleinfo_pub = n.advertise<std_msgs::String>("vehicleinfo", 1000);
-    ros::Rate loop_rate(10);
+    ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
+    ros::Rate loop_rate(5);
+
     // ------------------------------
     // Create the vehicle and terrain
     // ------------------------------
@@ -243,8 +247,11 @@ int main(int argc, char* argv[]) {
     // ----------------------
 
 //  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
-auto path = ChBezierCurve::read(path_file);
-    ////path->write("my_path.txt");
+//z= 0.1;
+
+    auto path = ChBezierCurve::read(path_file);
+//std::cout << path;
+  //  path->write("my_path.txt");
 
     // ---------------------------------------
     // Create the vehicle Irrlicht application
@@ -335,7 +342,6 @@ auto path = ChBezierCurve::read(path_file);
 
     // Driver location in vehicle local frame
     ChVector<> driver_pos = my_hmmwv.GetChassis()->GetLocalDriverCoordsys().pos;
-
     // Number of simulation steps between miscellaneous events
     double render_step_size = 1 / fps;
     int render_steps = (int)std::ceil(render_step_size / step_size);
@@ -436,10 +442,40 @@ auto path = ChBezierCurve::read(path_file);
 
         // Increment simulation frame number
         sim_frame++;
+
+        ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehiclePos(); //global location of chassis reference frame origin
+        ChQuaternion<> global_orntn = my_hmmwv.GetVehicle().GetVehicleRot();//global orientation as quaternion
+        //ChVector<> euler_ang = global_orntn.Q_to_Rotv(); //convert to euler angles
+        double q0 = global_orntn[0];
+        double q1 = global_orntn[1];
+        double q2 = global_orntn[2];
+        double q3 = global_orntn[3];
+
+
+        //ChPacejkaTire<> slip_angle = GetSlipAngle()
+        //double slip_angle = PacejkaTire.GetSlipAngle();
+
+        ros_chrono_msgs::veh_status data_out;
+        data_out.t_chrono=time; //time in chrono simulation
+        data_out.x_pos= global_pos[0] ;
+        data_out.y_pos=global_pos[1];
+        data_out.x_v=my_hmmwv.GetVehicle().GetVehicleSpeed(); //speed measured at the origin of the chassis reference frame.
+        data_out.yaw_curr=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3)); //in radians
+        //data_out.sa=slip_angle;
+        data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
+        data_out.brk_in=braking_input; //braking input in the range [0,+1]
+        data_out.str_in=steering_input; //steeering input in the range [-1,+1]
+
+
+        vehicleinfo_pub.publish(data_out);
+      //  ros::spinOnce();
+        loop_rate.sleep();
     }
 
-    if (state_output)
+    if (state_output){
         csv.write_to_file(out_dir + "/state.out");
+    }
 
+//}
     return 0;
 }

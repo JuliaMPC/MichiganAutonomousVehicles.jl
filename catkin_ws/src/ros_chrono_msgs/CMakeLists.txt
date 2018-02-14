@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ros_chrono)
+project(ros_chrono_msgs)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,23 +7,13 @@ project(ros_chrono)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-SET(Chrono_DIR "/opt/chrono/chrono_build/cmake")
-
-LIST(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/opt/chrono/chrono_build/lib64")
-
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  ros_chrono_msgs
-  //message_generation
+  message_generation
 )
 
-find_package(
-  Chrono
-  COMPONENTS Irrlicht
-  CONFIG
-)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -58,10 +48,11 @@ find_package(
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-#add_message_files(
-#   FILES
-#   veh_status.msg
-#)
+ add_message_files(
+   FILES
+   veh_status.msg
+#   Message2.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -78,10 +69,10 @@ find_package(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-#)
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -114,9 +105,9 @@ find_package(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ros_chrono
+#  LIBRARIES ros_chrono_msgs
    CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
-#   DEPENDS system_lib Chrono
+#  DEPENDS system_lib
 )
 
 ###########
@@ -125,30 +116,14 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-#SET(Irrlicht_INCLUDE_DIRS "/home/shreyas/Downloads/irrlicht-1.8.4/include")
-#LIST(APPEND CHRONO_INCLUDE_DIRS "${CHRONO_INCLUDE_DIRS}/home/shreyas/Downloads/irrlicht-1.8.4/include")
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
-  ${CHRONO_INCLUDE_DIRS}
-  ${CH_IRRLICHTINC}
-#  ${Irrlicht_INCLUDE_DIRS}
 )
-
-#--------------------------------------------------------------
-# Tweaks to disable some warnings with MSVC
-#--------------------------------------------------------------
-if(MSVC)
-    add_definitions("-D_CRT_SECURE_NO_DEPRECATE")  # avoids deprecation warnings
-    add_definitions("-D_SCL_SECURE_NO_DEPRECATE")  # avoids deprecation warnings
-    set(EXTRA_COMPILE_FLAGS "/wd4275")             # disable warnings triggered by Irrlicht
-else()
-    set(EXTRA_COMPILE_FLAGS "")
-endif()
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/ros_chrono.cpp
+#   src/${PROJECT_NAME}/ros_chrono_msgs.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -156,27 +131,11 @@ endif()
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-MESSAGE(STATUS "...add hmmwv_model")
-
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/ros_chrono_node.cpp)
-add_executable(hmmwv_model src/hmmwv_model.cpp)
+# add_executable(${PROJECT_NAME}_node src/ros_chrono_msgs_node.cpp)
 
-#--------------------------------------------------------------
-# Set properties for your executable target
-#
-# Note that here we define a macro CHRONO_DATA_DIR which will
-# contain the path to the Chrono data directory, either in its
-# source tree (if using a build version of Chrono), or in its
-# install tree (if using an installed version of Chrono).
-#--------------------------------------------------------------
-
-set_target_properties(hmmwv_model PROPERTIES
-	    COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${CH_CXX_FLAGS} ${CH_IRRLICHT_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
-      COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
-	    LINK_FLAGS "${CHRONO_LINKER_FLAGS} ${LINKERFLAG_EXE}")
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -191,13 +150,7 @@ set_target_properties(hmmwv_model PROPERTIES
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(hmmwv_model
-  ChronoEngine
-  ChronoEngine_irrlicht
-  ChronoEngine_vehicle
-  ChronoModels_vehicle
-  ${catkin_LIBRARIES}
-  ${CHRONO_LIBRARIES})
+
 #############
 ## Install ##
 #############
@@ -238,7 +191,7 @@ target_link_libraries(hmmwv_model
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_ros_chrono.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_ros_chrono_msgs.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
