@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--  ************** Global Parameters ***************  -->
+  <!--param name="/use_sim_time" value="true"/-->
+
+  <rosparam command="load" file="$(find mavs_gazebo)/config/global_params.yaml" />
+
+  <!-- TODO fix gazebo and RViz views on hmmwv -->
+
+  <!-- TODO use the robot name parametrically in all files-->
+  <arg name="name" default="hmmwv"/>
+
+  <!-- start gazebo and load the world -->
+  <include file="$(find mavs_gazebo)/launch/world.launch" />
+
+  <!-- spawn obstacles -->
+  <param command="$(find xacro)/xacro --inorder $(find mavs_description)/urdf/obstacles.urdf.xacro " name="obstacles" />
+  <node args="-urdf -param obstacles -model obstacles" name="spawn_obstacles" output="screen" pkg="gazebo_ros" respawn="false" type="spawn_model" />
+
+  <!-- spawn robot into Gazebo -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mavs_gazebo)/urdf/mavs.urdf.xacro" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model hmmwv"/>
+
+  <!-- teliop TODO make this optional with args-->
+  <node name="teliop_keys" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
+  <node name="teliop" pkg="mavs_control" type="teliop.jl" output="screen"/>
+
+</launch>

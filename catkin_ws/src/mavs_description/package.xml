@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mavs_description</name>
+  <version>0.0.0</version>
+  <description>The mavs_description package</description>
+
+  <license>MIT</license>
+  <author email="febboh@umich.edu">Huckleberry Febbo</author>
+  <maintainer email="febbo@umich.edu">Huckleberry Febbo</maintainer>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf</depend>
+  <depend>gazebo_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nodelet</depend>
+  <depend>eigen3</depend>
+  <depend>velodyne_description</depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+     <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include `rosboost-cfg --cflags`"
+          lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lplanning_models"/>
+   </export>
+</package>

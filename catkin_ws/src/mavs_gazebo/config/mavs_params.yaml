@@ -1,0 +1,21 @@
+mavs:
+
+ # robot
+ X0:
+   x: 200.0
+   y: 0.0
+   v: 0.0
+   r: 0.0
+   psi: 1.57079632679
+   sa: 0.0
+   ux: 0.0
+   ax: 0.0
+
+ # obstacles
+ obs:
+   radius: [1.0]
+   length: [2.]
+   x0: [200.]
+   y0: [10.]
+   vx: [0.]
+   vy: [0.]

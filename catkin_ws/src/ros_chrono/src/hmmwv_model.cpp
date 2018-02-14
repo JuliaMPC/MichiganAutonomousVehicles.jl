@@ -42,7 +42,7 @@ using namespace chrono::vehicle::hmmwv;
 // =============================================================================
 // Problem parameters
 // Main Data Path
-std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
+std::string data_path("/home/febbo/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
 // Contact method type
 ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 
