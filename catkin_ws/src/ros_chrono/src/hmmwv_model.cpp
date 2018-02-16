@@ -16,8 +16,11 @@
 //
 // The vehicle reference frame has Z up, X towards the front of the vehicle, and
 // Y pointing to the left.
-//
+// TO DO:
+// Find proper yaw rate calculation
+// Subsscribe to msg from obstacle_avoidance_chrono, callback to that to calculate ChBezierCurve
 // =============================================================================
+
 #include <fstream>
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
@@ -25,6 +28,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ros_chrono_msgs/veh_status.h"
+#include "ros_chrono_msgs/command_chrono.h"
 #include <sstream>
 #include "chrono_vehicle/ChVehicleModelData.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
@@ -33,6 +37,7 @@
 #include "chrono_vehicle/wheeled_vehicle/utils/ChWheeledVehicleIrrApp.h"
 #include <math.h>
 #include "chrono_models/vehicle/hmmwv/HMMWV.h"
+#define PI 3.1415926535
 //using veh_status.msg
 using namespace chrono;
 using namespace chrono::geometry;
@@ -42,7 +47,7 @@ using namespace chrono::vehicle::hmmwv;
 // =============================================================================
 // Problem parameters
 // Main Data Path
-std::string data_path("/home/febbo/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
+std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
 // Contact method type
 ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 
@@ -355,6 +360,7 @@ int main(int argc, char* argv[]) {
 
     while (app.GetDevice()->run()) {
         // Extract system state
+
         double time = my_hmmwv.GetSystem()->GetChTime();
         ChVector<> acc_CG = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         ChVector<> acc_driver = my_hmmwv.GetVehicle().GetVehicleAcceleration(driver_pos);
@@ -443,15 +449,27 @@ int main(int argc, char* argv[]) {
         // Increment simulation frame number
         sim_frame++;
 
-        ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehiclePos(); //global location of chassis reference frame origin
+        ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehicleCOMPos();//global location of chassis reference frame origin
         ChQuaternion<> global_orntn = my_hmmwv.GetVehicle().GetVehicleRot();//global orientation as quaternion
+        //ChQuaternion<> global_orntn_dt = my_hmmwv.GetVehicle().GetChassisBody()->GetVehicleRot_dt();//global orientation as quaternion
+        ChVector<> global_velCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dt();
+        ChVector<> global_accCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         //ChVector<> euler_ang = global_orntn.Q_to_Rotv(); //convert to euler angles
         double q0 = global_orntn[0];
         double q1 = global_orntn[1];
         double q2 = global_orntn[2];
         double q3 = global_orntn[3];
+        double yaw_val=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3));
 
-
+        if (yaw_val<0){
+          yaw_val=-yaw_val+PI/2;
+        }
+        else if (yaw_val>=0 && yaw_val<=PI/2){
+          yaw_val=PI/2-yaw_val;
+        }
+        else if (yaw_val>PI/2 && yaw_val<=PI){
+          yaw_val=5*PI/2-yaw_val;
+        }
         //ChPacejkaTire<> slip_angle = GetSlipAngle()
         double slip_angle = my_hmmwv.GetTire(0)->GetLongitudinalSlip();
 
@@ -459,8 +477,11 @@ int main(int argc, char* argv[]) {
         data_out.t_chrono=time; //time in chrono simulation
         data_out.x_pos= global_pos[0] ;
         data_out.y_pos=global_pos[1];
-        data_out.x_v=my_hmmwv.GetVehicle().GetVehicleSpeed(); //speed measured at the origin of the chassis reference frame.
-        data_out.yaw_curr=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3)); //in radians
+        data_out.x_v= global_velCOM[0]; //speed measured at the origin of the chassis reference frame.
+        data_out.y_v= global_velCOM[1];
+        data_out.x_a= global_accCOM[0];
+        data_out.yaw_curr=yaw_val; //in radians
+        data_out.yaw_rate=0; //in radians
         data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]

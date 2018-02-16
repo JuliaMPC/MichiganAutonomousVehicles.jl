@@ -35,6 +35,33 @@ function setObstacleParams(msg::Obstacles)
   return nothing
 end
 
+# 2 constant static obstacles 
+function setConstObstacleParams(msg::Obstacles)
+  L = 2
+  radius=[1 1]
+  center_x=[200 250]
+  center_y=[50 50]
+  velocity_x=[0 0]
+  velocity_y=[0 0]
+    r = (); x = (); y = (); vx = (); vy = ();
+    for i in 1:L
+      r = (r..., radius)
+      x = (x..., center_x)
+      y = (y..., center_y)
+      vx = (vx..., velocity_x)
+      vy = (vy..., velocity_y)
+    end
+
+    # update obstacle field parameters
+    RobotOS.set_param("obstacle_radius",r)
+    RobotOS.set_param("obstacle_x",x)
+    RobotOS.set_param("obstacle_y",y)
+    RobotOS.set_param("obstacle_vx",vx)
+    RobotOS.set_param("obstacle_vy",vy)
+
+
+  return nothing
+end
 init_node("obstacle_params")
-sub = Subscriber{Obstacles}("/obstacles", setObstacleParams, queue_size = 10)
+sub = Subscriber{Obstacles}("/obstacles", setConstObstacleParams, queue_size = 10)
 spin()

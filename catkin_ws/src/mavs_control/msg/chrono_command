@@ -1,0 +1,2 @@
+float64[] x_traj                       #desired x positions [m]
+float64[] y_traj                       #desired y positions [m]
