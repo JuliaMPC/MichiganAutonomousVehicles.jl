@@ -18,6 +18,8 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- for obstacle message service -->
+  <build_depend>ros_chrono_msgs</build_depend>
+  <run_depend>ros_chrono_msgs</run_depend>
   <build_depend>message_generation</build_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>obstacle_detector</run_depend>

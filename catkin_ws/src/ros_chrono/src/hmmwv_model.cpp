@@ -16,15 +16,20 @@
 //
 // The vehicle reference frame has Z up, X towards the front of the vehicle, and
 // Y pointing to the left.
-//
+// TO DO:
+// Find proper yaw rate calculation
+// Subsscribe to msg from obstacle_avoidance_chrono, callback to that to calculate ChBezierCurve
 // =============================================================================
+
 #include <fstream>
+#include<iostream>
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/utils/ChFilters.h"
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ros_chrono_msgs/veh_status.h"
+#include "mavs_control/Control.h"
 #include <sstream>
 #include "chrono_vehicle/ChVehicleModelData.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
@@ -33,6 +38,7 @@
 #include "chrono_vehicle/wheeled_vehicle/utils/ChWheeledVehicleIrrApp.h"
 #include <math.h>
 #include "chrono_models/vehicle/hmmwv/HMMWV.h"
+#define PI 3.1415926535
 //using veh_status.msg
 using namespace chrono;
 using namespace chrono::geometry;
@@ -42,7 +48,7 @@ using namespace chrono::vehicle::hmmwv;
 // =============================================================================
 // Problem parameters
 // Main Data Path
-std::string data_path("/home/febbo/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
+std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
 // Contact method type
 ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 
@@ -72,22 +78,23 @@ std::string steering_controller_file(data_path+"generic/driver/SteeringControlle
 std::string speed_controller_file(data_path+"generic/driver/SpeedController.json");
 //std::string speed_controller_file("generic/driver/SpeedController.json");
 // std::string path_file("paths/straight.txt");
+std::string path_file(data_path+"paths/my_path.txt");
+
 // std::string path_file("paths/curve.txt");
 // std::string path_file("paths/NATO_double_lane_change.txt");
-std::string path_file(data_path+"paths/ISO_double_lane_change.txt");
+//std::string path_file(data_path+"paths/ISO_double_lane_change.txt");
 //std::string path_file("paths/ISO_double_lane_change.txt");
-
 // Initial vehicle location and orientation
-ChVector<> initLoc(-125, -125, 0.5);
-ChQuaternion<> initRot(1, 0, 0, 0);
+ChVector<> initLoc(200, 0, 0.5);
+ChQuaternion<> initRot(cos(PI/4), 0, 0, sin(PI/4)); //initial yaw of pi/2
 
 // Desired vehicle speed (m/s)
 double target_speed = 12;
 
 // Rigid terrain dimensions
 double terrainHeight = 0;
-double terrainLength = 300.0;  // size in X direction
-double terrainWidth = 300.0;   // size in Y direction
+double terrainLength = 1000.0;  // size in X direction
+double terrainWidth = 1000.0;   // size in Y direction
 
 // Point on chassis tracked by the chase camera
 ChVector<> trackPoint(0.0, 0.0, 1.75);
@@ -191,23 +198,43 @@ class ChDriverSelector : public irr::IEventReceiver {
     ChIrrGuiDriver* m_driver_gui;
     ChDriver* m_driver;
 };
+//----------------------callback
+void controlCallback(const mavs_control::Control::ConstPtr &msg)
+{
+  //ROS_INFO("I heard: [%f]", msg->t);
+  std::vector<double> x_vec=msg->x;
+  std::vector<double> y_vec=msg->y;
+  double num_pts = x_vec.size();
+  double num_cols = 3;
+  double z_val = 0.5;
+  std::ofstream myfile;
+  myfile.open(path_file,std::ofstream::out | std::ofstream::trunc);
+
+  myfile << ' ' << num_pts << ' '<< num_cols << '\n';
+  for (int pt_cnt=0; pt_cnt<num_pts;pt_cnt=pt_cnt+1){
+  myfile << ' ' << x_vec[pt_cnt] << ' '<< y_vec[pt_cnt] <<' ' << z_val << '\n';
+}
+  myfile.close();
+}
 
 // =============================================================================
 
 int main(int argc, char* argv[]) {
 //while (ros::ok())
 //{
+
+
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     SetChronoDataPath(CHRONO_DATA_DIR);
     vehicle::SetDataPath("opt/chrono/chrono/data/vehicle");
-
     // std::cout << GetChronoDataPath() << "\n"; check path of chrono data folder
     // Initialize ROS Chrono node and set node handle to n
 
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
     ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
+    ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
     //ros::Rate loop_rate(5);
 
     // ------------------------------
@@ -248,10 +275,9 @@ int main(int argc, char* argv[]) {
 
 //  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
 //z= 0.1;
-
     auto path = ChBezierCurve::read(path_file);
 //std::cout << path;
-  //  path->write("my_path.txt");
+//    lol->write(data_path+"paths/my_path.txt");
 
     // ---------------------------------------
     // Create the vehicle Irrlicht application
@@ -352,9 +378,11 @@ int main(int argc, char* argv[]) {
     ChRealtimeStepTimer realtime_timer;
     int sim_frame = 0;
     int render_frame = 0;
-
+    double yaw_prev_val=0;
+    double t_prev_val=0;
     while (app.GetDevice()->run()) {
         // Extract system state
+
         double time = my_hmmwv.GetSystem()->GetChTime();
         ChVector<> acc_CG = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         ChVector<> acc_driver = my_hmmwv.GetVehicle().GetVehicleAcceleration(driver_pos);
@@ -443,15 +471,27 @@ int main(int argc, char* argv[]) {
         // Increment simulation frame number
         sim_frame++;
 
-        ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehiclePos(); //global location of chassis reference frame origin
+        ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehicleCOMPos();//global location of chassis reference frame origin
         ChQuaternion<> global_orntn = my_hmmwv.GetVehicle().GetVehicleRot();//global orientation as quaternion
+        //ChQuaternion<> global_orntn_dt = my_hmmwv.GetVehicle().GetChassisBody()->GetVehicleRot_dt();//global orientation as quaternion
+        ChVector<> global_velCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dt();
+        ChVector<> global_accCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         //ChVector<> euler_ang = global_orntn.Q_to_Rotv(); //convert to euler angles
         double q0 = global_orntn[0];
         double q1 = global_orntn[1];
         double q2 = global_orntn[2];
         double q3 = global_orntn[3];
+        double yaw_val=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3));
 
-
+        if (yaw_val<0){
+          yaw_val=-yaw_val+PI/2;
+        }
+        else if (yaw_val>=0 && yaw_val<=PI/2){
+          yaw_val=PI/2-yaw_val;
+        }
+        else if (yaw_val>PI/2 && yaw_val<=PI){
+          yaw_val=5*PI/2-yaw_val;
+        }
         //ChPacejkaTire<> slip_angle = GetSlipAngle()
         double slip_angle = my_hmmwv.GetTire(0)->GetLongitudinalSlip();
 
@@ -459,16 +499,20 @@ int main(int argc, char* argv[]) {
         data_out.t_chrono=time; //time in chrono simulation
         data_out.x_pos= global_pos[0] ;
         data_out.y_pos=global_pos[1];
-        data_out.x_v=my_hmmwv.GetVehicle().GetVehicleSpeed(); //speed measured at the origin of the chassis reference frame.
-        data_out.yaw_curr=atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3)); //in radians
+        data_out.x_v= global_velCOM[0]; //speed measured at the origin of the chassis reference frame.
+        data_out.y_v= global_velCOM[1];
+        data_out.x_a= global_accCOM[0];
+        data_out.yaw_curr=yaw_val; //in radians
+        data_out.yaw_rate=(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
         data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]
         data_out.str_in=steering_input; //steeering input in the range [-1,+1]
 
+        yaw_prev_val=yaw_val; //update previous yaw and time for next iteration's yaw rate calculation
+        t_prev_val=time;
 
         vehicleinfo_pub.publish(data_out);
-      //  ros::spinOnce();
       //  loop_rate.sleep();
     }
 
@@ -477,5 +521,6 @@ int main(int argc, char* argv[]) {
     }
 
 //}
+    ros::spinOnce();
     return 0;
 }

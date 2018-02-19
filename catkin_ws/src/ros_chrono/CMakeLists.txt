@@ -61,6 +61,7 @@ find_package(
 #add_message_files(
 #   FILES
 #   veh_status.msg
+#   command_chrono.msg
 #)
 
 ## Generate services in the 'srv' folder
