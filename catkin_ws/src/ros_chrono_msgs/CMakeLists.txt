@@ -51,7 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    veh_status.msg
-   command_chrono.msg
 #   Message2.msg
 )
 

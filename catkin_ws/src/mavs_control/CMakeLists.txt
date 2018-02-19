@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   rqt_gui
   effort_controllers
   teleop_twist_keyboard
+  ros_chrono_msgs
+  ros_chrono
 )
 
 

@@ -7,8 +7,7 @@ using RobotOS
 @rosimport gazebo_msgs.srv: SetModelState, GetModelState, GetWorldProperties, GetLinkState, SetLinkState
 @rosimport obstacle_detector.msg: Obstacles, CircleObstacle
 @rosimport mavs_control.msg: Control
-@rosimport mavs_control.msg: chrono_command
-
+@rosimport ros_chrono_msgs.msg: veh_status
 
 rostypegen()
 using geometry_msgs.msg
@@ -19,6 +18,7 @@ using gazebo_msgs.srv
 using gazebo_msgs.msg
 using obstacle_detector.msg
 using mavs_control.msg
+using ros_chrono_msgs.msg
 
 using NLOptControl
 using VehicleModels
@@ -79,10 +79,25 @@ function setObstacleData(params)
   return nothing
 end
 
+function callback(msg::veh_status)
+    X0 = zeros(8)
+    X0[1] = msg.x_pos
+    X0[2] = msg.y_pos
+    X0[3] = msg.y_v
+    X0[4] = msg.yaw_rate
+#    Q = [gs_r.pose.orientation.x,gs_r.pose.orientation.y,gs_r.pose.orientation.z,gs_r.pose.orientation.w]
+#    roll, pitch, yaw = tf.euler_from_quaternion(Q)
+    X0[5] = msg.yaw_curr
+    X0[6] = msg.sa
+    X0[7] = msg.x_v
+    X0[8] = msg.x_a
+    println(string(X0,"\n"))
+    updateX0!(n,X0;(:userUpdate=>true))
+end
+
 function main()
   init_node("rosjl_obstacles")
   #linkName = "base_footprint"  # TODO make this a parameter
-
   modelName = RobotOS.get_param("robotName")
 
   ###############################
@@ -136,6 +151,7 @@ function main()
   vehPose.orientation.z = Q[3]
   vehPose.orientation.w = Q[4]
 
+  #veh_info = Subscriber{veh_status}("vehicleinfo", callback,queue_size = 2)
   # Define the robot state
   ms = ModelState()
   ms.model_name = modelName
@@ -177,19 +193,8 @@ function main()
     if !gs_r.success
         error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
     end
-    X0 = zeros(8)
-    X0[1] = gs_r.pose.position.x
-    X0[2] = gs_r.pose.position.y
-    X0[3] = n.mpc.X0p[3]
-    X0[4] = n.mpc.X0p[4]
-    Q = [gs_r.pose.orientation.x,gs_r.pose.orientation.y,gs_r.pose.orientation.z,gs_r.pose.orientation.w]
-    roll, pitch, yaw = tf.euler_from_quaternion(Q)
-    X0[5] = yaw
-    X0[6] = n.mpc.X0p[6]
-    X0[7] = n.mpc.X0p[7]
-    X0[8] = n.mpc.X0p[8]
-    println(string(X0,"\n"))
-    updateX0!(n,X0;(:userUpdate=>true))
+    veh_info = Subscriber{veh_status}("vehicleinfo", callback,queue_size = 2)
+
     status=autonomousControl!(n)                # rerun optimization
   #  n.mpc.t0_actual=(n.r.eval_num-1)*n.mpc.tex  # external so that it can be updated easily in PathFollowing
     n.mpc.t0_actual = to_sec(get_rostime())

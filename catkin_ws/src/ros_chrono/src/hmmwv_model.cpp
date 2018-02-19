@@ -22,13 +22,14 @@
 // =============================================================================
 
 #include <fstream>
+#include<iostream>
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/utils/ChFilters.h"
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ros_chrono_msgs/veh_status.h"
-#include "ros_chrono_msgs/command_chrono.h"
+#include "mavs_control/Control.h"
 #include <sstream>
 #include "chrono_vehicle/ChVehicleModelData.h"
 #include "chrono_vehicle/terrain/RigidTerrain.h"
@@ -77,22 +78,23 @@ std::string steering_controller_file(data_path+"generic/driver/SteeringControlle
 std::string speed_controller_file(data_path+"generic/driver/SpeedController.json");
 //std::string speed_controller_file("generic/driver/SpeedController.json");
 // std::string path_file("paths/straight.txt");
+std::string path_file(data_path+"paths/my_path.txt");
+
 // std::string path_file("paths/curve.txt");
 // std::string path_file("paths/NATO_double_lane_change.txt");
-std::string path_file(data_path+"paths/ISO_double_lane_change.txt");
+//std::string path_file(data_path+"paths/ISO_double_lane_change.txt");
 //std::string path_file("paths/ISO_double_lane_change.txt");
-
 // Initial vehicle location and orientation
-ChVector<> initLoc(-125, -125, 0.5);
-ChQuaternion<> initRot(1, 0, 0, 0);
+ChVector<> initLoc(200, 0, 0.5);
+ChQuaternion<> initRot(cos(PI/4), 0, 0, sin(PI/4)); //initial yaw of pi/2
 
 // Desired vehicle speed (m/s)
 double target_speed = 12;
 
 // Rigid terrain dimensions
 double terrainHeight = 0;
-double terrainLength = 300.0;  // size in X direction
-double terrainWidth = 300.0;   // size in Y direction
+double terrainLength = 1000.0;  // size in X direction
+double terrainWidth = 1000.0;   // size in Y direction
 
 // Point on chassis tracked by the chase camera
 ChVector<> trackPoint(0.0, 0.0, 1.75);
@@ -196,23 +198,43 @@ class ChDriverSelector : public irr::IEventReceiver {
     ChIrrGuiDriver* m_driver_gui;
     ChDriver* m_driver;
 };
+//----------------------callback
+void controlCallback(const mavs_control::Control::ConstPtr &msg)
+{
+  //ROS_INFO("I heard: [%f]", msg->t);
+  std::vector<double> x_vec=msg->x;
+  std::vector<double> y_vec=msg->y;
+  double num_pts = x_vec.size();
+  double num_cols = 3;
+  double z_val = 0.5;
+  std::ofstream myfile;
+  myfile.open(path_file,std::ofstream::out | std::ofstream::trunc);
+
+  myfile << ' ' << num_pts << ' '<< num_cols << '\n';
+  for (int pt_cnt=0; pt_cnt<num_pts;pt_cnt=pt_cnt+1){
+  myfile << ' ' << x_vec[pt_cnt] << ' '<< y_vec[pt_cnt] <<' ' << z_val << '\n';
+}
+  myfile.close();
+}
 
 // =============================================================================
 
 int main(int argc, char* argv[]) {
 //while (ros::ok())
 //{
+
+
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     SetChronoDataPath(CHRONO_DATA_DIR);
     vehicle::SetDataPath("opt/chrono/chrono/data/vehicle");
-
     // std::cout << GetChronoDataPath() << "\n"; check path of chrono data folder
     // Initialize ROS Chrono node and set node handle to n
 
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
     ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
+    ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
     //ros::Rate loop_rate(5);
 
     // ------------------------------
@@ -253,10 +275,9 @@ int main(int argc, char* argv[]) {
 
 //  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
 //z= 0.1;
-
     auto path = ChBezierCurve::read(path_file);
 //std::cout << path;
-  //  path->write("my_path.txt");
+//    lol->write(data_path+"paths/my_path.txt");
 
     // ---------------------------------------
     // Create the vehicle Irrlicht application
@@ -357,7 +378,8 @@ int main(int argc, char* argv[]) {
     ChRealtimeStepTimer realtime_timer;
     int sim_frame = 0;
     int render_frame = 0;
-
+    double yaw_prev_val=0;
+    double t_prev_val=0;
     while (app.GetDevice()->run()) {
         // Extract system state
 
@@ -481,15 +503,16 @@ int main(int argc, char* argv[]) {
         data_out.y_v= global_velCOM[1];
         data_out.x_a= global_accCOM[0];
         data_out.yaw_curr=yaw_val; //in radians
-        data_out.yaw_rate=0; //in radians
+        data_out.yaw_rate=(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
         data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]
         data_out.str_in=steering_input; //steeering input in the range [-1,+1]
 
+        yaw_prev_val=yaw_val; //update previous yaw and time for next iteration's yaw rate calculation
+        t_prev_val=time;
 
         vehicleinfo_pub.publish(data_out);
-      //  ros::spinOnce();
       //  loop_rate.sleep();
     }
 
@@ -498,5 +521,6 @@ int main(int argc, char* argv[]) {
     }
 
 //}
+    ros::spinOnce();
     return 0;
 }

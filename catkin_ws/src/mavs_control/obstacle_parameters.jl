@@ -35,7 +35,7 @@ function setObstacleParams(msg::Obstacles)
   return nothing
 end
 
-# 2 constant static obstacles 
+# 2 constant static obstacles
 function setConstObstacleParams(msg::Obstacles)
   L = 2
   radius=[1 1]
