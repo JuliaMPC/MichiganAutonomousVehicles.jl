@@ -24,7 +24,7 @@ using NLOptControl
 using VehicleModels
 using DataFrames
 using MAVs
-using KNITRO
+using Ipopt
 using PyCall
 @pyimport tf.transformations as tf
 
@@ -102,7 +102,7 @@ function main()
 
   ###############################
   # set up services and messages
-#=
+
   # pause simulation
   const pause_physics = ServiceProxy("/gazebo/pause_physics",Empty)
   println("Waiting for '/gazebo/pause_physics' service...")
@@ -122,7 +122,7 @@ function main()
   const set_state = ServiceProxy("/gazebo/set_model_state", SetModelState)
   println("Waiting for 'gazebo/set_model_state' service...")
   wait_for_service("gazebo/set_model_state")
-=#
+
   # message for solution to optimal control problem
   const pub = Publisher{Control}("/mavs/optimal_control", queue_size=10)
 

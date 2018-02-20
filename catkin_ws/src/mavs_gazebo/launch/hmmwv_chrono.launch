@@ -43,11 +43,8 @@
   <node name="teliop" pkg="mavs_control" type="teliop.jl" output="screen"/>
 
   <!-- Obstacle Avoidance-->
-  <node name="obstacle_params" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/>
-  <node name="rosjl_obstacles" pkg="mavs_control" type="obstacle_avoidance_chrono.jl" output="screen"/>
-  <!--node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/>-->
-  <node name="Chronode" pkg="ros_chrono" type="hmmwv_model.cpp" output="screen"/>
-
-
+  <!--<node name="obstacle_parameters" pkg="mavs_control" type="obstacle_parameters.jl" output="screen"/>-->
+  <!--<node name="obstacle_avoidance" pkg="mavs_control" type="obstacle_avoidance.jl" output="screen"/>-->
+    <!--<node name="move_hmmwv" pkg="mavs_control" type="move_hmmwv.jl" output="screen"/>-->
 
 </launch>

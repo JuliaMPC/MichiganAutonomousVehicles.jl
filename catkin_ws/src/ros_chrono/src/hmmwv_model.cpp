@@ -234,7 +234,6 @@ int main(int argc, char* argv[]) {
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
     ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
-    ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
     //ros::Rate loop_rate(5);
 
     // ------------------------------
@@ -272,10 +271,10 @@ int main(int argc, char* argv[]) {
     // ----------------------
     // Create the Bezier path
     // ----------------------
-
+    ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
+    auto path = ChBezierCurve::read(path_file);
 //  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
 //z= 0.1;
-    auto path = ChBezierCurve::read(path_file);
 //std::cout << path;
 //    lol->write(data_path+"paths/my_path.txt");
 
@@ -382,6 +381,7 @@ int main(int argc, char* argv[]) {
     double t_prev_val=0;
     while (app.GetDevice()->run()) {
         // Extract system state
+
 
         double time = my_hmmwv.GetSystem()->GetChTime();
         ChVector<> acc_CG = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
