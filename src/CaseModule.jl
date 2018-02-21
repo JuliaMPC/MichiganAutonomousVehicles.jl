@@ -493,11 +493,11 @@ function defineMisc(name)
     m.Xlims=[111.,250.]
     m.Ylims=[-1., 140.]
     m.tex=0.5;
-    m.max_cpu_time=0.47;#0.41;
+    m.max_cpu_time=15.;#0.41;
     m.sm=5.0;
     m.sigma=1.0;
     m.Nck=[10,8,6];#[12,10,8,6];
-    m.solver=:lpopt;
+    m.solver=:Ipopt;
     m.max_iter=500;
     m.mpc_max_iter=60;
     m.PredictX0=true;

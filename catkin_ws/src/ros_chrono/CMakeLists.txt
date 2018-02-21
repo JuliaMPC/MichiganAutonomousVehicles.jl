@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   ros_chrono_msgs
-  //message_generation
+  mavs_control
 )
 
 find_package(

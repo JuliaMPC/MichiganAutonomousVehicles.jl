@@ -79,7 +79,7 @@ function setObstacleData(params)
   return nothing
 end
 
-function callback(msg::veh_status)
+function callback(msg::veh_status,n::NLOpt)
     X0 = zeros(8)
     X0[1] = msg.x_pos
     X0[2] = msg.y_pos
@@ -91,7 +91,7 @@ function callback(msg::veh_status)
     X0[6] = msg.sa
     X0[7] = msg.x_v
     X0[8] = msg.x_a
-    println(string(X0,"\n"))
+    println(string(X0," X0\n"))
     updateX0!(n,X0;(:userUpdate=>true))
 end
 
@@ -173,7 +173,8 @@ function main()
   up = EmptyRequest()
   unpause_physics(up)
 
-  while !is_shutdown()
+idx=1
+  while true #!is_shutdown()
 
     if ((n.r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (n.r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.XF_tol[1]
        println("Goal Attained! \n"); n.mpc.goal_reached=true;
@@ -193,9 +194,12 @@ function main()
     if !gs_r.success
         error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
     end
-    veh_info = Subscriber{veh_status}("vehicleinfo", callback,queue_size = 2)
+    veh_info = Subscriber{veh_status}("vehicleinfo", callback,(n,),queue_size = 2)
 
-    status=autonomousControl!(n)                # rerun optimization
+    if idx == 1
+        idx=2
+        status=autonomousControl!(n)                # rerun optimization
+    end
   #  n.mpc.t0_actual=(n.r.eval_num-1)*n.mpc.tex  # external so that it can be updated easily in PathFollowing
     n.mpc.t0_actual = to_sec(get_rostime())
     msg = Control()

@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include<iostream>
+#include "boost/bind.hpp"
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/utils/ChFilters.h"
@@ -44,6 +45,7 @@ using namespace chrono;
 using namespace chrono::geometry;
 using namespace chrono::vehicle;
 using namespace chrono::vehicle::hmmwv;
+
 
 // =============================================================================
 // Problem parameters
@@ -201,9 +203,55 @@ class ChDriverSelector : public irr::IEventReceiver {
 //----------------------callback
 void controlCallback(const mavs_control::Control::ConstPtr &msg)
 {
+
+  HMMWV_Reduced my_hmmwv;
+  my_hmmwv.SetContactMethod(contact_method);
+  my_hmmwv.SetChassisFixed(false);
+  my_hmmwv.SetInitPosition(ChCoordsys<>(initLoc, initRot));
+  my_hmmwv.SetPowertrainType(powertrain_model);
+  my_hmmwv.SetDriveType(drive_type);
+  my_hmmwv.SetTireType(tire_model);
+  my_hmmwv.SetTireStepSize(tire_step_size);
+  my_hmmwv.SetPacejkaParamfile(pacejka_tire_file);
+  my_hmmwv.Initialize();
+
+  my_hmmwv.SetChassisVisualizationType(chassis_vis_type);
+  my_hmmwv.SetSuspensionVisualizationType(suspension_vis_type);
+  my_hmmwv.SetSteeringVisualizationType(steering_vis_type);
+  my_hmmwv.SetWheelVisualizationType(wheel_vis_type);
+  my_hmmwv.SetTireVisualizationType(tire_vis_type);
+
+  ChVehicleIrrApp app(&my_hmmwv.GetVehicle(), &my_hmmwv.GetPowertrain(), L"Steering Controller Demo",
+  irr::core::dimension2d<irr::u32>(800, 640));
+  app.SetHUDLocation(500, 20);
+  app.SetSkyBox();
+  app.AddTypicalLogo();
+  app.AddTypicalLights(irr::core::vector3df(-150.f, -150.f, 200.f), irr::core::vector3df(-150.f, 150.f, 200.f), 100,
+                                           100);
+  app.AddTypicalLights(irr::core::vector3df(150.f, -150.f, 200.f), irr::core::vector3df(150.0f, 150.f, 200.f), 100,
+                                           100);
+  app.EnableGrid(false);
+  app.SetChaseCamera(trackPoint, 6.0, 0.5);
+
+  app.SetTimestep(step_size);
+
+  // Visualization of controller points (sentinel & target)
+  irr::scene::IMeshSceneNode* ballS = app.GetSceneManager()->addSphereSceneNode(0.1f);
+  irr::scene::IMeshSceneNode* ballT = app.GetSceneManager()->addSphereSceneNode(0.1f);
+  ballS->getMaterial(0).EmissiveColor = irr::video::SColor(0, 255, 0, 0);
+  ballT->getMaterial(0).EmissiveColor = irr::video::SColor(0, 0, 255, 0);
+
+  // -------------------------
+  // Create the driver systems
+  // -------------------------
+
+  // Create both a GUI driver and a path-follower and allow switching between them
+  ChIrrGuiDriver driver_gui(app);
+//  app.SetPaused(1);
   //ROS_INFO("I heard: [%f]", msg->t);
   std::vector<double> x_vec=msg->x;
   std::vector<double> y_vec=msg->y;
+  ROS_INFO("I heard: [%f]", x_vec[0]);
   double num_pts = x_vec.size();
   double num_cols = 3;
   double z_val = 0.5;
@@ -215,6 +263,47 @@ void controlCallback(const mavs_control::Control::ConstPtr &msg)
   myfile << ' ' << x_vec[pt_cnt] << ' '<< y_vec[pt_cnt] <<' ' << z_val << '\n';
 }
   myfile.close();
+
+  auto path = ChBezierCurve::read(path_file);
+
+  // Initialize driver follower
+  ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
+                                       speed_controller_file, path, "my_path", target_speed);
+  driver_follower.Initialize();
+
+  // Create and register a custom Irrlicht event receiver to allow selecting the
+  // current driver model.
+  ChDriverSelector selector(my_hmmwv.GetVehicle(), &driver_follower, &driver_gui);
+  app.SetUserEventReceiver(&selector);
+
+  // Finalize construction of visualization assets
+  app.AssetBindAll();
+  app.AssetUpdateAll();
+
+  // -----------------
+  // Initialize output
+  // -----------------
+
+  state_output = state_output || povray_output;
+
+  if (state_output) {
+      if (ChFileutils::MakeDirectory(out_dir.c_str()) < 0) {
+          std::cout << "Error creating directory " << out_dir << std::endl;
+          //return 1;
+      }
+  }
+
+  if (povray_output) {
+      if (ChFileutils::MakeDirectory(pov_dir.c_str()) < 0) {
+          std::cout << "Error creating directory " << pov_dir << std::endl;
+        //  return 1;
+      }
+      driver_follower.ExportPathPovray(out_dir);
+  }
+
+  app.SetPaused(0);
+
+
 }
 
 // =============================================================================
@@ -271,7 +360,8 @@ int main(int argc, char* argv[]) {
     // ----------------------
     // Create the Bezier path
     // ----------------------
-    ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
+
+
     auto path = ChBezierCurve::read(path_file);
 //  auto path = ChBezierCurve::read(chrono::vehicle::GetDataFile(path_file));
 //z= 0.1;
@@ -317,6 +407,7 @@ int main(int argc, char* argv[]) {
     driver_follower.GetSteeringController().SetGains(0.5, 0, 0);
     driver_follower.GetSpeedController().SetGains(0.4, 0, 0);
     */
+
     ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
                                          speed_controller_file, path, "my_path", target_speed);
     driver_follower.Initialize();
@@ -381,7 +472,46 @@ int main(int argc, char* argv[]) {
     double t_prev_val=0;
     while (app.GetDevice()->run()) {
         // Extract system state
+        ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
+    /*    app.SetPaused(1);
+        auto path = ChBezierCurve::read(path_file);
 
+        // Initialize driver follower
+        ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
+                                             speed_controller_file, path, "my_path", target_speed);
+        driver_follower.Initialize();
+
+        // Create and register a custom Irrlicht event receiver to allow selecting the
+        // current driver model.
+        ChDriverSelector selector(my_hmmwv.GetVehicle(), &driver_follower, &driver_gui);
+        app.SetUserEventReceiver(&selector);
+
+        // Finalize construction of visualization assets
+        app.AssetBindAll();
+        app.AssetUpdateAll();
+
+        // -----------------
+        // Initialize output
+        // -----------------
+
+        state_output = state_output || povray_output;
+
+        if (state_output) {
+            if (ChFileutils::MakeDirectory(out_dir.c_str()) < 0) {
+                std::cout << "Error creating directory " << out_dir << std::endl;
+                //return 1;
+            }
+        }
+
+        if (povray_output) {
+            if (ChFileutils::MakeDirectory(pov_dir.c_str()) < 0) {
+                std::cout << "Error creating directory " << pov_dir << std::endl;
+              //  return 1;
+            }
+            driver_follower.ExportPathPovray(out_dir);
+        }
+
+        app.SetPaused(0);  */
 
         double time = my_hmmwv.GetSystem()->GetChTime();
         ChVector<> acc_CG = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
@@ -503,7 +633,7 @@ int main(int argc, char* argv[]) {
         data_out.y_v= global_velCOM[1];
         data_out.x_a= global_accCOM[0];
         data_out.yaw_curr=yaw_val; //in radians
-        data_out.yaw_rate=(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
+        data_out.yaw_rate=0;//(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
         data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]
