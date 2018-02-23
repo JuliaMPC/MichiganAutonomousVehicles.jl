@@ -93,6 +93,7 @@ function callback(msg::veh_status,n::NLOpt)
     X0[8] = msg.x_a
     println(string(X0," X0\n"))
     updateX0!(n,X0;(:userUpdate=>true))
+    idx=1;
 end
 
 function main()
@@ -194,6 +195,8 @@ idx=1
     if !gs_r.success
         error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
     end
+
+    
     veh_info = Subscriber{veh_status}("vehicleinfo", callback,(n,),queue_size = 2)
 
     if idx == 1

@@ -27,6 +27,7 @@
 #include "chrono/core/ChFileutils.h"
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/utils/ChFilters.h"
+#include <ros/console.h>
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ros_chrono_msgs/veh_status.h"
@@ -126,6 +127,7 @@ bool povray_output = false;
 bool state_output = false;
 int filter_window_size = 20;
 
+
 // =============================================================================
 
 // Custom Irrlicht event receiver for selecting current driver model.
@@ -201,10 +203,11 @@ class ChDriverSelector : public irr::IEventReceiver {
     ChDriver* m_driver;
 };
 //----------------------callback
-void controlCallback(const mavs_control::Control::ConstPtr &msg)
+//void controlCallback(const mavs_control::Control::ConstPtr &msg)
+void controlCallback(const mavs_control::Control::ConstPtr &msg,HMMWV_Reduced &my_hmmwv, ChVehicleIrrApp &app,ChIrrGuiDriver &driver_gui)
 {
-
-  HMMWV_Reduced my_hmmwv;
+  std::cout << "Callback Activated!!!";
+/*  HMMWV_Reduced my_hmmwv;
   my_hmmwv.SetContactMethod(contact_method);
   my_hmmwv.SetChassisFixed(false);
   my_hmmwv.SetInitPosition(ChCoordsys<>(initLoc, initRot));
@@ -223,6 +226,9 @@ void controlCallback(const mavs_control::Control::ConstPtr &msg)
 
   ChVehicleIrrApp app(&my_hmmwv.GetVehicle(), &my_hmmwv.GetPowertrain(), L"Steering Controller Demo",
   irr::core::dimension2d<irr::u32>(800, 640));
+  //PAUSE SIMULATION
+  app.SetPaused(1);
+
   app.SetHUDLocation(500, 20);
   app.SetSkyBox();
   app.AddTypicalLogo();
@@ -244,14 +250,17 @@ void controlCallback(const mavs_control::Control::ConstPtr &msg)
   // -------------------------
   // Create the driver systems
   // -------------------------
-
+  //double time = my_hmmwv.GetSystem()->GetChTime();
+*/
   // Create both a GUI driver and a path-follower and allow switching between them
-  ChIrrGuiDriver driver_gui(app);
-//  app.SetPaused(1);
-  //ROS_INFO("I heard: [%f]", msg->t);
+//  ChIrrGuiDriver driver_gui(app);
+  //driver_gui.Initialize();
+  app.SetPaused(1);
+
   std::vector<double> x_vec=msg->x;
   std::vector<double> y_vec=msg->y;
-  ROS_INFO("I heard: [%f]", x_vec[0]);
+//  ROS_INFO("I heard: [%f]", x_vec[0]);
+  //ROS_INFO_STREAM(msg);
   double num_pts = x_vec.size();
   double num_cols = 3;
   double z_val = 0.5;
@@ -470,49 +479,13 @@ int main(int argc, char* argv[]) {
     int render_frame = 0;
     double yaw_prev_val=0;
     double t_prev_val=0;
+    //my_hmmwv_ptr = &my_hmmwv;
+    //app_ptr = &app;
     while (app.GetDevice()->run()) {
         // Extract system state
-        ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 1000, controlCallback);
-    /*    app.SetPaused(1);
-        auto path = ChBezierCurve::read(path_file);
-
-        // Initialize driver follower
-        ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
-                                             speed_controller_file, path, "my_path", target_speed);
-        driver_follower.Initialize();
-
-        // Create and register a custom Irrlicht event receiver to allow selecting the
-        // current driver model.
-        ChDriverSelector selector(my_hmmwv.GetVehicle(), &driver_follower, &driver_gui);
-        app.SetUserEventReceiver(&selector);
-
-        // Finalize construction of visualization assets
-        app.AssetBindAll();
-        app.AssetUpdateAll();
-
-        // -----------------
-        // Initialize output
-        // -----------------
-
-        state_output = state_output || povray_output;
-
-        if (state_output) {
-            if (ChFileutils::MakeDirectory(out_dir.c_str()) < 0) {
-                std::cout << "Error creating directory " << out_dir << std::endl;
-                //return 1;
-            }
-        }
-
-        if (povray_output) {
-            if (ChFileutils::MakeDirectory(pov_dir.c_str()) < 0) {
-                std::cout << "Error creating directory " << pov_dir << std::endl;
-              //  return 1;
-            }
-            driver_follower.ExportPathPovray(out_dir);
-        }
-
-        app.SetPaused(0);  */
-
+       ros::Subscriber sub = n.subscribe<mavs_control::Control>("/mavs/optimal_control", 10, boost::bind(controlCallback, _1, boost::ref(my_hmmwv),boost::ref(app),boost::ref(driver_gui)));
+    //   ros::Subscriber sub = n.subscribe<mavs_control::Control>("/mavs/optimal_control", 10, boost::bind(&controlCallback, _1, boost::ref(my_hmmwv),boost::ref(app)));
+      //  ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 10, controlCallback);
         double time = my_hmmwv.GetSystem()->GetChTime();
         ChVector<> acc_CG = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         ChVector<> acc_driver = my_hmmwv.GetVehicle().GetVehicleAcceleration(driver_pos);
@@ -644,6 +617,7 @@ int main(int argc, char* argv[]) {
 
         vehicleinfo_pub.publish(data_out);
       //  loop_rate.sleep();
+       ros::spinOnce();
     }
 
     if (state_output){
@@ -651,6 +625,6 @@ int main(int argc, char* argv[]) {
     }
 
 //}
-    ros::spinOnce();
+
     return 0;
 }
