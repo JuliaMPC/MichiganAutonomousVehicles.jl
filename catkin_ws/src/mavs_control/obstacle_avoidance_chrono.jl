@@ -78,9 +78,9 @@ function setObstacleData(params)
 
   return nothing
 end
+global X0 = zeros(8)
 
 function callback(msg::veh_status,n::NLOpt)
-    X0 = zeros(8)
     X0[1] = msg.x_pos
     X0[2] = msg.y_pos
     X0[3] = msg.y_v
@@ -164,7 +164,7 @@ function main()
   println("Calling 'gazebo/set_model_state' service...")
   ss_r = set_state(ss)
 
-  n=initializeAutonomousControl(c);
+ global  n=initializeAutonomousControl(c);
 
   driveStraight!(n)
 
@@ -196,7 +196,7 @@ idx=1
         error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
     end
 
-    
+
     veh_info = Subscriber{veh_status}("vehicleinfo", callback,(n,),queue_size = 2)
 
     if idx == 1

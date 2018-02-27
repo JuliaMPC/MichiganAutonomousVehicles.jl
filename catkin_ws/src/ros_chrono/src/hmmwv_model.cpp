@@ -40,6 +40,7 @@
 #include "chrono_vehicle/wheeled_vehicle/utils/ChWheeledVehicleIrrApp.h"
 #include <math.h>
 #include "chrono_models/vehicle/hmmwv/HMMWV.h"
+
 #define PI 3.1415926535
 //using veh_status.msg
 using namespace chrono;
@@ -51,7 +52,8 @@ using namespace chrono::vehicle::hmmwv;
 // =============================================================================
 // Problem parameters
 // Main Data Path
-std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
+//std::string data_path("/home/shreyas/.julia/v0.6/MAVs/catkin_ws/data/vehicle/");
+std::string data_path("data/vehicle/");
 // Contact method type
 ChMaterialSurface::ContactMethod contact_method = ChMaterialSurface::SMC;
 
@@ -90,7 +92,6 @@ std::string path_file(data_path+"paths/my_path.txt");
 // Initial vehicle location and orientation
 ChVector<> initLoc(200, 0, 0.5);
 ChQuaternion<> initRot(cos(PI/4), 0, 0, sin(PI/4)); //initial yaw of pi/2
-
 // Desired vehicle speed (m/s)
 double target_speed = 12;
 
@@ -103,7 +104,7 @@ double terrainWidth = 1000.0;   // size in Y direction
 ChVector<> trackPoint(0.0, 0.0, 1.75);
 
 // Simulation step size
-double step_size = 10e-3;
+double step_size = 1e-2;
 double tire_step_size = step_size;
 
 // Simulation end time
@@ -276,6 +277,7 @@ void controlCallback(const mavs_control::Control::ConstPtr &msg,HMMWV_Reduced &m
   auto path = ChBezierCurve::read(path_file);
 
   // Initialize driver follower
+  //driver_follower.Reset();
   ChPathFollowerDriver driver_follower(my_hmmwv.GetVehicle(), steering_controller_file,
                                        speed_controller_file, path, "my_path", target_speed);
   driver_follower.Initialize();
@@ -331,7 +333,7 @@ int main(int argc, char* argv[]) {
 
     ros::init(argc, argv, "Chronode");
     ros::NodeHandle n;
-    ros::Publisher vehicleinfo_pub =     n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
+    ros::Publisher vehicleinfo_pub = n.advertise<ros_chrono_msgs::veh_status>("vehicleinfo", 1);
     //ros::Rate loop_rate(5);
 
     // ------------------------------
@@ -481,9 +483,14 @@ int main(int argc, char* argv[]) {
     double t_prev_val=0;
     //my_hmmwv_ptr = &my_hmmwv;
     //app_ptr = &app;
+  //  int file_idx=0;
+    //double xVec[3];
+    std::ofstream myfile1;
+    myfile1.open(data_path+"position.txt",std::ofstream::out | std::ofstream::trunc);
+
     while (app.GetDevice()->run()) {
         // Extract system state
-       ros::Subscriber sub = n.subscribe<mavs_control::Control>("/mavs/optimal_control", 10, boost::bind(controlCallback, _1, boost::ref(my_hmmwv),boost::ref(app),boost::ref(driver_gui)));
+        ros::Subscriber sub = n.subscribe<mavs_control::Control>("/mavs/optimal_control", 10, boost::bind(controlCallback, _1, boost::ref(my_hmmwv),boost::ref(app),boost::ref(driver_gui)));
     //   ros::Subscriber sub = n.subscribe<mavs_control::Control>("/mavs/optimal_control", 10, boost::bind(&controlCallback, _1, boost::ref(my_hmmwv),boost::ref(app)));
       //  ros::Subscriber sub = n.subscribe("/mavs/optimal_control", 10, controlCallback);
         double time = my_hmmwv.GetSystem()->GetChTime();
@@ -529,7 +536,7 @@ int main(int argc, char* argv[]) {
             app.BeginScene(true, true, irr::video::SColor(255, 140, 161, 192));
             app.DrawAll();
             app.EndScene();
-
+          /*
             if (povray_output) {
                 char filename[100];
                 sprintf(filename, "%s/data_%03d.dat", pov_dir.c_str(), render_frame + 1);
@@ -542,18 +549,18 @@ int main(int argc, char* argv[]) {
                 csv << acc_CG.x() << fwd_acc_CG << acc_CG.y() << lat_acc_CG;
                 csv << acc_driver.x() << fwd_acc_driver << acc_driver.y() << lat_acc_driver;
                 csv << std::endl;
-            }
+            }*/
 
             render_frame++;
         }
-
+/*
         // Debug logging
         if (debug_output && sim_frame % debug_steps == 0) {
             GetLog() << "driver acceleration:  " << acc_driver.x() << "  " << acc_driver.y() << "  " << acc_driver.z()
                      << "\n";
             GetLog() << "CG acceleration:      " << acc_CG.x() << "  " << acc_CG.y() << "  " << acc_CG.z() << "\n";
             GetLog() << "\n";
-        }
+        }*/
 
         // Update modules (process inputs from other modules)
         driver_follower.Synchronize(time);
@@ -576,7 +583,7 @@ int main(int argc, char* argv[]) {
 
         ChVector<> global_pos = my_hmmwv.GetVehicle().GetVehicleCOMPos();//global location of chassis reference frame origin
         ChQuaternion<> global_orntn = my_hmmwv.GetVehicle().GetVehicleRot();//global orientation as quaternion
-        //ChQuaternion<> global_orntn_dt = my_hmmwv.GetVehicle().GetChassisBody()->GetVehicleRot_dt();//global orientation as quaternion
+        ChVector<> rot_dt = my_hmmwv.GetVehicle().GetChassisBody()->GetWvel_loc();//global orientation as quaternion
         ChVector<> global_velCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dt();
         ChVector<> global_accCOM = my_hmmwv.GetVehicle().GetChassisBody()->GetPos_dtdt();
         //ChVector<> euler_ang = global_orntn.Q_to_Rotv(); //convert to euler angles
@@ -606,7 +613,7 @@ int main(int argc, char* argv[]) {
         data_out.y_v= global_velCOM[1];
         data_out.x_a= global_accCOM[0];
         data_out.yaw_curr=yaw_val; //in radians
-        data_out.yaw_rate=0;//(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
+        data_out.yaw_rate=-rot_dt[2];//(yaw_val-yaw_prev_val)/(time-t_prev_val); //in radians
         data_out.sa=slip_angle;
         data_out.thrt_in=throttle_input; //throttle input in the range [0,+1]
         data_out.brk_in=braking_input; //braking input in the range [0,+1]
@@ -618,6 +625,8 @@ int main(int argc, char* argv[]) {
         vehicleinfo_pub.publish(data_out);
       //  loop_rate.sleep();
        ros::spinOnce();
+
+       myfile1 << ' ' << global_pos[0] << ' '<< global_pos[1]  <<' ' << global_pos[2]  << '\n';
     }
 
     if (state_output){
@@ -625,6 +634,8 @@ int main(int argc, char* argv[]) {
     }
 
 //}
+
+myfile1.close();
 
     return 0;
 }
