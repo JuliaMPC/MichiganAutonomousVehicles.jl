@@ -28,6 +28,7 @@ using Ipopt
 using PyCall
 @pyimport tf.transformations as tf
 
+
 function setObstacleData(params)
 
   if RobotOS.has_param("obstacle_radius")
@@ -78,9 +79,8 @@ function setObstacleData(params)
 
   return nothing
 end
-global X0 = zeros(8)
 
-function callback(msg::veh_status,n::NLOpt)
+function callback(msg::veh_status)
     X0[1] = msg.x_pos
     X0[2] = msg.y_pos
     X0[3] = msg.y_v
@@ -91,10 +91,11 @@ function callback(msg::veh_status,n::NLOpt)
     X0[6] = msg.sa
     X0[7] = msg.x_v
     X0[8] = msg.x_a
-    println(string(X0," X0\n"))
-    updateX0!(n,X0;(:userUpdate=>true))
-    idx=1;
+    #println(string(X0," X0\n"))
+    idx=2;
+    #updateX0!(n,X0;(:userUpdate=>true))
 end
+global X0 = zeros(8)
 
 function main()
   init_node("rosjl_obstacles")
@@ -173,10 +174,10 @@ function main()
   # unpause physics
   up = EmptyRequest()
   unpause_physics(up)
+  ctr=1
 
-idx=1
   while true #!is_shutdown()
-
+    idx=1
     if ((n.r.dfs_plant[end][:x][end]-c.g.x_ref)^2 + (n.r.dfs_plant[end][:y][end]-c.g.y_ref)^2)^0.5 < 2*n.XF_tol[1]
        println("Goal Attained! \n"); n.mpc.goal_reached=true;
        pp = EmptyRequest()
@@ -196,13 +197,18 @@ idx=1
         error(string(" calling /gazebo/get_model_state service: ", gs_r.status_message))
     end
 
+    X0_prev=n.mpc.X0[ctr]
+    #veh_info = Subscriber{veh_status}("vehicleinfo", callback,(n,),queue_size = 2)
+    veh_info = Subscriber{veh_status}("vehicleinfo", callback,queue_size = 2)
 
-    veh_info = Subscriber{veh_status}("vehicleinfo", callback,(n,),queue_size = 2)
-
-    if idx == 1
-        idx=2
-        status=autonomousControl!(n)                # rerun optimization
+    if idx==2
+        updateX0!(n,X0;(:userUpdate=>true))
+    else
+        updateX0!(n,X0_prev;(:userUpdate=>true))
     end
+    println(string(n.mpc.X0[ctr]," X0\n"))
+    status=autonomousControl!(n)                # rerun optimization
+
   #  n.mpc.t0_actual=(n.r.eval_num-1)*n.mpc.tex  # external so that it can be updated easily in PathFollowing
     n.mpc.t0_actual = to_sec(get_rostime())
     msg = Control()
@@ -215,6 +221,7 @@ idx=1
     # TODO consider buffering the message here..
     publish(pub,msg)
 
+    ctr=ctr+1
   #  spinOnce() # call the callbacks
     rossleep(loop_rate) # NOTE might not want to do this ...
   end

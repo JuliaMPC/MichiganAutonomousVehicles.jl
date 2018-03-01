@@ -40,6 +40,8 @@
 #include "chrono_vehicle/wheeled_vehicle/utils/ChWheeledVehicleIrrApp.h"
 #include <math.h>
 #include "chrono_models/vehicle/hmmwv/HMMWV.h"
+#include <unistd.h>
+#include <errno.h>
 
 #define PI 3.1415926535
 //using veh_status.msg
@@ -323,7 +325,11 @@ int main(int argc, char* argv[]) {
 //while (ros::ok())
 //{
 
-
+   char cwd[1024];
+   if (getcwd(cwd, sizeof(cwd)) != NULL)
+       fprintf(stdout, "Current working dir: %s\n", cwd);
+   else
+       perror("getcwd() error");
     GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     SetChronoDataPath(CHRONO_DATA_DIR);
