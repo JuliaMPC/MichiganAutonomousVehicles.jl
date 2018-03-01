@@ -129,7 +129,7 @@ function main()
   # set up services and messages
   ###############################
 
-  c=defineCase(;(:mode=>:autoGazebo));
+  c=defineCase(;(:mode=>:autoBench));
 
   # Get the current position of the Gazebo model
   gs = GetModelStateRequest()

@@ -102,9 +102,6 @@ function main()
   #linkName = "base_footprint"  # TODO make this a parameter
   modelName = RobotOS.get_param("robotName")
 
-  ###############################
-  # set up services and messages
-
   # pause simulation
   const pause_physics = ServiceProxy("/gazebo/pause_physics",Empty)
   println("Waiting for '/gazebo/pause_physics' service...")
