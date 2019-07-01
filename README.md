@@ -7,7 +7,7 @@ This package uses NLOptControl and VehicleModels to solve NMPC problems.
 
 julia packages:
 ```
-Pkg.add("MichiganAutonomousVehicles.jl")
+Pkg.clone("https://github.com/JuliaMPC/MichiganAutonomousVehicles.jl")
 ```
 
 To test:
