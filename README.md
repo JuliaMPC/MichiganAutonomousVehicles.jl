@@ -7,7 +7,10 @@ This package uses NLOptControl and VehicleModels to solve NMPC problems.
 
 julia packages:
 ```
+Pkg.add("PyCall")
+ENV["PYTHON"]="/usr/bin/python2.7"; Pkg.build("PyCall");
 Pkg.clone("https://github.com/JuliaMPC/MichiganAutonomousVehicles.jl")
+
 ```
 
 To test:

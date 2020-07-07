@@ -3,7 +3,7 @@ isdefined(Base, :__precompile__) && __precompile__()
 module AutonomousControl
 
 using NLOptControl
-using RobotOS
+#using RobotOS
 
 include("CaseModule.jl")
 using .CaseModule
@@ -70,6 +70,7 @@ function initializeAutonomousControl(c)
 
  pa = Vpara(ax_min=copy(c["vehicle"][:ax_min]),ax_max=copy(c["vehicle"][:ax_max]),m=copy(c["vehicle"][:m]),Izz=copy(c["vehicle"][:Izz]), la=copy(c["vehicle"][:la]), lb=copy(c["vehicle"][:lb]), FzF0=copy(c["vehicle"][:FzF0]), FzR0=copy(c["vehicle"][:FzR0]), KZX=copy(c["vehicle"][:KZX]), KZYR=copy(c["vehicle"][:KZYR]), KZYF=copy(c["vehicle"][:KZYF]), AXC=copy(c["vehicle"][:AXC]),x_min=copy(c["misc"]["Xmin"]),x_max=copy(c["misc"]["Xmax"]),y_min=copy(c["misc"]["Ymin"]),y_max=copy(c["misc"]["Ymax"]),sa_min=copy(c["vehicle"][:sa_min]),sa_max=copy(c["vehicle"][:sa_max]),psi_min=copy(c["vehicle"][:psi_min]),psi_max=copy(c["vehicle"][:psi_max]),u_min=copy(c["vehicle"][:u_min]),u_max=copy(c["vehicle"][:u_max]),sr_min=copy(c["vehicle"][:sr_min]),sr_max=copy(c["vehicle"][:sr_max]),jx_min=copy(c["vehicle"][:jx_min]),jx_max=copy(c["vehicle"][:jx_max]),FZ0=copy(c["vehicle"][:FZ0]),PCY1=copy(c["vehicle"][:PCY1]),PDY1=copy(c["vehicle"][:PDY1]),PDY2=copy(c["vehicle"][:PDY2]),PEY1=copy(c["vehicle"][:PEY1]),PEY2=copy(c["vehicle"][:PEY2]),PEY3=copy(c["vehicle"][:PEY3]),PKY1=copy(c["vehicle"][:PKY1]),PKY2=copy(c["vehicle"][:PKY2]),PHY1=copy(c["vehicle"][:PHY1]),PHY2=copy(c["vehicle"][:PHY2]),PVY1=copy(c["vehicle"][:PVY1]),PVY2=copy(c["vehicle"][:PVY2]),Caf=copy(c["vehicle"][:Caf]),Car=copy(c["vehicle"][:Car]),Fy_min=copy(c["vehicle"][:Fy_min]),Fy_max=copy(c["vehicle"][:Fy_max]),Fz_min=copy(c["vehicle"][:Fz_min]),Fz_off=copy(c["vehicle"][:Fz_off]),EP=copy(c["misc"]["EP"]))
 
+@unpack_Vpara(pa)
 if isequal(c["misc"]["model"],:ThreeDOFv2)
     XF = [copy(c["goal"]["x"]), copy(c["goal"]["yVal"]), NaN, NaN, NaN, NaN, NaN, NaN]
     XL = [x_min, y_min, NaN, NaN, psi_min, sa_min, u_min, NaN]
