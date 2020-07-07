@@ -4,7 +4,7 @@
 
     # Test set #1
     models =[:ThreeDOFv2]
-    cases = ["s1","s2","s3","s4","s5","s6"]; t = 1;
+    cases = ["s1","s2","s3","s4","s6"]; t = 1;
     @testset "Test set #1, test #$(t) \n cases with (case=>$(case_name)) \n models with (model=>$(model))  " for case_name in cases, model in models
       c = load(open(string(Pkg.dir("MichiganAutonomousVehicles"),"/config/planner/","RTPP",".yaml")))
       c["vehicle"] = load(open(string(Pkg.dir("MichiganAutonomousVehicles"),"/config/vehicle/","hmmwv",".yaml")))
