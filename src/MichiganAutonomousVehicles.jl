@@ -31,6 +31,7 @@ export
     lidarConstraints!,
     objFunc!,
     goalRange,
+    simMPC!,
 
     # VehicleModels.jl
     # Objects
