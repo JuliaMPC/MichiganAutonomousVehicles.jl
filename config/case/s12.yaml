@@ -1,0 +1,24 @@
+goal:
+ x: -10.
+ yVal: 1.5
+ psi: 3.1415
+ tol: .5
+
+X0:
+ x: 1.5
+ yVal: -4.0
+ v: 0.0
+ r: 0.0
+ psi: 1.57079632679
+ sa: 0.0
+ ux: 0.0
+ ax: 0.0
+
+obstacle:
+ num: 0
+ radius: [1.]
+ length: [5.]
+ x0: [-200]
+ y0: [50]
+ vx: [0]
+ vy: [0]

@@ -45,29 +45,29 @@ function obstaclePlot(n,c,idx,args...;kwargs...)
   if basic
     pp = plot(0,leg=:false)
 
-    if typeof(c["goal"]["x"])==Float64  # TODO remove redundant code
-      if isnan(c["goal"]["tol"]); rg = 1; else rg = c["goal"]["tol"]; end
-      if !posterPlot || idx == r.ocp.evalNum
-        pts = Plots.partialcircle(0,2π,100,rg)
-        x, y = Plots.unzip(pts)
-        x += c["goal"]["x"];  y += c["goal"]["yVal"]
-        pts = collect(zip(x, y))
-        if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
-          scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][1],label="Goal Area")
-        end
-        plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][1],leg=true,label="")
-
-        if isnan(c["tolerances"]["fx"]); rg = 1; else rg = c["tolerances"]["fx"]; end
-        pts = Plots.partialcircle(0,2π,100,rg)
-        x, y = Plots.unzip(pts)
-        x += c["goal"]["x"];  y += c["goal"]["yVal"]
-        pts = collect(zip(x, y))
-        if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
-          scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][2],label="Goal")
-        end
-        plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][2],leg=true,label="")
-      end
-    end
+    # if typeof(c["goal"]["x"])==Float64  # TODO remove redundant code
+    #   if isnan(c["goal"]["tol"]); rg = 1; else rg = c["goal"]["tol"]; end
+    #   if !posterPlot || idx == r.ocp.evalNum
+    #     pts = Plots.partialcircle(0,2π,100,rg)
+    #     x, y = Plots.unzip(pts)
+    #     x += c["goal"]["x"];  y += c["goal"]["yVal"]
+    #     pts = collect(zip(x, y))
+    #     if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
+    #       scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][1],label="Goal Area")
+    #     end
+    #     plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][1],leg=true,label="")
+    #
+    #     if isnan(c["tolerances"]["fx"]); rg = 1; else rg = c["tolerances"]["fx"]; end
+    #     pts = Plots.partialcircle(0,2π,100,rg)
+    #     x, y = Plots.unzip(pts)
+    #     x += c["goal"]["x"];  y += c["goal"]["yVal"]
+    #     pts = collect(zip(x, y))
+    #     if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
+    #       scatter!((c["goal"]["x"] + c["goal"]["vx"]*r.ip.dfsplant[idx][:t][end],c["goal"]["yVal"] + c["goal"]["vy"]*r.ip.dfsplant[idx][:t][end]),marker=_pretty_defaults[:goal_marker][2],label="Goal")
+    #     end
+    #     plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][2],leg=true,label="")
+    #   end
+    # end
 
     if !isempty(c["obstacle"]["radius"])
       for i in 1:length(c["obstacle"]["radius"])
@@ -96,22 +96,29 @@ function obstaclePlot(n,c,idx,args...;kwargs...)
     if typeof(c["goal"]["x"])==Float64 # TODO remove redundant code
       if isnan(c["goal"]["tol"]); rg = 1; else rg = c["goal"]["tol"]; end
       if !posterPlot || idx ==r.ocp.evalNum
-        pts = Plots.partialcircle(0,2π,100,rg)
-        x, y = Plots.unzip(pts)
-        x += c["goal"]["x"];  y += c["goal"]["yVal"]
-        pts = collect(zip(x, y))
-        if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
-          scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][1],label="Goal Area")
-        end
-        plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][1],leg=true,label="")
+        # pts = Plots.partialcircle(0,2π,100,rg)
+        # x, y = Plots.unzip(pts)
+        # x += c["goal"]["x"];  y += c["goal"]["yVal"]
+        # pts = collect(zip(x, y))
+        # if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
+        #   scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][1],label="Goal Area")
+        # end
+        # plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][1],leg=true,label="")
 
         if isnan(c["tolerances"]["fx"]); rg=1; else rg = c["tolerances"]["fx"]; end
         pts = Plots.partialcircle(0,2π,100,rg)
         x, y = Plots.unzip(pts)
-        x += c["goal"]["x"];  y += c["goal"]["yVal"]
+        if length(r.ip.dfsplant) < idx
+          goalIdx = idx - 1
+          warn("no time data for current frame using previos data")
+        else
+          goalIdx = idx
+        end
+        x += c["goal"]["x"] + c["goal"]["vx"]*r.ip.dfsplant[goalIdx][:t][end]
+        y += c["goal"]["yVal"] + c["goal"]["vy"]*r.ip.dfsplant[goalIdx][:t][end]
         pts = collect(zip(x, y))
         if !smallMarkers  #TODO get ride of this-> will not be a legend for this case
-          scatter!((c["goal"]["x"],c["goal"]["yVal"]),marker=_pretty_defaults[:goal_marker][2],label="Goal")
+          scatter!((c["goal"]["x"] + c["goal"]["vx"]*r.ip.dfsplant[goalIdx][:t][end],c["goal"]["yVal"] + c["goal"]["vy"]*r.ip.dfsplant[goalIdx][:t][end]),marker=_pretty_defaults[:goal_marker][2],label="Goal")
         end
         plot!(pts,line=_pretty_defaults[:goal_line],fill=_pretty_defaults[:goal_fill][2],leg=true,label="")
       end
@@ -127,9 +134,9 @@ function obstaclePlot(n,c,idx,args...;kwargs...)
           y = c["obstacle"]["radius"][i]/c["obstacle"]["radius"][i]*y + c["obstacle"]["y0"][i] + c["obstacle"]["vy"][i]*r.ip.dfsplant[idx][:t][end];
         else
           if r.ocp.dfs[idx]!=nothing
-            tc=r.ocp.dfs[idx][:t][end];
+            tc = r.ocp.dfs[idx][:t][end]
           else
-            tc=0;
+            tc = 0
             if idx!=1; warn("\n Obstacles set to inital condition for current frame. \n") end
           end
           x += c["obstacle"]["x0"][i] + c["obstacle"]["vx"][i]*tc;
@@ -238,7 +245,7 @@ function vehiclePlot(n,c,idx,args...;kwargs...)
       scatter!((X_v,Y_v),marker=_pretty_defaults[:vehicle_marker], grid=true,label="Vehicle")
     end
   end
-  scatter!((P2[1,:]+X_v,P2[2,:]+Y_v),ms=0,fill=_pretty_defaults[:vehicle_fill],leg=true,grid=true,label="")
+  scatter!((P2[1,:]+X_v,P2[2,:]+Y_v),marker=(:circle,:black,0.,0.),fill=_pretty_defaults[:vehicle_fill],leg=true,grid=true,label="")
 
   if !zoom && !setLims
     if _pretty_defaults[:plant]  # TODO push this to a higher level
@@ -533,6 +540,41 @@ function lidarPlot(r,c,idx,args...;kwargs...)
   return pp
 end
 """
+--------------------------------------------------------------------------------------\n
+Author: Huckleberry Febbo, Tesla
+Date Create: 7/7/2020, Last Modified: 7/7/2020 \n
+--------------------------------------------------------------------------------------\n
+"""
+function pltCurb(P2,w,h)
+    scatter!((P2[1,:]+w,P2[2,:]+h),marker=(:circle,:black,0.,0.),fill=(0,1,:black),leg=true,grid=true,label="")
+end
+
+function intersectionPlot()
+    pp = plot(0,leg=:false)
+
+    # parameters TODO add to YAML file
+    lw = 3
+    w = 3
+    h = 3
+    psi = 0
+
+    XQ = [-w/2 w/2 w/2 -w/2 -w/2]
+    YQ = [h/2 h/2 -h/2 -h/2 h/2]
+    P = [XQ;YQ]
+    ct = cos(psi)
+    st = sin(psi)
+    R = [ct -st;st ct]
+    P2 = R*P
+
+    pltCurb(P2,w+lw/2,h+lw/2)
+    pltCurb(P2,w+lw/2,-h-lw/2)
+    pltCurb(P2,-w-lw/2,-h-lw/2)
+    pltCurb(P2,-w-lw/2,h+lw/2)
+
+    return pp
+end
+
+"""
 # to plot the second solution
 pp = posPlot(n,2)
 --------------------------------------------------------------------------------------\n
@@ -545,9 +587,19 @@ function posPlot(n,idx;kwargs...)
   c = n.ocp.params[5]
 
   kw = Dict(kwargs)
-  if !haskey(kw,:zoom); zoom=false;
-  else; zoom=get(kw,:zoom,0);
+
+  if !haskey(kw,:intersection);
+      intersection=false;
+  else;
+      intersection=get(kw,:zoom,0);
   end
+
+  if !haskey(kw,:zoom);
+      zoom = false
+  else
+      zoom = get(kw,:zoom,0)
+  end
+
   # check to see if we want to set the limits to the position constraints
   if !haskey(kw,:setLims)
     setLims = false
@@ -565,14 +617,36 @@ function posPlot(n,idx;kwargs...)
   else;obstacleMiss=get(kw,:obstacleMiss,0);
   end
 
-  if haskey(c,"track"); pp=trackPlot(c;(:smallMarkers=>smallMarkers)); else pp=plot(0,leg=:false); end  # track
-  if haskey(c["misc"],"Lr"); pp=lidarPlot(r,c,idx,pp;(:append=>true)); end  # lidar
+  if haskey(c,"track");
+      pp = trackPlot(c;(:smallMarkers=>smallMarkers));
+  else
+      if intersection
+          pp = intersectionPlot()
+      else
+          pp = plot(0,leg=:false)
+      end
+  end  # track
+
+  # TEMP removing lidar plot
+  #if haskey(c["misc"],"Lr"); pp=lidarPlot(r,c,idx,pp;(:append=>true)); end  # lidar
 
   pp = obstaclePlot(n,c,idx,pp;(:append=>true),(:smallMarkers=>smallMarkers),(:obstacleMiss=>obstacleMiss))   # obstacles
   pp = statePlot(n,idx,1,2,pp;(:lims=>false),(:append=>true)) # vehicle trajectory
   pp = vehiclePlot(n,c,idx,pp;(:append=>true),(:zoom=>zoom),(:setLims=>setLims),(:smallMarkers=>smallMarkers))# vehicle
 
   if !setLims; plot!(aspect_ratio=:equal); end
+
+  if intersection
+      lim_size = 6       #  TODO add to YAML file
+      if length(r.ocp.dfs) < idx
+        ocpIdx = idx - 1
+        warn("no time data for current frame using previos data")
+      else
+        ocpIdx = idx
+      end
+      xlims!(r.ocp.dfs[ocpIdx][:x][1]-lim_size , lim_size + r.ocp.dfs[ocpIdx][:x][1])
+      ylims!(r.ocp.dfs[ocpIdx][:y][1]-lim_size, lim_size + r.ocp.dfs[ocpIdx][:y][1])
+  end
 
   if !_pretty_defaults[:simulate] savefig(string(r.resultsDir,"pp.",_pretty_defaults[:format])) end
   return pp
@@ -638,6 +712,23 @@ function mainPlot(n,idx;kwargs...)
     mainS = plot(pz,tp,pp,vt,sap,longv,axp,layout=l,size=_pretty_defaults[:size])
     else
       error("TODO")
+    end
+  elseif mode==:intersection
+    if isequal(c["misc"]["model"],:ThreeDOFv2)
+        psip=statePlot(n,idx,5);plot!(leg=:topleft)
+
+        sap = statePlot(n,idx,6);plot!(leg=:topleft)
+        longv = statePlot(n,idx,7);plot!(leg=:topleft)
+        axp=axLimsPlot(n,pa,idx);# add nonlinear acceleration limits
+        axp=statePlot(n,idx,8,axp;(:lims=>false),(:append=>true));plot!(leg=:bottomright);
+        vt = vtPlot(n,idx);plot!(leg=:bottomleft)
+        #pp = posPlot(n,idx;(:setLims=>true),(:smallMarkers=>true),(:obstacleMiss=>false));plot!(leg=false);
+        pz = posPlot(n,idx;(:intersection=>true),(:zoom=>true),(:obstacleMiss=>false));plot!(leg=:topleft)
+        if _pretty_defaults[:plant]; tp=tPlot(n,idx);plot!(leg=:topright) else; tp=plot(0,leg=:false);plot!(leg=:topright) end
+        l = @layout [[a;b{0.2h}] [c;d;e;f;g]]
+        mainS = plot(pz,tp,vt,psip,sap,longv,axp,layout=l,size=_pretty_defaults[:size])
+    else
+        error("TODO")
     end
   elseif mode==:open1
     if isequal(c["misc"]["model"],:ThreeDOFv2)

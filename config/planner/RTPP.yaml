@@ -9,7 +9,7 @@ misc:
   Ymin: NaN              # min limit for y in OCP
   Ymax: NaN              # max limit for y in OCP
   tp: NaN                # prediction horizon (s)
-  tex: 0.5               # execution horizon (s)
+  tex: 0.1               # execution horizon (s)
   sm: 2.                 # (m) distance to see if obstacle was hit (for crash checking)
   sm1: 2.5               # (m) distance 1 to make sure we don't hit obstacle (for optimization)
   sm2: 4.0               # (m) distance 2 to make sure we don't hit obstacle (for optimization)
@@ -32,12 +32,14 @@ misc:
   x0slackVariables: true
   xFslackVariables: true
   movingObstacles: true
-  onlyOptimal: false
+  onlyOptimal: true
   evalConstraints: false
   ocpSave: true
+  movingGoal: true
+  lidarConstraints: false
 
 weights:
-  ic: 100.0
+  ic: 500.0
   x0: 1. #0.1
   y0: 1. #0.1
   v0: 10.0 #10.
@@ -49,7 +51,7 @@ weights:
   xf: 100.
   goal: 10. # 100.
   psi: 0.01
-  time: 10.
+  time: 1.
   haf: 1.
   Fz: 0.5 # 0.1
   ce: 1.
@@ -59,6 +61,7 @@ weights:
   jx: 0.01
   path: 1.0
   driver: 1.0
+  ux: 100.
 
 tolerances:
   ix: 0.5 #0.05
@@ -69,12 +72,12 @@ tolerances:
   isa: 0.025 #0.0025
   iu: 0.5 #0.25
   iax: 0.5 # 0.05
-  fx: 5.0 # 5.0
-  fy: 5.0 # 5.0
+  fx: 0.5 # 5.0
+  fy: 0.5 # 5.0
   fv: NaN # NOTE YAML file turns these into strings
   fr: NaN
-  fpsi: NaN
-  fsa: NaN
+  fpsi: .02
+  fsa: .01
   fu: NaN
   fax: NaN
 
@@ -85,7 +88,7 @@ solver:
   outlev: 0 # (c.m.solver==:Ipopt) ? :print_level : :outlev # print level
   feastol_abs: 7e-2 # (c.m.solver==:Ipopt) ? :constr_viol_tol : :feastol_abs
   maxit: 500 # (c.m.solver==:Ipopt) ? :max_iter : :maxit
-  maxtime_cpu: 15.0 # (c.m.solver==:Ipopt) ? :max_cpu_time : :maxtime_cpu
+  maxtime_cpu: 20.0 # (c.m.solver==:Ipopt) ? :max_cpu_time : :maxtime_cpu
 
   # settings for KNITRO
   ftol: 1e-15 # relative change in the objective function is less than ftol for ftol_iters consecutive iterations

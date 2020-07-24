@@ -70,7 +70,7 @@ saveOptData(n)
 
 if _pretty_defaults[:simulate]
   println("Plotting the Final Results!")
-  mainSim(n;(:mode=>:zoom1))
+  mainSim(n;(:mode=>:intersection))
 end
 
 #optPlot(n)

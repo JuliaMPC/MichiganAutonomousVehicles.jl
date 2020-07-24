@@ -72,7 +72,7 @@ function initializeAutonomousControl(c)
 
 @unpack_Vpara(pa)
 if isequal(c["misc"]["model"],:ThreeDOFv2)
-    XF = [copy(c["goal"]["x"]), copy(c["goal"]["yVal"]), NaN, NaN, NaN, NaN, NaN, NaN]
+    XF = [copy(c["goal"]["x"]), copy(c["goal"]["yVal"]), NaN, NaN, copy(c["goal"]["psi"]), NaN, NaN, NaN]
     XL = [x_min, y_min, NaN, NaN, psi_min, sa_min, u_min, NaN]
     XU = [x_max, y_max, NaN, NaN, psi_max, sa_max, u_max, NaN]
     CL = [sr_min, jx_min]; CU = [sr_max, jx_max]
@@ -101,12 +101,7 @@ end
 
   # TODO check if Chrono is being used
 if isequal(c["misc"]["model"],:ThreeDOFv2)
-
-  #if isequal(c["misc"]["mode"], :OCP)
    IPModel = ThreeDOFv2
- # elseif isequal(c["misc"]["mode"], :IP)
-#    IPModel = ThreeDOFv1
-  #end
 
   # define tolerances on slack variables
   X0_tol = [c["tolerances"]["ix"], c["tolerances"]["iy"], c["tolerances"]["iv"], c["tolerances"]["ir"], c["tolerances"]["ipsi"], c["tolerances"]["isa"], c["tolerances"]["iu"], c["tolerances"]["iax"]]
@@ -132,12 +127,7 @@ if isequal(c["misc"]["model"],:ThreeDOFv2)
   dynamics!(n,dx)
   constraints!(n,con)
 elseif isequal(c["misc"]["model"],:ThreeDOFv3)
-
-   #if isequal(c["misc"]["mode"], :OCP)
    IPModel = ThreeDOFv3
-#   elseif isequal(c["misc"]["mode"], :IP)
-#     IPModel = ThreeDOFv1
- #  end
 
    # define tolerances on slack variables
    X0_tol = [c["tolerances"]["ix"], c["tolerances"]["iy"], c["tolerances"]["iv"], c["tolerances"]["ir"], c["tolerances"]["ipsi"], c["tolerances"]["isa"]]
@@ -163,11 +153,8 @@ elseif isequal(c["misc"]["model"],:ThreeDOFv3)
    dynamics!(n,dx)
    constraints!(n,con)
 elseif isequal(c["misc"]["model"],:KinematicBicycle2)
-  # if isequal(c["misc"]["mode"], :OCP)
     IPModel = KinematicBicycle2
-  # elseif isequal(c["misc"]["mode"], :IP)
-#     IPModel = ThreeDOFv1
-  # end
+
    # define tolerances on slack variables
    X0_tol = [c["tolerances"]["ix"], c["tolerances"]["iy"], c["tolerances"]["ipsi"], c["tolerances"]["iu"]]
    if goalRange(n)
@@ -192,10 +179,15 @@ elseif isequal(c["misc"]["model"],:KinematicBicycle2)
    dynamics!(n,dx)
    tire_expr = NaN
  end
+
  configProb!(n,c)
 
  obs_params = obstacleAvoidanceConstraints!(n,c)
- LiDAR_params = lidarConstraints!(n,c)
+ if c["misc"]["lidarConstraints"]
+     LiDAR_params = lidarConstraints!(n,c)
+ else
+     LiDAR_params = NaN
+ end
  obj_params = objFunc!(n,c,tire_expr)
                #  1      2          3          4       5
  n.ocp.params = [pa,obs_params,LiDAR_params,obj_params,c]
@@ -218,7 +210,7 @@ elseif isequal(c["misc"]["model"],:KinematicBicycle2)
 
  defineMPC!(n;onlyOptimal=c["misc"]["onlyOptimal"],mode=c["misc"]["mode"],goal=goal,goalTol=goalTol,fixedTp=c["misc"]["FixedTp"],predictX0=c["misc"]["PredictX0"],tp=c["misc"]["tp"],tex=copy(c["misc"]["tex"]),maxSim=copy(c["misc"]["mpc_max_iter"]))
  if isequal(c["misc"]["mode"], :OCP)
-   defineIP!(n,IPModel)
+   defineIP!(n, IPModel)
  elseif isequal(c["misc"]["mode"], :IP) # NOTE for now assuming that the ThreeDOFv1 is always used for the IP
    error("TODO")
    defineIP!(n,IPModel)
@@ -237,10 +229,17 @@ function updateAutoParams!(n)
 
   # obstacle information-> only show if it is in range at the start TODO
   goal_in_range = goalRange(n)
-  if goal_in_range # TODO make a flag that indicates this switch has been flipped
+  if goal_in_range || !c["misc"]["lidarConstraints"] # TODO make a flag that indicates this switch has been flipped
     # otherwise it will keep setting the same parameters..
     println("goal is in range")
     c = n.ocp.params[5]
+
+    if c["misc"]["movingGoal"]
+        setRHS(n.r.ocp.xfCon[1,1], c["goal"]["x"] + c["goal"]["vx"]*getvalue(n.ocp.tV[1]))
+        setRHS(n.r.ocp.xfCon[1,2], -c["goal"]["x"] - c["goal"]["vx"]*getvalue(n.ocp.tV[1]))
+        setRHS(n.r.ocp.xfCon[2,1], c["goal"]["yVal"] + c["goal"]["vy"]*getvalue(n.ocp.tV[1]))
+        setRHS(n.r.ocp.xfCon[2,2], -c["goal"]["yVal"] - c["goal"]["vy"]*getvalue(n.ocp.tV[1]))
+    end
 
     # enforce final state constraints on x and y position
     # TODO consider throwing error if not using slack variables as they are not tested
@@ -255,8 +254,10 @@ function updateAutoParams!(n)
     setvalue(n.ocp.params[4][2],0.0)
 
     # relax LiDAR constraints
-    setvalue(n.ocp.params[3][1], 1e6)
-    setvalue(n.ocp.params[3][2],-1e6)
+    if c["misc"]["lidarConstraints"]
+        setvalue(n.ocp.params[3][1], 1e6)
+        setvalue(n.ocp.params[3][2],-1e6)
+    end
   end
   #NOTE assuming it is not going in and out of range
 
@@ -266,6 +267,7 @@ end
 
 """
 # TODO use plant instead of mpc
+# TODO add time
 --------------------------------------------------------------------------------------\n
 Author: Huckleberry Febbo, Graduate Student, University of Michigan
 Date Create: 7/04/2017, Last Modified: 3/12/2018 \n
@@ -410,6 +412,18 @@ Date Create: 4/08/2018, Last Modified: 5/30/2010 \n
 --------------------------------------------------------------------------------------\n
 """
 function objFunc!(n,c,tire_expr)
+
+    if c["misc"]["followPath"]
+        # follow the path -> min((X_path(Yt)-Xt)^2)
+        #if c["misc"]["trackFunc"]==:poly
+        path_obj = @NLexpression(mdl,c.w.path*sum(  (  (c.t.a[1] + c.t.a[2]*r.x[(i+1),2] + c.t.a[3]*r.x[(i+1),2]^2 + c.t.a[4]*r.x[(i+1),2]^3 + c.t.a[5]*r.x[(i+1),2]^4) - r.x[(i+1),1]  )^2 for i in 1:n.numStatePoints-1)  );
+        #elseif c["misc"]["trackFunc"]==:fourier
+        #path_obj = @NLexpression(mdl,c.w.path*sum(  (  (c.t.a[1]*sin(c.t.b[1]*r.x[(i+1),1]+c.t.c[1]) + c.t.a[2]*sin(c.t.b[2]*r.x[(i+1),1]+c.t.c[2]) + c.t.a[3]*sin(c.t.b[3]*r.x[(i+1),1]+c.t.c[3]) + c.t.a[4]*sin(c.t.b[4]*r.x[(i+1),1]+c.t.c[4]) + c.t.a[5]*sin(c.t.b[5]*r.x[(i+1),1]+c.t.c[5]) + c.t.a[6]*sin(c.t.b[6]*r.x[(i+1),1]+c.t.c[6]) + c.t.a[7]*sin(c.t.b[7]*r.x[(i+1),1]+c.t.c[7]) + c.t.a[8]*sin(c.t.b[8]*r.x[(i+1),1]+c.t.c[8])+c.t.y0) - r.x[(i+1),2]  )^2 for i in 1:n.numStatePoints-1)  );
+        #end
+    else
+        path_obj = 0
+    end
+
   # parameters
   if goalRange(n)
    println("\n goal in range")
@@ -430,6 +444,7 @@ function objFunc!(n,c,tire_expr)
     ax = n.r.ocp.x[:,8]
     sr = n.r.ocp.u[:,1]
     jx = n.r.ocp.u[:,2]
+    ux = n.r.ocp.x[:,7]
   elseif isequal(c["misc"]["model"],:ThreeDOFv3)
     psi = n.r.ocp.x[:,5]
     sa = n.r.ocp.x[:,6]
@@ -446,8 +461,9 @@ function objFunc!(n,c,tire_expr)
   # minimizing the integral over the entire prediction horizon of the line that passes through the goal
   haf_obj=integrate!(n,:( $c["weights"]["haf"]*( sin($c["goal"]["psi"])*(x[j]-$c["goal"]["x"]) - cos($c["goal"]["psi"])*(y[j]-$c["goal"]["yVal"]) )^2 ))
 
+
   if c["misc"]["xFslackVariables"]
-    xf_obj = @NLexpression(n.ocp.mdl, w_xf*(n.ocp.xFs[1] + n.ocp.xFs[2]) )
+    xf_obj = @NLexpression(n.ocp.mdl, w_xf*(n.ocp.xFs[1] + n.ocp.xFs[2] +  n.ocp.xFs[5]) )
   else
     xf_obj = 0
   end
@@ -470,8 +486,8 @@ function objFunc!(n,c,tire_expr)
     tire_obj = integrate!(n,tire_expr)
 
     # penalize control effort
-    ce_obj = integrate!(n,:($c["weights"]["ce"]*($c["weights"]["sa"]*(sa[j]^2)+$c["weights"]["sr"]*(sr[j]^2)+$c["weights"]["jx"]*(jx[j]^2))) )
-    @NLobjective(n.ocp.mdl, Min, xf_obj + goal_obj + x0_obj + psi_obj + c["weights"]["Fz"]*tire_obj + haf_obj + c["weights"]["time"]*n.ocp.tf + ce_obj )
+    ce_obj = integrate!(n,:($c["weights"]["ux"]/(ux[j] + $c["misc"]["EP"]) + $c["weights"]["ce"]*($c["weights"]["sa"]*(sa[j]^2)+$c["weights"]["sr"]*(sr[j]^2)+$c["weights"]["jx"]*(jx[j]^2))) )
+    @NLobjective(n.ocp.mdl, Min,  xf_obj + goal_obj + x0_obj + psi_obj + c["weights"]["Fz"]*tire_obj + haf_obj + c["weights"]["time"]*n.ocp.tf + ce_obj )
   elseif isequal(c["misc"]["model"],:ThreeDOFv3)
       # initial conditions slack variables
       if c["misc"]["x0slackVariables"]
